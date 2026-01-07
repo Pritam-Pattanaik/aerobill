@@ -1,0 +1,95 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
+import { SessionProvider } from "next-auth/react"
+
+const navItems = [
+    { href: "/admin", label: "Dashboard", icon: "📊" },
+    { href: "/admin/menu", label: "Menu", icon: "🍽️" },
+    { href: "/admin/inventory", label: "Inventory", icon: "📦" },
+    { href: "/admin/tables", label: "Tables", icon: "🪑" },
+    { href: "/admin/billing", label: "Billing", icon: "🧾" },
+    { href: "/admin/settings", label: "Settings", icon: "⚙️" },
+]
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname()
+
+    return (
+        <div className="min-h-screen flex">
+            {/* Sidebar */}
+            <aside className="w-64 glass-card rounded-none border-t-0 border-l-0 border-b-0 flex flex-col">
+                {/* Logo */}
+                <div className="p-6 border-b border-[var(--border)]">
+                    <Link href="/">
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] bg-clip-text text-transparent">
+                            Aerobill
+                        </h1>
+                    </Link>
+                    <p className="text-sm text-gray-500 mt-1">Admin Panel</p>
+                </div>
+
+                {/* Navigation */}
+                <nav className="flex-1 p-4">
+                    <ul className="space-y-2">
+                        {navItems.map((item) => (
+                            <li key={item.href}>
+                                <Link
+                                    href={item.href}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${pathname === item.href
+                                            ? "bg-[var(--primary)] text-white"
+                                            : "text-gray-400 hover:bg-[var(--card-hover)] hover:text-white"
+                                        }`}
+                                >
+                                    <span className="text-lg">{item.icon}</span>
+                                    <span className="font-medium">{item.label}</span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Kitchen shortcut */}
+                <div className="p-4 border-t border-[var(--border)]">
+                    <Link
+                        href="/kitchen"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/30 transition-all"
+                    >
+                        <span className="text-lg">🍳</span>
+                        <span className="font-medium">Kitchen Display</span>
+                    </Link>
+                </div>
+
+                {/* Sign out */}
+                <div className="p-4 border-t border-[var(--border)]">
+                    <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                    >
+                        <span className="text-lg">🚪</span>
+                        <span className="font-medium">Sign Out</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main content */}
+            <main className="flex-1 overflow-auto">
+                {children}
+            </main>
+        </div>
+    )
+}
+
+export default function AdminLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    return (
+        <SessionProvider>
+            <AdminLayoutContent>{children}</AdminLayoutContent>
+        </SessionProvider>
+    )
+}

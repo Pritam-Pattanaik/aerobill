@@ -1,0 +1,321 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import {
+    getInventory,
+    createInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem,
+    adjustInventoryQuantity,
+} from "@/app/actions/inventory"
+
+type InventoryItem = {
+    id: string
+    name: string
+    quantity: number
+    unit: string
+    pricePerUnit: number
+    products: { id: string; name: string }[]
+}
+
+export default function InventoryManagement() {
+    const [inventory, setInventory] = useState<InventoryItem[]>([])
+    const [loading, setLoading] = useState(true)
+    const [showModal, setShowModal] = useState(false)
+    const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
+    const [adjustingId, setAdjustingId] = useState<string | null>(null)
+    const [adjustAmount, setAdjustAmount] = useState("")
+
+    const [form, setForm] = useState({
+        name: "",
+        quantity: "",
+        unit: "",
+        pricePerUnit: "",
+    })
+
+    const fetchInventory = async () => {
+        try {
+            const result = await getInventory()
+            if (result.success) {
+                setInventory(result.inventory as InventoryItem[])
+            }
+        } catch (error) {
+            console.error("Failed to fetch inventory:", error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchInventory()
+    }, [])
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        const data = {
+            name: form.name,
+            quantity: parseFloat(form.quantity),
+            unit: form.unit,
+            pricePerUnit: parseFloat(form.pricePerUnit),
+        }
+
+        if (editingItem) {
+            await updateInventoryItem(editingItem.id, data)
+        } else {
+            await createInventoryItem(data)
+        }
+
+        setShowModal(false)
+        setEditingItem(null)
+        resetForm()
+        fetchInventory()
+    }
+
+    const handleDelete = async (id: string) => {
+        if (confirm("Are you sure you want to delete this item?")) {
+            const result = await deleteInventoryItem(id)
+            if (!result.success) {
+                alert(result.error)
+            }
+            fetchInventory()
+        }
+    }
+
+    const handleAdjust = async (id: string) => {
+        const amount = parseFloat(adjustAmount)
+        if (isNaN(amount)) return
+
+        await adjustInventoryQuantity(id, amount)
+        setAdjustingId(null)
+        setAdjustAmount("")
+        fetchInventory()
+    }
+
+    const editItem = (item: InventoryItem) => {
+        setEditingItem(item)
+        setForm({
+            name: item.name,
+            quantity: item.quantity.toString(),
+            unit: item.unit,
+            pricePerUnit: item.pricePerUnit.toString(),
+        })
+        setShowModal(true)
+    }
+
+    const resetForm = () => {
+        setForm({ name: "", quantity: "", unit: "", pricePerUnit: "" })
+    }
+
+    const lowStockItems = inventory.filter((item) => item.quantity <= 10)
+
+    if (loading) {
+        return (
+            <div className="p-8 flex items-center justify-center">
+                <div className="animate-pulse text-xl">Loading inventory...</div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="p-8">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold mb-2">Inventory Management</h1>
+                    <p className="text-gray-400">Track and manage your stock levels</p>
+                </div>
+                <button
+                    onClick={() => {
+                        resetForm()
+                        setEditingItem(null)
+                        setShowModal(true)
+                    }}
+                    className="btn-primary"
+                >
+                    + Add Item
+                </button>
+            </div>
+
+            {/* Low stock alert */}
+            {lowStockItems.length > 0 && (
+                <div className="glass-card p-4 mb-8 border-[var(--warning)]">
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl">⚠️</span>
+                        <div>
+                            <h3 className="font-semibold text-[var(--warning)]">Low Stock Alert</h3>
+                            <p className="text-sm text-gray-400">
+                                {lowStockItems.length} item(s) are running low on stock
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Inventory table */}
+            <div className="glass-card overflow-hidden">
+                <table className="w-full">
+                    <thead>
+                        <tr className="bg-[var(--card)]">
+                            <th className="text-left p-4 font-medium">Item Name</th>
+                            <th className="text-left p-4 font-medium">Quantity</th>
+                            <th className="text-left p-4 font-medium">Unit</th>
+                            <th className="text-left p-4 font-medium">Price/Unit</th>
+                            <th className="text-left p-4 font-medium">Linked Products</th>
+                            <th className="text-right p-4 font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {inventory.map((item) => (
+                            <tr key={item.id} className="border-t border-[var(--border)]">
+                                <td className="p-4 font-medium">{item.name}</td>
+                                <td className="p-4">
+                                    <span
+                                        className={`font-semibold ${item.quantity <= 10 ? "text-[var(--warning)]" : ""
+                                            }`}
+                                    >
+                                        {item.quantity}
+                                    </span>
+                                    {/* Adjust quantity inline */}
+                                    {adjustingId === item.id ? (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <input
+                                                type="number"
+                                                value={adjustAmount}
+                                                onChange={(e) => setAdjustAmount(e.target.value)}
+                                                className="input w-20 py-1"
+                                                placeholder="+/-"
+                                            />
+                                            <button
+                                                onClick={() => handleAdjust(item.id)}
+                                                className="text-sm text-green-400"
+                                            >
+                                                ✓
+                                            </button>
+                                            <button
+                                                onClick={() => setAdjustingId(null)}
+                                                className="text-sm text-red-400"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                setAdjustingId(item.id)
+                                                setAdjustAmount("")
+                                            }}
+                                            className="text-xs text-blue-400 hover:underline ml-2"
+                                        >
+                                            Adjust
+                                        </button>
+                                    )}
+                                </td>
+                                <td className="p-4 text-gray-400">{item.unit}</td>
+                                <td className="p-4">₹{item.pricePerUnit.toFixed(2)}</td>
+                                <td className="p-4 text-sm text-gray-400">
+                                    {item.products.length > 0
+                                        ? item.products.map((p) => p.name).join(", ")
+                                        : "-"}
+                                </td>
+                                <td className="p-4 text-right">
+                                    <button
+                                        onClick={() => editItem(item)}
+                                        className="text-sm text-blue-400 hover:text-blue-300 mr-3"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(item.id)}
+                                        className="text-sm text-red-400 hover:text-red-300"
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {inventory.length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="p-8 text-center text-gray-500">
+                                    No inventory items yet. Add your first item!
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Modal */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+                    <div className="glass-card p-6 w-full max-w-md relative z-10 animate-fadeIn">
+                        <h2 className="text-xl font-bold mb-6">
+                            {editingItem ? "Edit Item" : "Add New Item"}
+                        </h2>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Item Name</label>
+                                <input
+                                    type="text"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    className="input"
+                                    placeholder="e.g., Rice, Cooking Oil"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Quantity</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={form.quantity}
+                                        onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                                        className="input"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Unit</label>
+                                    <input
+                                        type="text"
+                                        value={form.unit}
+                                        onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                                        className="input"
+                                        placeholder="kg, liters, pcs"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Price per Unit (₹)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={form.pricePerUnit}
+                                    onChange={(e) => setForm({ ...form, pricePerUnit: e.target.value })}
+                                    className="input"
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary flex-1">
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary flex-1">
+                                    {editingItem ? "Update" : "Create"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
