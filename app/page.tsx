@@ -56,8 +56,8 @@ export default function HomePage() {
             <Link href="/register" className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
               Start Free Trial →
             </Link>
-            <Link href="#demo" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
-              View Demo
+            <Link href="#pricing" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
+              View Pricing
             </Link>
           </div>
           <p className="text-gray-500 text-sm mt-4">No credit card required • Free forever plan available</p>
