@@ -1,50 +1,38 @@
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
-import { withAuth } from "next-auth/middleware"
 
-export default withAuth(
-    async function middleware(req) {
-        const token = await getToken({ req })
-        const isAuth = !!token
-        const isAuthPage = req.nextUrl.pathname.startsWith("/login") || req.nextUrl.pathname.startsWith("/register")
+export async function middleware(req: NextRequest) {
+    const token = await getToken({ req })
+    const isAuth = !!token
+    const path = req.nextUrl.pathname
 
-        if (isAuthPage) {
-            if (isAuth) {
-                return NextResponse.redirect(new URL("/admin", req.url))
-            }
-            return null
+    // Auth pages - redirect to admin if already logged in
+    if (path.startsWith("/login") || path.startsWith("/register")) {
+        if (isAuth) {
+            return NextResponse.redirect(new URL("/admin", req.url))
         }
+        return NextResponse.next()
+    }
 
+    // Protected routes - redirect to login if not authenticated
+    if (path.startsWith("/admin") || path.startsWith("/kitchen")) {
         if (!isAuth) {
-            let from = req.nextUrl.pathname
-            if (req.nextUrl.search) {
-                from += req.nextUrl.search
-            }
-            return NextResponse.redirect(new URL(`/login?from=${encodeURIComponent(from)}`, req.url))
+            const from = encodeURIComponent(path + req.nextUrl.search)
+            return NextResponse.redirect(new URL(`/login?from=${from}`, req.url))
         }
 
-        // Role-based access control
-        const role = token?.role as string
-        const path = req.nextUrl.pathname
-
-        // Admin/Owner only routes
+        // Role-based access control for admin routes
         if (path.startsWith("/admin")) {
+            const role = token?.role as string
             if (role !== "OWNER" && role !== "ADMIN") {
                 return NextResponse.redirect(new URL("/kitchen", req.url))
             }
         }
-
-        // Waiter restrictions (can access kitchen, but maybe we want to restrict them from verifying settings etc if they had access)
-        // Currently Waiter has no specific route other than /kitchen or public table view
-
-        return NextResponse.next()
-    },
-    {
-        callbacks: {
-            authorized: ({ token }) => !!token,
-        },
     }
-)
+
+    return NextResponse.next()
+}
 
 export const config = {
     matcher: ["/admin/:path*", "/kitchen/:path*", "/login", "/register"],
