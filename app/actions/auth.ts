@@ -2,13 +2,22 @@
 
 import { prisma } from "@/lib/prisma"
 import { hash } from "bcryptjs"
+import { Plan } from "@prisma/client"
 
 type RegisterInput = {
-    restaurantName: string
+    // Personal Details
     ownerName: string
     email: string
+    ownerPhone?: string
     password: string
-    phone?: string
+    // Restaurant Details
+    restaurantName: string
+    restaurantAddress?: string
+    restaurantPhone?: string
+    gstNumber?: string
+    fssaiLicense?: string
+    // Subscription
+    plan: "FREE" | "STARTER" | "BUSINESS" | "ENTERPRISE"
 }
 
 function generateSlug(name: string): string {
@@ -47,15 +56,18 @@ export async function registerRestaurant(data: RegisterInput) {
                     name: data.restaurantName,
                     slug,
                     email: data.email,
-                    phone: data.phone || null,
+                    phone: data.restaurantPhone || null,
+                    address: data.restaurantAddress || null,
+                    gstNumber: data.gstNumber || null,
+                    fssaiLicense: data.fssaiLicense || null,
                 },
             })
 
-            // Create FREE subscription
+            // Create subscription with selected plan
             await tx.subscription.create({
                 data: {
                     restaurantId: rest.id,
-                    plan: "FREE",
+                    plan: data.plan as Plan,
                     status: "ACTIVE",
                 },
             })
@@ -77,6 +89,15 @@ export async function registerRestaurant(data: RegisterInput) {
                     cafeName: data.restaurantName,
                     restaurantId: rest.id,
                     taxRate: 0,
+                },
+            })
+
+            // Create a default table for the restaurant
+            await tx.table.create({
+                data: {
+                    number: 1,
+                    restaurantId: rest.id,
+                    isActive: true,
                 },
             })
 

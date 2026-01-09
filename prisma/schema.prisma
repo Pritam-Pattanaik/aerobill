@@ -47,6 +47,8 @@ model Restaurant {
   email        String        @unique
   phone        String?
   address      String?
+  gstNumber    String?
+  fssaiLicense String?
   logo         String?
   isActive     Boolean       @default(true)
   subscription Subscription?
