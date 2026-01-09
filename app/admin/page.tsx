@@ -1,15 +1,17 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 // Revalidate every 30 seconds for better performance while keeping data fresh
 export const revalidate = 30
 
-async function getStats() {
+async function getStats(restaurantId: string) {
     try {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        // Use a single transaction for all count queries - much faster
         const [
             totalOrders,
             pendingOrders,
@@ -18,15 +20,15 @@ async function getStats() {
             lowStockCount,
             totalTables,
         ] = await prisma.$transaction([
-            prisma.order.count(),
-            prisma.order.count({ where: { status: { in: ["PENDING", "COOKING"] } } }),
+            prisma.order.count({ where: { restaurantId } }),
+            prisma.order.count({ where: { restaurantId, status: { in: ["PENDING", "COOKING"] } } }),
             prisma.order.aggregate({
-                where: { status: "BILLED", createdAt: { gte: today } },
+                where: { restaurantId, status: "BILLED", createdAt: { gte: today } },
                 _sum: { totalAmount: true },
             }),
-            prisma.product.count(),
-            prisma.inventory.count({ where: { quantity: { lte: 10 } } }),
-            prisma.table.count({ where: { isActive: true } }),
+            prisma.product.count({ where: { restaurantId } }),
+            prisma.inventory.count({ where: { restaurantId, quantity: { lte: 10 } } }),
+            prisma.table.count({ where: { restaurantId, isActive: true } }),
         ])
 
         return {
@@ -50,9 +52,10 @@ async function getStats() {
     }
 }
 
-async function getRecentOrders() {
+async function getRecentOrders(restaurantId: string) {
     try {
         return await prisma.order.findMany({
+            where: { restaurantId },
             take: 5,
             orderBy: { createdAt: "desc" },
             select: {
@@ -80,9 +83,17 @@ type RecentOrder = {
 }
 
 export default async function AdminDashboard() {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.restaurantId) {
+        redirect("/login")
+    }
+
+    const restaurantId = session.user.restaurantId
+    const restaurantName = session.user.restaurantName || "Restaurant"
+
     const [stats, recentOrders] = await Promise.all([
-        getStats(),
-        getRecentOrders(),
+        getStats(restaurantId),
+        getRecentOrders(restaurantId),
     ])
 
     const statCards = [
@@ -98,7 +109,7 @@ export default async function AdminDashboard() {
         <div className="p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold">Dashboard</h1>
-                <p className="text-gray-400 text-sm">Welcome back!</p>
+                <p className="text-gray-400 text-sm">Welcome back, {restaurantName}!</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
