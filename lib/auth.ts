@@ -1,9 +1,9 @@
-import NextAuth, { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
-import { prisma } from "./prisma"
+import { prisma } from "@/lib/prisma"
+import type { NextAuthOptions } from "next-auth"
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             name: "credentials",
@@ -16,25 +16,33 @@ export const authOptions: AuthOptions = {
                     return null
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email }
-                })
+                try {
+                    const user = await prisma.user.findUnique({
+                        where: { email: credentials.email },
+                        include: { restaurant: true }
+                    })
 
-                if (!user) {
+                    if (!user || !user.restaurant.isActive) {
+                        return null
+                    }
+
+                    const isValid = await compare(credentials.password, user.passwordHash)
+                    if (!isValid) {
+                        return null
+                    }
+
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role,
+                        restaurantId: user.restaurantId,
+                        restaurantSlug: user.restaurant.slug,
+                        restaurantName: user.restaurant.name,
+                    }
+                } catch (error) {
+                    console.error("Auth error:", error)
                     return null
-                }
-
-                const isValid = await compare(credentials.password, user.passwordHash)
-
-                if (!isValid) {
-                    return null
-                }
-
-                return {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
                 }
             }
         })
@@ -44,6 +52,9 @@ export const authOptions: AuthOptions = {
             if (user) {
                 token.id = user.id
                 token.role = (user as { role: string }).role
+                token.restaurantId = (user as { restaurantId: string }).restaurantId
+                token.restaurantSlug = (user as { restaurantSlug: string }).restaurantSlug
+                token.restaurantName = (user as { restaurantName: string }).restaurantName
             }
             return token
         },
@@ -51,6 +62,9 @@ export const authOptions: AuthOptions = {
             if (session.user) {
                 session.user.id = token.id as string
                 session.user.role = token.role as string
+                session.user.restaurantId = token.restaurantId as string
+                session.user.restaurantSlug = token.restaurantSlug as string
+                session.user.restaurantName = token.restaurantName as string
             }
             return session
         }
@@ -63,6 +77,3 @@ export const authOptions: AuthOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET
 }
-
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }

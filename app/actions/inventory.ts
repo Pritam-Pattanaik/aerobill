@@ -2,23 +2,16 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { requireRestaurantId } from "@/lib/session"
 
 export async function getInventory() {
     try {
+        const restaurantId = await requireRestaurantId()
         const inventory = await prisma.inventory.findMany({
-            include: {
-                products: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
-            },
-            orderBy: {
-                name: "asc"
-            }
+            where: { restaurantId },
+            include: { products: { select: { id: true, name: true } } },
+            orderBy: { name: "asc" }
         })
-
         return { success: true, inventory }
     } catch (error) {
         console.error("Failed to fetch inventory:", error)
@@ -26,22 +19,12 @@ export async function getInventory() {
     }
 }
 
-export async function createInventoryItem(data: {
-    name: string
-    quantity: number
-    unit: string
-    pricePerUnit: number
-}) {
+export async function createInventoryItem(data: { name: string; quantity: number; unit: string; pricePerUnit: number }) {
     try {
+        const restaurantId = await requireRestaurantId()
         const item = await prisma.inventory.create({
-            data: {
-                name: data.name,
-                quantity: data.quantity,
-                unit: data.unit,
-                pricePerUnit: data.pricePerUnit
-            }
+            data: { ...data, restaurantId }
         })
-
         revalidatePath("/admin/inventory")
         return { success: true, item }
     } catch (error) {
@@ -50,26 +33,13 @@ export async function createInventoryItem(data: {
     }
 }
 
-export async function updateInventoryItem(
-    id: string,
-    data: {
-        name: string
-        quantity: number
-        unit: string
-        pricePerUnit: number
-    }
-) {
+export async function updateInventoryItem(id: string, data: { name: string; quantity: number; unit: string; pricePerUnit: number }) {
     try {
+        const restaurantId = await requireRestaurantId()
         const item = await prisma.inventory.update({
-            where: { id },
-            data: {
-                name: data.name,
-                quantity: data.quantity,
-                unit: data.unit,
-                pricePerUnit: data.pricePerUnit
-            }
+            where: { id, restaurantId },
+            data: { name: data.name, quantity: data.quantity, unit: data.unit, pricePerUnit: data.pricePerUnit }
         })
-
         revalidatePath("/admin/inventory")
         return { success: true, item }
     } catch (error) {
@@ -80,22 +50,12 @@ export async function updateInventoryItem(
 
 export async function deleteInventoryItem(id: string) {
     try {
-        // Check if any products are linked to this inventory item
-        const linkedProducts = await prisma.product.findMany({
-            where: { inventoryId: id }
-        })
-
+        const restaurantId = await requireRestaurantId()
+        const linkedProducts = await prisma.product.findMany({ where: { inventoryId: id, restaurantId } })
         if (linkedProducts.length > 0) {
-            return {
-                success: false,
-                error: `Cannot delete: ${linkedProducts.length} product(s) linked to this inventory item`
-            }
+            return { success: false, error: `Cannot delete: ${linkedProducts.length} product(s) linked` }
         }
-
-        await prisma.inventory.delete({
-            where: { id }
-        })
-
+        await prisma.inventory.delete({ where: { id, restaurantId } })
         revalidatePath("/admin/inventory")
         return { success: true }
     } catch (error) {
@@ -106,15 +66,11 @@ export async function deleteInventoryItem(id: string) {
 
 export async function adjustInventoryQuantity(id: string, adjustment: number) {
     try {
+        const restaurantId = await requireRestaurantId()
         const item = await prisma.inventory.update({
-            where: { id },
-            data: {
-                quantity: {
-                    increment: adjustment
-                }
-            }
+            where: { id, restaurantId },
+            data: { quantity: { increment: adjustment } }
         })
-
         revalidatePath("/admin/inventory")
         return { success: true, item }
     } catch (error) {
@@ -125,17 +81,11 @@ export async function adjustInventoryQuantity(id: string, adjustment: number) {
 
 export async function getLowStockItems(threshold: number = 10) {
     try {
+        const restaurantId = await requireRestaurantId()
         const items = await prisma.inventory.findMany({
-            where: {
-                quantity: {
-                    lte: threshold
-                }
-            },
-            orderBy: {
-                quantity: "asc"
-            }
+            where: { restaurantId, quantity: { lte: threshold } },
+            orderBy: { quantity: "asc" }
         })
-
         return { success: true, items }
     } catch (error) {
         console.error("Failed to fetch low stock items:", error)

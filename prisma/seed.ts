@@ -3,7 +3,6 @@ import * as path from 'path'
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcryptjs'
 
-// Load .env
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 const prisma = new PrismaClient()
@@ -11,23 +10,50 @@ const prisma = new PrismaClient()
 async function main() {
     console.log('🌱 Starting seed...')
 
-    // Create admin user
-    const adminPassword = await hash('admin123', 12)
-    const admin = await prisma.user.upsert({
+    // Create demo restaurant
+    const demoRestaurant = await prisma.restaurant.upsert({
+        where: { slug: 'demo-restaurant' },
+        update: {},
+        create: {
+            name: 'Demo Restaurant',
+            slug: 'demo-restaurant',
+            email: 'demo@aerobill.com',
+            phone: '+91 98765 43210',
+            address: '123 Main Street, City',
+        },
+    })
+    console.log('✅ Created demo restaurant:', demoRestaurant.name)
+
+    // Create FREE subscription
+    await prisma.subscription.upsert({
+        where: { restaurantId: demoRestaurant.id },
+        update: {},
+        create: {
+            restaurantId: demoRestaurant.id,
+            plan: 'FREE',
+            status: 'ACTIVE',
+        },
+    })
+    console.log('✅ Created FREE subscription')
+
+    // Create owner user
+    const ownerPassword = await hash('admin123', 12)
+    await prisma.user.upsert({
         where: { email: 'admin@aerobill.com' },
         update: {},
         create: {
             email: 'admin@aerobill.com',
-            name: 'Admin',
-            passwordHash: adminPassword,
-            role: 'ADMIN',
+            name: 'Admin Owner',
+            passwordHash: ownerPassword,
+            role: 'OWNER',
+            restaurantId: demoRestaurant.id,
         },
     })
-    console.log('✅ Created admin user:', admin.email)
+    console.log('✅ Created owner: admin@aerobill.com / admin123')
 
     // Create kitchen user
     const kitchenPassword = await hash('kitchen123', 12)
-    const kitchen = await prisma.user.upsert({
+    await prisma.user.upsert({
         where: { email: 'kitchen@aerobill.com' },
         update: {},
         create: {
@@ -35,49 +61,49 @@ async function main() {
             name: 'Kitchen Staff',
             passwordHash: kitchenPassword,
             role: 'KITCHEN',
+            restaurantId: demoRestaurant.id,
         },
     })
-    console.log('✅ Created kitchen user:', kitchen.email)
+    console.log('✅ Created kitchen: kitchen@aerobill.com / kitchen123')
 
     // Create settings
-    const settings = await prisma.settings.upsert({
-        where: { id: 'default-settings' },
+    await prisma.settings.upsert({
+        where: { restaurantId: demoRestaurant.id },
         update: {},
         create: {
-            id: 'default-settings',
-            cafeName: 'Aerobill Cafe',
+            cafeName: 'Demo Restaurant',
             taxRate: 5,
-            feedbackLink: null,
+            restaurantId: demoRestaurant.id,
         },
     })
-    console.log('✅ Created settings:', settings.cafeName)
+    console.log('✅ Created settings')
 
     // Create categories
     const categories = await Promise.all([
         prisma.category.upsert({
-            where: { name: 'Indian' },
+            where: { restaurantId_name: { restaurantId: demoRestaurant.id, name: 'Indian' } },
             update: {},
-            create: { name: 'Indian', sortOrder: 1 },
+            create: { name: 'Indian', sortOrder: 1, restaurantId: demoRestaurant.id },
         }),
         prisma.category.upsert({
-            where: { name: 'Chinese' },
+            where: { restaurantId_name: { restaurantId: demoRestaurant.id, name: 'Chinese' } },
             update: {},
-            create: { name: 'Chinese', sortOrder: 2 },
+            create: { name: 'Chinese', sortOrder: 2, restaurantId: demoRestaurant.id },
         }),
         prisma.category.upsert({
-            where: { name: 'Beverages' },
+            where: { restaurantId_name: { restaurantId: demoRestaurant.id, name: 'Beverages' } },
             update: {},
-            create: { name: 'Beverages', sortOrder: 3 },
+            create: { name: 'Beverages', sortOrder: 3, restaurantId: demoRestaurant.id },
         }),
         prisma.category.upsert({
-            where: { name: 'Desserts' },
+            where: { restaurantId_name: { restaurantId: demoRestaurant.id, name: 'Desserts' } },
             update: {},
-            create: { name: 'Desserts', sortOrder: 4 },
+            create: { name: 'Desserts', sortOrder: 4, restaurantId: demoRestaurant.id },
         }),
     ])
-    console.log('✅ Created categories:', categories.map((c: { name: string }) => c.name).join(', '))
+    console.log('✅ Created categories:', categories.map(c => c.name).join(', '))
 
-    // Create sample products
+    // Create products
     const products = [
         { name: 'Paneer Butter Masala', price: 250, isVeg: true, categoryName: 'Indian' },
         { name: 'Dal Makhani', price: 180, isVeg: true, categoryName: 'Indian' },
@@ -85,88 +111,47 @@ async function main() {
         { name: 'Butter Naan', price: 45, isVeg: true, categoryName: 'Indian' },
         { name: 'Veg Manchurian', price: 180, isVeg: true, categoryName: 'Chinese' },
         { name: 'Hakka Noodles', price: 160, isVeg: true, categoryName: 'Chinese' },
-        { name: 'Chicken Fried Rice', price: 200, isVeg: false, categoryName: 'Chinese' },
         { name: 'Masala Chai', price: 30, isVeg: true, categoryName: 'Beverages' },
         { name: 'Cold Coffee', price: 80, isVeg: true, categoryName: 'Beverages' },
-        { name: 'Fresh Lime Soda', price: 50, isVeg: true, categoryName: 'Beverages' },
         { name: 'Gulab Jamun', price: 60, isVeg: true, categoryName: 'Desserts' },
         { name: 'Ice Cream', price: 80, isVeg: true, categoryName: 'Desserts' },
     ]
 
-    for (const product of products) {
-        const category = categories.find((c: { name: string }) => c.name === product.categoryName)
-        if (category) {
-            await prisma.product.upsert({
-                where: {
-                    id: `${product.name.toLowerCase().replace(/\s/g, '-')}-id`
-                },
-                update: {},
-                create: {
-                    id: `${product.name.toLowerCase().replace(/\s/g, '-')}-id`,
-                    name: product.name,
-                    price: product.price,
-                    isVeg: product.isVeg,
+    for (const p of products) {
+        const cat = categories.find(c => c.name === p.categoryName)
+        if (cat) {
+            await prisma.product.create({
+                data: {
+                    name: p.name,
+                    price: p.price,
+                    isVeg: p.isVeg,
                     isAvailable: true,
-                    categoryId: category.id,
+                    categoryId: cat.id,
+                    restaurantId: demoRestaurant.id,
                 },
             })
         }
     }
-    console.log('✅ Created sample products')
+    console.log('✅ Created', products.length, 'products')
 
     // Create tables
-    const tableCount = 10
-    for (let i = 1; i <= tableCount; i++) {
+    for (let i = 1; i <= 5; i++) {
         await prisma.table.upsert({
-            where: { number: i },
+            where: { restaurantId_number: { restaurantId: demoRestaurant.id, number: i } },
             update: {},
-            create: {
-                number: i,
-                isActive: true,
-            },
+            create: { number: i, isActive: true, restaurantId: demoRestaurant.id },
         })
     }
-    console.log(`✅ Created ${tableCount} tables`)
-
-    // Create sample inventory
-    const inventoryItems = [
-        { name: 'Rice', quantity: 50, unit: 'kg', pricePerUnit: 60 },
-        { name: 'Cooking Oil', quantity: 20, unit: 'liters', pricePerUnit: 150 },
-        { name: 'Paneer', quantity: 10, unit: 'kg', pricePerUnit: 350 },
-        { name: 'Chicken', quantity: 15, unit: 'kg', pricePerUnit: 280 },
-        { name: 'Tea Leaves', quantity: 5, unit: 'kg', pricePerUnit: 400 },
-        { name: 'Sugar', quantity: 25, unit: 'kg', pricePerUnit: 45 },
-    ]
-
-    for (const item of inventoryItems) {
-        await prisma.inventory.upsert({
-            where: { id: `${item.name.toLowerCase().replace(/\s/g, '-')}-inv` },
-            update: {},
-            create: {
-                id: `${item.name.toLowerCase().replace(/\s/g, '-')}-inv`,
-                name: item.name,
-                quantity: item.quantity,
-                unit: item.unit,
-                pricePerUnit: item.pricePerUnit,
-            },
-        })
-    }
-    console.log('✅ Created sample inventory items')
+    console.log('✅ Created 5 tables')
 
     console.log('')
-    console.log('🎉 Seed completed successfully!')
+    console.log('🎉 Seed completed!')
     console.log('')
-    console.log('📋 Login credentials:')
-    console.log('   Admin: admin@aerobill.com / admin123')
+    console.log('📋 Demo credentials:')
+    console.log('   Owner: admin@aerobill.com / admin123')
     console.log('   Kitchen: kitchen@aerobill.com / kitchen123')
 }
 
 main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+    .then(async () => { await prisma.$disconnect() })
+    .catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1) })

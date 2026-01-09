@@ -7,7 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
 enum Role {
+  OWNER
   ADMIN
   KITCHEN
 }
@@ -24,62 +26,130 @@ enum PaymentStatus {
   PAID
 }
 
-model User {
-  id           String   @id @default(cuid())
+enum Plan {
+  FREE
+  STARTER
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+// Multi-tenant Restaurant model
+model Restaurant {
+  id           String        @id @default(cuid())
   name         String
-  email        String   @unique
+  slug         String        @unique
+  email        String        @unique
+  phone        String?
+  address      String?
+  logo         String?
+  isActive     Boolean       @default(true)
+  subscription Subscription?
+  users        User[]
+  categories   Category[]
+  products     Product[]
+  tables       Table[]
+  orders       Order[]
+  inventory    Inventory[]
+  settings     Settings?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// Subscription for each restaurant
+model Subscription {
+  id           String     @id @default(cuid())
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  plan         Plan       @default(FREE)
+  status       SubStatus  @default(ACTIVE)
+  expiresAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
   passwordHash String
-  role         Role     @default(KITCHEN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         Role        @default(KITCHEN)
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([restaurantId])
 }
 
 model Category {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  sortOrder Int       @default(0)
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String      @id @default(cuid())
+  name         String
+  sortOrder    Int         @default(0)
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  products     Product[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([restaurantId, name])
+  @@index([restaurantId])
 }
 
 model Inventory {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   name         String
   quantity     Float
   unit         String
   pricePerUnit Float
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   products     Product[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([restaurantId])
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  price       Float
-  isVeg       Boolean     @default(true)
-  isAvailable Boolean     @default(true)
-  image       String?
-  categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id])
-  inventoryId String?
-  inventory   Inventory?  @relation(fields: [inventoryId], references: [id])
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id           String      @id @default(cuid())
+  name         String
+  price        Float
+  isVeg        Boolean     @default(true)
+  isAvailable  Boolean     @default(true)
+  image        String?
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+  inventoryId  String?
+  inventory    Inventory?  @relation(fields: [inventoryId], references: [id])
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([categoryId])
   @@index([inventoryId])
+  @@index([restaurantId])
 }
 
 model Table {
-  id        String   @id @default(cuid())
-  number    Int      @unique
-  isActive  Boolean  @default(true)
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String      @id @default(cuid())
+  number       Int
+  isActive     Boolean     @default(true)
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orders       Order[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([restaurantId, number])
+  @@index([restaurantId])
 }
 
 model Order {
@@ -89,12 +159,15 @@ model Order {
   status        OrderStatus   @default(PENDING)
   totalAmount   Float
   paymentStatus PaymentStatus @default(UNPAID)
+  restaurantId  String
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   items         OrderItem[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
   @@index([tableId])
   @@index([status])
+  @@index([restaurantId])
 }
 
 model OrderItem {
@@ -112,10 +185,12 @@ model OrderItem {
 }
 
 model Settings {
-  id           String   @id @default(cuid())
-  cafeName     String   @default("Aerobill Cafe")
+  id           String      @id @default(cuid())
+  cafeName     String      @default("My Restaurant")
   feedbackLink String?
-  taxRate      Float    @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  taxRate      Float       @default(0)
+  restaurantId String      @unique
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }

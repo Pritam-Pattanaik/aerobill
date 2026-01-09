@@ -1,12 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const registered = searchParams.get("registered") === "true"
+
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
@@ -18,91 +21,55 @@ export default function LoginPage() {
         setLoading(true)
 
         try {
-            const result = await signIn("credentials", {
-                email,
-                password,
-                redirect: false,
-            })
-
-            if (result?.error) {
-                setError("Invalid email or password")
-            } else {
-                router.push("/admin")
-            }
-        } catch (err) {
+            const result = await signIn("credentials", { email, password, redirect: false })
+            if (result?.error) setError("Invalid email or password")
+            else router.push("/admin")
+        } catch {
             setError("Something went wrong")
-            console.error(err)
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center p-4">
-            {/* Background effects */}
-            <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] -z-10" />
-            <div className="fixed top-1/3 left-1/3 w-80 h-80 bg-[#ff6b35]/10 rounded-full blur-3xl -z-10 animate-pulse" />
-
-            <div className="glass-card p-8 w-full max-w-md animate-fadeIn">
-                <div className="text-center mb-8">
-                    <Link href="/">
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] bg-clip-text text-transparent mb-2">
-                            Aerobill
-                        </h1>
-                    </Link>
-                    <p className="text-gray-400">Staff Login</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium mb-2">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="input"
-                            placeholder="admin@aerobill.com"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium mb-2">
-                            Password
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="input"
-                            placeholder="••••••••"
-                            required
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 text-red-400 text-sm">
-                            {error}
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn-primary w-full"
-                    >
-                        {loading ? "Signing in..." : "Sign In"}
-                    </button>
-                </form>
-
-                <p className="text-center text-sm text-gray-500 mt-6">
-                    For restaurant staff and administrators only
-                </p>
+        <div className="glass-card p-8 w-full max-w-md">
+            <div className="text-center mb-8">
+                <Link href="/"><h1 className="text-3xl font-bold text-[#ff6b35] mb-2">Aerobill</h1></Link>
+                <p className="text-gray-400">Sign in to your dashboard</p>
             </div>
+
+            {registered && (
+                <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-3 text-green-400 text-sm mb-4">
+                    Account created! Please sign in.
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm text-gray-400 mb-1">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@restaurant.com" required />
+                </div>
+                <div>
+                    <label className="block text-sm text-gray-400 mb-1">Password</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="••••••••" required />
+                </div>
+                {error && <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 text-red-400 text-sm">{error}</div>}
+                <button type="submit" disabled={loading} className="btn-primary w-full py-3">{loading ? "Signing in..." : "Sign In"}</button>
+            </form>
+
+            <p className="text-center text-sm text-gray-400 mt-6">
+                Don't have an account? <Link href="/register" className="text-[#ff6b35] hover:underline">Create one</Link>
+            </p>
+        </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
+            <Suspense fallback={<div className="text-gray-400">Loading...</div>}>
+                <LoginForm />
+            </Suspense>
         </main>
     )
 }
