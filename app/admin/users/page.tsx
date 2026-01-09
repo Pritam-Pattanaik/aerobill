@@ -89,6 +89,7 @@ export default function UsersManagement() {
                                     onChange={e => setNewUser({ ...newUser, role: e.target.value as Role })}
                                 >
                                     <option value="KITCHEN">Kitchen Staff</option>
+                                    <option value="WAITER">Waiter</option>
                                     <option value="ADMIN">Manager/Admin</option>
                                 </select>
                             </div>
@@ -135,7 +136,8 @@ export default function UsersManagement() {
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs ${user.role === 'OWNER' ? 'bg-purple-500/20 text-purple-400' :
-                                                        user.role === 'ADMIN' ? 'bg-blue-500/20 text-blue-400' :
+                                                    user.role === 'ADMIN' ? 'bg-blue-500/20 text-blue-400' :
+                                                        user.role === 'WAITER' ? 'bg-yellow-500/20 text-yellow-400' :
                                                             'bg-green-500/20 text-green-400'
                                                     }`}>
                                                     {user.role}
