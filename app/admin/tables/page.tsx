@@ -5,7 +5,10 @@ import { getTables, createTables, toggleTableStatus, deleteTable } from "@/app/a
 
 type Table = { id: string; number: number; isActive: boolean }
 
+import { useSession } from "next-auth/react"
+
 export default function TablesManagement() {
+    const { data: session } = useSession()
     const [tables, setTables] = useState<Table[]>([])
     const [loading, setLoading] = useState(true)
     const [addCount, setAddCount] = useState("1")
@@ -43,10 +46,11 @@ export default function TablesManagement() {
     }
 
     const generateQR = async (table: Table) => {
+        if (!session?.user?.restaurantSlug) return
         setSelectedTable(table)
         // Dynamic import QR code library only when needed
         const QRCode = (await import("qrcode")).default
-        const url = `${window.location.origin}/table/${table.number}`
+        const url = `${window.location.origin}/${session.user.restaurantSlug}/table/${table.number}`
         const dataUrl = await QRCode.toDataURL(url, { width: 250, margin: 1 })
         setQrDataUrl(dataUrl)
     }

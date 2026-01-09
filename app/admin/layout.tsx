@@ -11,6 +11,7 @@ const navItems = [
     { href: "/admin/inventory", label: "Inventory", icon: "📦" },
     { href: "/admin/tables", label: "Tables", icon: "🪑" },
     { href: "/admin/billing", label: "Billing", icon: "🧾" },
+    { href: "/admin/users", label: "Staff", icon: "👥" },
     { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ]
 
@@ -39,8 +40,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                                 <Link
                                     href={item.href}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${pathname === item.href
-                                            ? "bg-[var(--primary)] text-white"
-                                            : "text-gray-400 hover:bg-[var(--card-hover)] hover:text-white"
+                                        ? "bg-[var(--primary)] text-white"
+                                        : "text-gray-400 hover:bg-[var(--card-hover)] hover:text-white"
                                         }`}
                                 >
                                     <span className="text-lg">{item.icon}</span>
