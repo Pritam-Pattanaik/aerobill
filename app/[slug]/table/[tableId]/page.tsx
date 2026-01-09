@@ -22,6 +22,7 @@ export default function TableMenu() {
     const [restaurantName, setRestaurantName] = useState("")
     const [loading, setLoading] = useState(true)
     const [orderPlaced, setOrderPlaced] = useState(false)
+    const [ordering, setOrdering] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -66,12 +67,15 @@ export default function TableMenu() {
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
     const handlePlaceOrder = async () => {
-        if (!tableDbId || cart.length === 0) return
+        if (!tableDbId || cart.length === 0 || ordering) return
+        setOrdering(true)
         try {
             const result = await placeOrder(tableDbId, cart)
             if (result.success) { setOrderPlaced(true); setCart([]); setIsCartOpen(false) }
             else setError(result.error || "Failed to place order")
-        } catch { setError("Failed to place order") }
+        } catch { setError("Failed to place order") } finally {
+            setOrdering(false)
+        }
     }
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
@@ -173,7 +177,14 @@ export default function TableMenu() {
                         {cart.length > 0 && (
                             <div className="p-6 border-t border-[var(--border)]">
                                 <div className="flex justify-between mb-4 text-lg"><span>Total</span><span className="font-bold text-[var(--primary)]">₹{cartTotal.toFixed(0)}</span></div>
-                                <button onClick={handlePlaceOrder} className="btn-primary w-full text-lg">Place Order</button>
+                                <button onClick={handlePlaceOrder} disabled={ordering} className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                    {ordering ? (
+                                        <>
+                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                            Placing Order...
+                                        </>
+                                    ) : "Place Order"}
+                                </button>
                             </div>
                         )}
                     </div>
