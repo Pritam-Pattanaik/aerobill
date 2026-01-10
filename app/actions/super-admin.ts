@@ -34,7 +34,7 @@ export async function getSystemStats() {
         prisma.restaurant.count({ where: { isActive: true } }),
         prisma.subscription.groupBy({
             by: ["plan"],
-            _count: true,
+            _count: { _all: true },
             orderBy: { plan: "asc" },
         }),
         prisma.order.count({ where: { createdAt: { gte: today } } }),
@@ -54,7 +54,8 @@ export async function getSystemStats() {
         ENTERPRISE: 0,
     }
     subscriptionsByPlan.forEach((sub) => {
-        subscriptions[sub.plan] = sub._count ?? 0
+        const count = typeof sub._count === 'object' && sub._count !== null ? sub._count._all ?? 0 : 0
+        subscriptions[sub.plan] = count
     })
 
     return {
