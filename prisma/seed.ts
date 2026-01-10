@@ -144,14 +144,30 @@ async function main() {
     }
     console.log('✅ Created 5 tables')
 
+    // Create super admin for platform management
+    const superAdminPassword = await hash('superadmin123', 12)
+    await prisma.superAdmin.upsert({
+        where: { email: 'super@aerobill.com' },
+        update: {},
+        create: {
+            email: 'super@aerobill.com',
+            name: 'Super Admin',
+            passwordHash: superAdminPassword,
+            isActive: true,
+        },
+    })
+    console.log('✅ Created super admin: super@aerobill.com / superadmin123')
+
     console.log('')
     console.log('🎉 Seed completed!')
     console.log('')
     console.log('📋 Demo credentials:')
     console.log('   Owner: admin@aerobill.com / admin123')
     console.log('   Kitchen: kitchen@aerobill.com / kitchen123')
+    console.log('   Super Admin: super@aerobill.com / superadmin123')
 }
 
 main()
     .then(async () => { await prisma.$disconnect() })
     .catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1) })
+

@@ -21,7 +21,7 @@ export default function KitchenPage() {
 
     useEffect(() => {
         fetchOrders()
-        const interval = setInterval(fetchOrders, 5000)
+        const interval = setInterval(fetchOrders, 10000)
         return () => clearInterval(interval)
     }, [fetchOrders])
 
@@ -53,7 +53,7 @@ export default function KitchenPage() {
                         <h1 className="text-xl font-bold text-[var(--primary)]">🍳 Kitchen Display</h1>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400">Auto-refresh: 5s</span>
+                        <span className="text-xs text-gray-400">Auto-refresh: 10s</span>
                         <button onClick={() => signOut({ callbackUrl: "/" })} className="btn-secondary text-xs py-1.5">Sign Out</button>
                     </div>
                 </div>

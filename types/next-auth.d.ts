@@ -6,18 +6,20 @@ declare module "next-auth" {
         user: {
             id: string
             role: string
-            restaurantId: string
-            restaurantSlug: string
-            restaurantName: string
+            restaurantId?: string
+            restaurantSlug?: string
+            restaurantName?: string
+            isSuperAdmin?: boolean
         } & DefaultSession["user"]
     }
 
     interface User {
         id: string
         role: string
-        restaurantId: string
-        restaurantSlug: string
-        restaurantName: string
+        restaurantId?: string
+        restaurantSlug?: string
+        restaurantName?: string
+        isSuperAdmin?: boolean
     }
 }
 
@@ -25,8 +27,9 @@ declare module "next-auth/jwt" {
     interface JWT {
         id: string
         role: string
-        restaurantId: string
-        restaurantSlug: string
-        restaurantName: string
+        restaurantId?: string
+        restaurantSlug?: string
+        restaurantName?: string
+        isSuperAdmin?: boolean
     }
 }

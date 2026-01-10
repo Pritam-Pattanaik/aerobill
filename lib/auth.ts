@@ -9,7 +9,8 @@ export const authOptions: NextAuthOptions = {
             name: "credentials",
             credentials: {
                 email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" }
+                password: { label: "Password", type: "password" },
+                loginType: { label: "Login Type", type: "text" }
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
@@ -17,6 +18,31 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
+                    // Check if this is a super admin login attempt
+                    if (credentials.loginType === "super-admin") {
+                        const superAdmin = await prisma.superAdmin.findUnique({
+                            where: { email: credentials.email }
+                        })
+
+                        if (!superAdmin || !superAdmin.isActive) {
+                            return null
+                        }
+
+                        const isValid = await compare(credentials.password, superAdmin.passwordHash)
+                        if (!isValid) {
+                            return null
+                        }
+
+                        return {
+                            id: superAdmin.id,
+                            email: superAdmin.email,
+                            name: superAdmin.name,
+                            role: "SUPER_ADMIN",
+                            isSuperAdmin: true,
+                        }
+                    }
+
+                    // Regular user authentication
                     const user = await prisma.user.findUnique({
                         where: { email: credentials.email },
                         include: { restaurant: true }
@@ -39,6 +65,7 @@ export const authOptions: NextAuthOptions = {
                         restaurantId: user.restaurantId,
                         restaurantSlug: user.restaurant.slug,
                         restaurantName: user.restaurant.name,
+                        isSuperAdmin: false,
                     }
                 } catch (error) {
                     console.error("Auth error:", error)
@@ -52,9 +79,10 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id
                 token.role = (user as { role: string }).role
-                token.restaurantId = (user as { restaurantId: string }).restaurantId
-                token.restaurantSlug = (user as { restaurantSlug: string }).restaurantSlug
-                token.restaurantName = (user as { restaurantName: string }).restaurantName
+                token.isSuperAdmin = (user as { isSuperAdmin?: boolean }).isSuperAdmin || false
+                token.restaurantId = (user as { restaurantId?: string }).restaurantId
+                token.restaurantSlug = (user as { restaurantSlug?: string }).restaurantSlug
+                token.restaurantName = (user as { restaurantName?: string }).restaurantName
             }
             return token
         },
@@ -62,9 +90,10 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 session.user.id = token.id as string
                 session.user.role = token.role as string
-                session.user.restaurantId = token.restaurantId as string
-                session.user.restaurantSlug = token.restaurantSlug as string
-                session.user.restaurantName = token.restaurantName as string
+                session.user.isSuperAdmin = token.isSuperAdmin as boolean
+                session.user.restaurantId = token.restaurantId as string | undefined
+                session.user.restaurantSlug = token.restaurantSlug as string | undefined
+                session.user.restaurantName = token.restaurantName as string | undefined
             }
             return session
         }
