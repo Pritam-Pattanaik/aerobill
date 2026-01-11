@@ -206,13 +206,6 @@ export default function HomePage() {
     { icon: "🪑", title: "Table Management", desc: "Manage tables and generate QR codes instantly" },
   ]
 
-  const plans = [
-    { name: "Free", price: "₹0", period: "/forever", tables: "1", products: "10", features: ["Basic QR ordering", "Customer menu", "Simple billing"], cta: "Start Free", popular: false },
-    { name: "Starter", price: "₹499", period: "/month", tables: "5", products: "50", features: ["Everything in Free", "Kitchen display", "Order history", "Email support"], cta: "Get Started", popular: false },
-    { name: "Business", price: "₹999", period: "/month", tables: "20", products: "Unlimited", features: ["Everything in Starter", "Inventory tracking", "Analytics dashboard", "Priority support"], cta: "Go Business", popular: true },
-    { name: "Enterprise", price: "₹2,499", period: "/month", tables: "Unlimited", products: "Unlimited", features: ["Everything in Business", "Custom branding", "API access", "Dedicated support"], cta: "Contact Sales", popular: false },
-  ]
-
   const steps = [
     { num: "1", title: "Sign Up", desc: "Create your restaurant account in under 2 minutes" },
     { num: "2", title: "Add Menu", desc: "Upload your menu items with prices and images" },
@@ -232,8 +225,11 @@ export default function HomePage() {
         <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-[#ff6b35]">Aerobill</Link>
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-6">
               <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
+              <Link href="/pricing" className="text-gray-300 hover:text-white transition">Pricing</Link>
+            </div>
+            <div className="flex items-center gap-4">
               <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
               <Link href="/register" className="bg-[#ff6b35] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#ff8c5a] transition">
                 Get Started
@@ -259,7 +255,7 @@ export default function HomePage() {
               <Link href="/register" className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
                 Start Free Trial →
               </Link>
-              <Link href="#pricing" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
+              <Link href="/pricing" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
                 View Pricing
               </Link>
             </div>
@@ -307,45 +303,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Pricing */}
-        <section className="py-20 px-4 bg-[#111827]/50" id="pricing">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-              <p className="text-gray-400">Choose the plan that fits your restaurant</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {plans.map((p, i) => (
-                <div key={i} className={`bg-[#1a1a2e] rounded-2xl p-6 border ${p.popular ? "border-[#ff6b35] shadow-lg shadow-[#ff6b35]/20" : "border-white/10"} relative`}>
-                  {p.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ff6b35] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      Most Popular
-                    </div>
-                  )}
-                  <h3 className="text-xl font-bold mb-2">{p.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold">{p.price}</span>
-                    <span className="text-gray-400">{p.period}</span>
-                  </div>
-                  <div className="text-sm text-gray-400 mb-4">
-                    <div>{p.tables} Tables</div>
-                    <div>{p.products} Products</div>
-                  </div>
-                  <ul className="space-y-2 mb-6">
-                    {p.features.map((f, j) => (
-                      <li key={j} className="text-sm text-gray-300 flex items-center gap-2">
-                        <span className="text-[#ff6b35]">✓</span> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/register" className={`block w-full text-center py-3 rounded-lg font-medium transition ${p.popular ? "bg-[#ff6b35] text-white hover:bg-[#ff8c5a]" : "bg-white/10 text-white hover:bg-white/20"}`}>
-                    {p.cta}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA */}
         <section className="py-20 px-4">
@@ -364,8 +321,8 @@ export default function HomePage() {
             <div className="text-gray-400 text-sm">© 2026 Aerobill by <a href="https://www.assetmagnets.com/" target="_blank" rel="noopener noreferrer" className="text-[#ff6b35] hover:underline">ASSETMAGNETS</a>. All rights reserved.</div>
             <div className="flex gap-6 text-gray-400 text-sm">
               <Link href="/about" className="hover:text-white">About</Link>
+              <Link href="/pricing" className="hover:text-white">Pricing</Link>
               <Link href="#" className="hover:text-white">Privacy</Link>
-              <Link href="#" className="hover:text-white">Terms</Link>
             </div>
           </div>
         </footer>
