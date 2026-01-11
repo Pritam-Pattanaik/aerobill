@@ -11,11 +11,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Aerobill - Restaurant Management System",
   description: "Modern restaurant management with digital ordering, kitchen display, and billing",
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-  },
 };
 
 export default function RootLayout({
