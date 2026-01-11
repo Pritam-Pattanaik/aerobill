@@ -233,6 +233,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-[#ff6b35]">Aerobill</Link>
             <div className="flex items-center gap-4">
+              <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
               <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
               <Link href="/register" className="bg-[#ff6b35] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#ff8c5a] transition">
                 Get Started
@@ -360,11 +361,11 @@ export default function HomePage() {
         {/* Footer */}
         <footer className="py-8 px-4 border-t border-white/10">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-gray-400 text-sm">© 2024 Aerobill. All rights reserved.</div>
+            <div className="text-gray-400 text-sm">© 2026 Aerobill by <a href="https://www.assetmagnets.com/" target="_blank" rel="noopener noreferrer" className="text-[#ff6b35] hover:underline">ASSETMAGNETS</a>. All rights reserved.</div>
             <div className="flex gap-6 text-gray-400 text-sm">
+              <Link href="/about" className="hover:text-white">About</Link>
               <Link href="#" className="hover:text-white">Privacy</Link>
               <Link href="#" className="hover:text-white">Terms</Link>
-              <Link href="#" className="hover:text-white">Support</Link>
             </div>
           </div>
         </footer>
