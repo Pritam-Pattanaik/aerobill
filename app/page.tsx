@@ -226,7 +226,7 @@ export default function HomePage() {
         <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Aerobill" width={120} height={40} className="h-10 w-auto" />
+              <Image src="/logo.png" alt="Aerobill" width={150} height={50} className="h-12 w-auto" />
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
