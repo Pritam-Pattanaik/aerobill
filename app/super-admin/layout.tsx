@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { SessionProvider } from "next-auth/react"
+import { Suspense } from "react"
+import NavigationProgress from "@/components/NavigationProgress"
 
 const navItems = [
     { href: "/super-admin", label: "Dashboard", icon: "🏠" },
@@ -44,8 +46,8 @@ function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {
                                 <Link
                                     href={item.href}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${pathname === item.href
-                                            ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/30 border border-purple-500/30 text-white"
-                                            : "text-gray-400 hover:bg-purple-500/10 hover:text-white"
+                                        ? "bg-gradient-to-r from-purple-600/30 to-indigo-600/30 border border-purple-500/30 text-white"
+                                        : "text-gray-400 hover:bg-purple-500/10 hover:text-white"
                                         }`}
                                 >
                                     <span className="text-lg">{item.icon}</span>
@@ -83,6 +85,9 @@ export default function SuperAdminLayout({
 }) {
     return (
         <SessionProvider>
+            <Suspense fallback={null}>
+                <NavigationProgress />
+            </Suspense>
             <SuperAdminLayoutContent>{children}</SuperAdminLayoutContent>
         </SessionProvider>
     )

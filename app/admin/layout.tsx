@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { SessionProvider } from "next-auth/react"
+import { Suspense } from "react"
+import NavigationProgress from "@/components/NavigationProgress"
 
 const navItems = [
     { href: "/admin", label: "Dashboard", icon: "📊" },
@@ -90,7 +92,11 @@ export default function AdminLayout({
 }) {
     return (
         <SessionProvider>
+            <Suspense fallback={null}>
+                <NavigationProgress />
+            </Suspense>
             <AdminLayoutContent>{children}</AdminLayoutContent>
         </SessionProvider>
     )
 }
+
