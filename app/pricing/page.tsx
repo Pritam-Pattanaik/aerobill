@@ -12,8 +12,8 @@ export default function PricingPage() {
             name: "Free",
             price: "₹0",
             period: "/forever",
-            tables: "1",
-            products: "10",
+            tables: "5",
+            products: "15",
             features: [
                 "Basic QR ordering",
                 "Customer menu",
@@ -24,10 +24,10 @@ export default function PricingPage() {
             popular: false,
         },
         {
-            name: "Starter",
+            name: "Standard",
             price: "₹499",
             period: "/month",
-            tables: "5",
+            tables: "10",
             products: "50",
             features: [
                 "Everything in Free",
@@ -36,34 +36,34 @@ export default function PricingPage() {
                 "Email support",
                 "3 user accounts",
             ],
-            cta: "Get Started",
+            cta: "Get Standard",
             popular: false,
         },
         {
-            name: "Business",
+            name: "Premium",
             price: "₹999",
             period: "/month",
-            tables: "20",
+            tables: "25",
             products: "Unlimited",
             features: [
-                "Everything in Starter",
+                "Everything in Standard",
                 "Inventory tracking",
                 "Analytics dashboard",
                 "Priority support",
                 "10 user accounts",
                 "Custom reports",
             ],
-            cta: "Go Business",
+            cta: "Go Premium",
             popular: true,
         },
         {
-            name: "Enterprise",
+            name: "Elite",
             price: "₹2,499",
             period: "/month",
             tables: "Unlimited",
             products: "Unlimited",
             features: [
-                "Everything in Business",
+                "Everything in Premium",
                 "Custom branding",
                 "API access",
                 "Dedicated support",
@@ -172,8 +172,8 @@ export default function PricingPage() {
                                 <Link
                                     href="/register"
                                     className={`block w-full text-center py-3 rounded-lg font-medium transition ${p.popular
-                                            ? "bg-[#ff6b35] text-white hover:bg-[#ff8c5a]"
-                                            : "bg-white/10 text-white hover:bg-white/20"
+                                        ? "bg-[#ff6b35] text-white hover:bg-[#ff8c5a]"
+                                        : "bg-white/10 text-white hover:bg-white/20"
                                         }`}
                                 >
                                     {p.cta}

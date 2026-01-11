@@ -117,20 +117,78 @@ export default function AboutPage() {
 
             {/* Our Story */}
             <section className="py-20 px-4 bg-[#111827]/50">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Our Story</h2>
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-16">
+                        <div className="inline-block px-4 py-1.5 bg-[#ff6b35]/10 rounded-full text-[#ff6b35] text-sm font-medium mb-4">
+                            📖 Our Journey
+                        </div>
+                        <h2 className="text-4xl font-bold mb-4">Our Story</h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto">How a simple observation turned into India&apos;s most innovative restaurant management platform</p>
                     </div>
-                    <div className="glass-card p-8 md:p-12">
-                        <p className="text-gray-300 text-lg leading-relaxed mb-6">
-                            <strong className="text-white">Aerobill</strong> was born from a simple observation: restaurants were struggling with outdated systems that were expensive, complicated, and slow. We saw restaurant owners juggling multiple apps, expensive POS hardware, and commission-hungry delivery platforms.
-                        </p>
-                        <p className="text-gray-300 text-lg leading-relaxed mb-6">
-                            At <strong className="text-white">ASSETMAGNETS</strong>, we believe technology should simplify, not complicate. So we built Aerobill — a complete restaurant management solution that runs entirely in the cloud. No expensive hardware. No complicated setup. No commissions eating into your profits.
-                        </p>
-                        <p className="text-gray-300 text-lg leading-relaxed">
-                            Today, hundreds of restaurants across India trust Aerobill to manage their daily operations. From small cafes to multi-location chains, we&apos;re helping businesses embrace the digital future — one order at a time.
-                        </p>
+
+                    <div className="relative">
+                        {/* Timeline line */}
+                        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#ff6b35] via-[#ff8c5a] to-[#ff6b35]/20"></div>
+
+                        {/* Timeline items */}
+                        <div className="space-y-12 md:space-y-0">
+                            {/* Item 1 */}
+                            <div className="md:flex md:items-center md:gap-8 relative">
+                                <div className="md:w-1/2 md:text-right md:pr-12">
+                                    <div className="glass-card p-6 md:p-8 border border-white/10 hover:border-[#ff6b35]/30 transition">
+                                        <div className="flex items-center gap-3 mb-4 md:justify-end">
+                                            <span className="text-3xl">💡</span>
+                                            <h3 className="text-xl font-bold text-[#ff6b35]">The Problem</h3>
+                                        </div>
+                                        <p className="text-gray-300 leading-relaxed">
+                                            We observed restaurants struggling with <strong className="text-white">outdated, expensive systems</strong>. Owners were juggling multiple apps, paying hefty commissions to delivery platforms, and dealing with complicated POS hardware.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#ff6b35] to-[#ff8c5a] rounded-full shadow-lg shadow-[#ff6b35]/30">
+                                    <span className="text-lg font-bold">1</span>
+                                </div>
+                                <div className="md:w-1/2 md:pl-12"></div>
+                            </div>
+
+                            {/* Item 2 */}
+                            <div className="md:flex md:items-center md:gap-8 relative md:mt-12">
+                                <div className="md:w-1/2 md:pr-12"></div>
+                                <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#ff6b35] to-[#ff8c5a] rounded-full shadow-lg shadow-[#ff6b35]/30">
+                                    <span className="text-lg font-bold">2</span>
+                                </div>
+                                <div className="md:w-1/2 md:pl-12 mt-8 md:mt-0">
+                                    <div className="glass-card p-6 md:p-8 border border-white/10 hover:border-[#ff6b35]/30 transition">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <span className="text-3xl">🚀</span>
+                                            <h3 className="text-xl font-bold text-[#ff6b35]">The Solution</h3>
+                                        </div>
+                                        <p className="text-gray-300 leading-relaxed">
+                                            At <strong className="text-white">ASSETMAGNETS</strong>, we believe technology should simplify, not complicate. So we built Aerobill — a complete cloud-based solution. <strong className="text-white">No hardware. No setup hassles. Zero commissions.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Item 3 */}
+                            <div className="md:flex md:items-center md:gap-8 relative md:mt-12">
+                                <div className="md:w-1/2 md:text-right md:pr-12 mt-8 md:mt-0">
+                                    <div className="glass-card p-6 md:p-8 border border-white/10 hover:border-[#ff6b35]/30 transition">
+                                        <div className="flex items-center gap-3 mb-4 md:justify-end">
+                                            <span className="text-3xl">🎯</span>
+                                            <h3 className="text-xl font-bold text-[#ff6b35]">Today</h3>
+                                        </div>
+                                        <p className="text-gray-300 leading-relaxed">
+                                            <strong className="text-white">Hundreds of restaurants</strong> across India trust Aerobill daily. From cozy cafes to multi-location chains, we&apos;re helping businesses embrace the digital future — <strong className="text-white">one order at a time</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#ff6b35] to-[#ff8c5a] rounded-full shadow-lg shadow-[#ff6b35]/30">
+                                    <span className="text-lg font-bold">3</span>
+                                </div>
+                                <div className="md:w-1/2 md:pl-12"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -156,30 +214,79 @@ export default function AboutPage() {
 
             {/* Comparison Table */}
             <section className="py-20 px-4 bg-[#111827]/50">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Aerobill vs. Traditional Solutions</h2>
-                        <p className="text-gray-400">See why restaurants are switching to Aerobill</p>
+                <div className="max-w-5xl mx-auto">
+                    <div className="text-center mb-16">
+                        <div className="inline-block px-4 py-1.5 bg-[#ff6b35]/10 rounded-full text-[#ff6b35] text-sm font-medium mb-4">
+                            ⚔️ The Comparison
+                        </div>
+                        <h2 className="text-4xl font-bold mb-4">Aerobill vs. Traditional Solutions</h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto">See why hundreds of restaurants are making the switch to Aerobill</p>
                     </div>
-                    <div className="glass-card overflow-hidden">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="text-left p-4 text-gray-400 font-medium">Feature</th>
-                                    <th className="text-center p-4 text-[#ff6b35] font-bold">Aerobill</th>
-                                    <th className="text-center p-4 text-gray-400 font-medium">Others</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {comparisons.map((row, i) => (
-                                    <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition">
-                                        <td className="p-4 text-gray-300">{row.feature}</td>
-                                        <td className="p-4 text-center text-green-400 font-medium">{row.aerobill}</td>
-                                        <td className="p-4 text-center text-gray-500">{row.others}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+
+                    <div className="glass-card overflow-hidden border border-white/10">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-3 bg-gradient-to-r from-[#1a1a2e] to-[#111827]">
+                            <div className="p-5 border-b border-white/10">
+                                <span className="text-gray-400 font-medium">Feature</span>
+                            </div>
+                            <div className="p-5 border-b border-white/10 text-center bg-[#ff6b35]/5">
+                                <div className="flex items-center justify-center gap-2">
+                                    <span className="text-2xl font-bold text-[#ff6b35]">Aerobill</span>
+                                    <span className="px-2 py-0.5 bg-[#ff6b35] text-white text-xs rounded-full font-semibold">Winner</span>
+                                </div>
+                            </div>
+                            <div className="p-5 border-b border-white/10 text-center">
+                                <span className="text-gray-400 font-medium">Traditional POS</span>
+                            </div>
+                        </div>
+
+                        {/* Table Body */}
+                        {comparisons.map((row, i) => (
+                            <div key={i} className="grid grid-cols-3 hover:bg-white/5 transition group">
+                                <div className="p-5 border-b border-white/5 flex items-center gap-3">
+                                    <span className="text-lg">
+                                        {i === 0 && "⏱️"}
+                                        {i === 1 && "🖥️"}
+                                        {i === 2 && "💵"}
+                                        {i === 3 && "💰"}
+                                        {i === 4 && "📱"}
+                                        {i === 5 && "🍳"}
+                                        {i === 6 && "🔄"}
+                                        {i === 7 && "🎧"}
+                                    </span>
+                                    <span className="text-gray-300 group-hover:text-white transition">{row.feature}</span>
+                                </div>
+                                <div className="p-5 border-b border-white/5 text-center bg-[#ff6b35]/5 flex items-center justify-center gap-2">
+                                    <span className="text-green-400">✓</span>
+                                    <span className="text-green-400 font-semibold">{row.aerobill}</span>
+                                </div>
+                                <div className="p-5 border-b border-white/5 text-center flex items-center justify-center gap-2">
+                                    <span className="text-red-400/70">✗</span>
+                                    <span className="text-gray-500">{row.others}</span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Bottom Summary */}
+                        <div className="grid grid-cols-3 bg-gradient-to-r from-[#1a1a2e] to-[#111827]">
+                            <div className="p-5">
+                                <span className="text-gray-400 font-medium">Verdict</span>
+                            </div>
+                            <div className="p-5 text-center bg-[#ff6b35]/5">
+                                <span className="text-green-400 font-bold">🏆 Clear Winner</span>
+                            </div>
+                            <div className="p-5 text-center">
+                                <span className="text-gray-500">Outdated</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom CTA */}
+                    <div className="mt-8 text-center">
+                        <p className="text-gray-400 mb-4">Ready to experience the difference?</p>
+                        <a href="/register" className="inline-flex items-center gap-2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
+                            Try Aerobill Free →
+                        </a>
                     </div>
                 </div>
             </section>
