@@ -2,16 +2,30 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { unstable_cache } from "next/cache"
 import { requireRestaurantId } from "@/lib/session"
+
+// Cached query for categories with products (30 second cache)
+const getCategoriesFromDb = async (restaurantId: string) => {
+    return prisma.category.findMany({
+        where: { restaurantId },
+        include: { products: { where: { isAvailable: true }, orderBy: { name: "asc" } } },
+        orderBy: { sortOrder: "asc" }
+    })
+}
 
 export async function getCategories() {
     try {
         const restaurantId = await requireRestaurantId()
-        const categories = await prisma.category.findMany({
-            where: { restaurantId },
-            include: { products: { where: { isAvailable: true }, orderBy: { name: "asc" } } },
-            orderBy: { sortOrder: "asc" }
-        })
+
+        // Use cached query with restaurant-specific key
+        const getCached = unstable_cache(
+            () => getCategoriesFromDb(restaurantId),
+            [`categories-${restaurantId}`],
+            { revalidate: 30 }
+        )
+
+        const categories = await getCached()
         return { success: true, categories }
     } catch (error) {
         console.error("Failed to fetch categories:", error)
@@ -21,14 +35,23 @@ export async function getCategories() {
 
 export async function getCategoriesPublic(restaurantSlug: string) {
     try {
-        const restaurant = await prisma.restaurant.findUnique({ where: { slug: restaurantSlug } })
+        // Cache restaurant lookup
+        const getRestaurant = unstable_cache(
+            () => prisma.restaurant.findUnique({ where: { slug: restaurantSlug } }),
+            [`restaurant-${restaurantSlug}`],
+            { revalidate: 60 }
+        )
+
+        const restaurant = await getRestaurant()
         if (!restaurant) return { success: false, error: "Restaurant not found", categories: [] }
 
-        const categories = await prisma.category.findMany({
-            where: { restaurantId: restaurant.id },
-            include: { products: { where: { isAvailable: true }, orderBy: { name: "asc" } } },
-            orderBy: { sortOrder: "asc" }
-        })
+        const getCached = unstable_cache(
+            () => getCategoriesFromDb(restaurant.id),
+            [`categories-public-${restaurant.id}`],
+            { revalidate: 30 }
+        )
+
+        const categories = await getCached()
         return { success: true, categories, restaurant }
     } catch (error) {
         console.error("Failed to fetch categories:", error)
@@ -36,13 +59,25 @@ export async function getCategoriesPublic(restaurantSlug: string) {
     }
 }
 
+// Cached query for all categories (without products)
+const getAllCategoriesFromDb = async (restaurantId: string) => {
+    return prisma.category.findMany({
+        where: { restaurantId },
+        orderBy: { sortOrder: "asc" }
+    })
+}
+
 export async function getAllCategories() {
     try {
         const restaurantId = await requireRestaurantId()
-        const categories = await prisma.category.findMany({
-            where: { restaurantId },
-            orderBy: { sortOrder: "asc" }
-        })
+
+        const getCached = unstable_cache(
+            () => getAllCategoriesFromDb(restaurantId),
+            [`all-categories-${restaurantId}`],
+            { revalidate: 30 }
+        )
+
+        const categories = await getCached()
         return { success: true, categories }
     } catch (error) {
         console.error("Failed to fetch categories:", error)
@@ -86,14 +121,26 @@ export async function deleteCategory(id: string) {
     }
 }
 
+// Cached query for products
+const getProductsFromDb = async (restaurantId: string) => {
+    return prisma.product.findMany({
+        where: { restaurantId },
+        include: { category: true, inventory: true },
+        orderBy: { name: "asc" }
+    })
+}
+
 export async function getProducts() {
     try {
         const restaurantId = await requireRestaurantId()
-        const products = await prisma.product.findMany({
-            where: { restaurantId },
-            include: { category: true, inventory: true },
-            orderBy: { name: "asc" }
-        })
+
+        const getCached = unstable_cache(
+            () => getProductsFromDb(restaurantId),
+            [`products-${restaurantId}`],
+            { revalidate: 30 }
+        )
+
+        const products = await getCached()
         return { success: true, products }
     } catch (error) {
         console.error("Failed to fetch products:", error)

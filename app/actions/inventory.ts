@@ -2,16 +2,29 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { unstable_cache } from "next/cache"
 import { requireRestaurantId } from "@/lib/session"
+
+// Cached query for inventory
+const getInventoryFromDb = async (restaurantId: string) => {
+    return prisma.inventory.findMany({
+        where: { restaurantId },
+        include: { products: { select: { id: true, name: true } } },
+        orderBy: { name: "asc" }
+    })
+}
 
 export async function getInventory() {
     try {
         const restaurantId = await requireRestaurantId()
-        const inventory = await prisma.inventory.findMany({
-            where: { restaurantId },
-            include: { products: { select: { id: true, name: true } } },
-            orderBy: { name: "asc" }
-        })
+
+        const getCached = unstable_cache(
+            () => getInventoryFromDb(restaurantId),
+            [`inventory-${restaurantId}`],
+            { revalidate: 30 }
+        )
+
+        const inventory = await getCached()
         return { success: true, inventory }
     } catch (error) {
         console.error("Failed to fetch inventory:", error)
@@ -79,13 +92,25 @@ export async function adjustInventoryQuantity(id: string, adjustment: number) {
     }
 }
 
+// Cached query for low stock items
+const getLowStockFromDb = async (restaurantId: string, threshold: number) => {
+    return prisma.inventory.findMany({
+        where: { restaurantId, quantity: { lte: threshold } },
+        orderBy: { quantity: "asc" }
+    })
+}
+
 export async function getLowStockItems(threshold: number = 10) {
     try {
         const restaurantId = await requireRestaurantId()
-        const items = await prisma.inventory.findMany({
-            where: { restaurantId, quantity: { lte: threshold } },
-            orderBy: { quantity: "asc" }
-        })
+
+        const getCached = unstable_cache(
+            () => getLowStockFromDb(restaurantId, threshold),
+            [`lowstock-${restaurantId}-${threshold}`],
+            { revalidate: 30 }
+        )
+
+        const items = await getCached()
         return { success: true, items }
     } catch (error) {
         console.error("Failed to fetch low stock items:", error)
