@@ -23,9 +23,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen flex">
             {/* Sidebar */}
-            <aside className="w-64 glass-card rounded-none border-t-0 border-l-0 border-b-0 flex flex-col">
+            <aside className="w-64 h-screen sticky top-0 glass-card rounded-none border-t-0 border-l-0 border-b-0 flex flex-col">
                 {/* Logo */}
-                <div className="p-6 border-b border-[var(--border)]">
+                <div className="p-6 border-b border-[var(--border)] flex-shrink-0">
                     <Link href="/">
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] bg-clip-text text-transparent">
                             Aerobill
@@ -35,7 +35,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4">
+                <nav className="flex-1 p-4 overflow-y-auto">
                     <ul className="space-y-2">
                         {navItems.map((item) => (
                             <li key={item.href}>
@@ -55,7 +55,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </nav>
 
                 {/* Kitchen shortcut */}
-                <div className="p-4 border-t border-[var(--border)]">
+                <div className="p-4 border-t border-[var(--border)] flex-shrink-0">
                     <Link
                         href="/kitchen"
                         className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/30 transition-all"
@@ -66,7 +66,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {/* Sign out */}
-                <div className="p-4 border-t border-[var(--border)]">
+                <div className="p-4 border-t border-[var(--border)] flex-shrink-0">
                     <button
                         onClick={() => signOut({ callbackUrl: "/" })}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
