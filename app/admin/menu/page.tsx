@@ -1,10 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import useSWR from "swr"
 import {
-    getCategories,
-    getAllCategories,
-    getProducts,
     createCategory,
     deleteCategory,
     createProduct,
@@ -12,7 +10,6 @@ import {
     deleteProduct,
     toggleProductAvailability
 } from "@/app/actions/menu"
-import { getInventory } from "@/app/actions/inventory"
 
 type Product = {
     id: string
@@ -38,11 +35,24 @@ type InventoryItem = {
     name: string
 }
 
+type MenuData = {
+    products: Product[]
+    categories: Category[]
+    inventory: InventoryItem[]
+}
+
 export default function MenuManagement() {
-    const [products, setProducts] = useState<Product[]>([])
-    const [categories, setCategories] = useState<Category[]>([])
-    const [inventory, setInventory] = useState<InventoryItem[]>([])
-    const [loading, setLoading] = useState(true)
+    // SWR for instant data on repeat visits - keepPreviousData shows stale data immediately
+    const { data, isLoading, mutate } = useSWR<MenuData>('/api/menu', {
+        revalidateOnFocus: false,
+        dedupingInterval: 30000,
+        keepPreviousData: true, // KEY: Show old data instantly while revalidating
+    })
+
+    const products = data?.products || []
+    const categories = data?.categories || []
+    const inventory = data?.inventory || []
+
     const [showProductModal, setShowProductModal] = useState(false)
     const [showCategoryModal, setShowCategoryModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -62,27 +72,7 @@ export default function MenuManagement() {
         sortOrder: 0,
     })
 
-    const fetchData = async () => {
-        try {
-            const [productsRes, categoriesRes, inventoryRes] = await Promise.all([
-                getProducts(),
-                getAllCategories(),
-                getInventory(),
-            ])
-
-            if (productsRes.success) setProducts(productsRes.products as Product[])
-            if (categoriesRes.success) setCategories(categoriesRes.categories)
-            if (inventoryRes.success) setInventory(inventoryRes.inventory as InventoryItem[])
-        } catch (error) {
-            console.error("Failed to fetch data:", error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchData()
-    }, [])
+    const refreshData = () => mutate()
 
     const handleProductSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -105,7 +95,7 @@ export default function MenuManagement() {
         setShowProductModal(false)
         setEditingProduct(null)
         resetProductForm()
-        fetchData()
+        refreshData()
     }
 
     const handleCategorySubmit = async (e: React.FormEvent) => {
@@ -113,13 +103,13 @@ export default function MenuManagement() {
         await createCategory(categoryForm.name, categoryForm.sortOrder)
         setShowCategoryModal(false)
         setCategoryForm({ name: "", sortOrder: 0 })
-        fetchData()
+        refreshData()
     }
 
     const handleDeleteProduct = async (id: string) => {
         if (confirm("Are you sure you want to delete this product?")) {
             await deleteProduct(id)
-            fetchData()
+            refreshData()
         }
     }
 
@@ -129,13 +119,13 @@ export default function MenuManagement() {
             if (!result.success) {
                 alert(result.error)
             }
-            fetchData()
+            refreshData()
         }
     }
 
     const handleToggleAvailability = async (id: string) => {
         await toggleProductAvailability(id)
-        fetchData()
+        refreshData()
     }
 
     const editProduct = (product: Product) => {
@@ -166,7 +156,8 @@ export default function MenuManagement() {
         ? products
         : products.filter(p => p.categoryId === filterCategory)
 
-    if (loading) {
+    // Show skeleton only on very first load (no cached data yet)
+    if (isLoading && !data) {
         return (
             <div className="p-8 flex items-center justify-center">
                 <div className="animate-pulse text-xl">Loading menu...</div>
@@ -270,8 +261,8 @@ export default function MenuManagement() {
                             <button
                                 onClick={() => handleToggleAvailability(product.id)}
                                 className={`text-sm px-3 py-1 rounded-full ${product.isAvailable
-                                        ? "bg-green-500/20 text-green-400"
-                                        : "bg-red-500/20 text-red-400"
+                                    ? "bg-green-500/20 text-green-400"
+                                    : "bg-red-500/20 text-red-400"
                                     }`}
                             >
                                 {product.isAvailable ? "Available" : "Unavailable"}
