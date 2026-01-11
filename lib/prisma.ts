@@ -9,5 +9,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
 })
 
-// Cache in globalThis to prevent connection exhaustion
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Cache in globalThis for both dev and production to prevent connection exhaustion
+// Critical for serverless environments like Vercel
+globalForPrisma.prisma = prisma
+

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { Plan, SubStatus } from "@prisma/client"
+import { unstable_cache, CacheConfig } from "@/lib/cache"
 
 // Helper to validate super admin session
 async function validateSuperAdmin() {
@@ -14,10 +15,8 @@ async function validateSuperAdmin() {
     return session
 }
 
-// Get platform-wide statistics
-export async function getSystemStats() {
-    await validateSuperAdmin()
-
+// Internal function to fetch system stats
+async function fetchSystemStats() {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -68,6 +67,19 @@ export async function getSystemStats() {
         totalOrders,
         totalUsers,
     }
+}
+
+// Cached version of system stats (60 second TTL)
+const getCachedSystemStats = unstable_cache(
+    fetchSystemStats,
+    ['system-stats'],
+    CacheConfig.systemStats
+)
+
+// Get platform-wide statistics (with caching)
+export async function getSystemStats() {
+    await validateSuperAdmin()
+    return getCachedSystemStats()
 }
 
 // Get all restaurants with subscription info
