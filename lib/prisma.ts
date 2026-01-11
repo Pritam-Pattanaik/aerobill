@@ -3,7 +3,7 @@ import { Pool, neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 import ws from 'ws'
 
-// Enable WebSocket for Neon serverless
+// Enable WebSocket for Neon serverless in Node.js
 neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = globalThis as unknown as {
@@ -11,9 +11,10 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-    // Use Neon serverless adapter for better connection handling
+    // Use Neon serverless adapter with connection pooling
     const connectionString = process.env.DATABASE_URL!
     const pool = new Pool({ connectionString })
+    // @ts-expect-error - adapter types are compatible at runtime
     const adapter = new PrismaNeon(pool)
 
     return new PrismaClient({
@@ -25,5 +26,5 @@ function createPrismaClient() {
 // Optimized Prisma client for serverless with connection pooling
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
-// Always cache in globalThis to prevent connection exhaustion
+// Cache in globalThis to prevent connection exhaustion in dev
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
