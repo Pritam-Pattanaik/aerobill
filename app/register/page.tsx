@@ -87,10 +87,8 @@ export default function RegisterPage() {
                 // If user selected a paid plan, redirect to payment
                 const selectedPlanData = plans.find(p => p.id === selectedPlan)
                 if (selectedPlan !== "FREE" && selectedPlanData?.paymentLink) {
-                    // Store email in URL for payment link (Razorpay will use this in notes)
-                    const paymentUrl = new URL(selectedPlanData.paymentLink)
-                    paymentUrl.searchParams.set("prefill_email", personal.email)
-                    window.location.href = paymentUrl.toString()
+                    // Razorpay short URLs don't support query params - redirect directly
+                    window.location.href = selectedPlanData.paymentLink
                 } else {
                     // Free plan - go directly to login
                     router.push("/login?registered=true")
