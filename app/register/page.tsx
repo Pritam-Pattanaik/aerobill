@@ -9,10 +9,10 @@ type Step = 1 | 2 | 3
 type Plan = "FREE" | "STARTER" | "BUSINESS" | "ENTERPRISE"
 
 const plans = [
-    { id: "FREE" as Plan, name: "Free", price: "₹0", period: "/forever", tables: "1", products: "10", desc: "Perfect for getting started" },
-    { id: "STARTER" as Plan, name: "Starter", price: "₹499", period: "/month", tables: "5", products: "50", desc: "Great for small restaurants" },
-    { id: "BUSINESS" as Plan, name: "Business", price: "₹999", period: "/month", tables: "20", products: "Unlimited", desc: "For growing businesses", popular: true },
-    { id: "ENTERPRISE" as Plan, name: "Enterprise", price: "₹2,499", period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits" },
+    { id: "FREE" as Plan, name: "Free", price: "₹0", period: "/forever", tables: "5", products: "Basic", desc: "Perfect for getting started", paymentLink: null },
+    { id: "STARTER" as Plan, name: "Standard", price: "₹999", period: "/month", tables: "15", products: "Full", desc: "Great for small restaurants", paymentLink: "https://rzp.io/rzp/K9dIQCU" },
+    { id: "BUSINESS" as Plan, name: "Premium", price: "₹1,999", period: "/month", tables: "30", products: "Unlimited", desc: "For growing businesses", popular: true, paymentLink: "https://rzp.io/rzp/GmrQt8g" },
+    { id: "ENTERPRISE" as Plan, name: "Elite", price: "₹3,999", period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits", paymentLink: "https://rzp.io/rzp/u0AJIYPZ" },
 ]
 
 export default function RegisterPage() {
@@ -68,6 +68,8 @@ export default function RegisterPage() {
         setLoading(true)
         setError("")
         try {
+            // Always register with FREE plan first
+            // For paid plans, webhook will upgrade after successful payment
             const result = await registerRestaurant({
                 ownerName: personal.name,
                 email: personal.email,
@@ -78,10 +80,24 @@ export default function RegisterPage() {
                 restaurantPhone: restaurant.phone,
                 gstNumber: restaurant.gst,
                 fssaiLicense: restaurant.fssai,
-                plan: selectedPlan,
+                plan: "FREE", // Always start with FREE
             })
-            if (result.success) router.push("/login?registered=true")
-            else setError(result.error || "Registration failed")
+
+            if (result.success) {
+                // If user selected a paid plan, redirect to payment
+                const selectedPlanData = plans.find(p => p.id === selectedPlan)
+                if (selectedPlan !== "FREE" && selectedPlanData?.paymentLink) {
+                    // Store email in URL for payment link (Razorpay will use this in notes)
+                    const paymentUrl = new URL(selectedPlanData.paymentLink)
+                    paymentUrl.searchParams.set("prefill_email", personal.email)
+                    window.location.href = paymentUrl.toString()
+                } else {
+                    // Free plan - go directly to login
+                    router.push("/login?registered=true")
+                }
+            } else {
+                setError(result.error || "Registration failed")
+            }
         } catch {
             setError("Something went wrong. Please try again.")
         } finally {
@@ -221,7 +237,7 @@ export default function RegisterPage() {
                             </button>
                         ) : (
                             <button onClick={handleSubmit} disabled={loading} className="btn-primary flex-1 py-3 disabled:opacity-50">
-                                {loading ? "Creating..." : "Create Restaurant 🚀"}
+                                {loading ? "Creating..." : selectedPlan === "FREE" ? "Create Restaurant 🚀" : "Create & Subscribe 💳"}
                             </button>
                         )}
                     </div>
