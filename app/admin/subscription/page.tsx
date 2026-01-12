@@ -34,7 +34,7 @@ const PLANS = [
             "QR code ordering",
             "Email support",
         ],
-        paymentLink: "https://rzp.io/rzp/K9dIQCU",
+        paymentLink: "https://rzp.io/rzp/K9dlQCU",
         color: "from-blue-500 to-indigo-600",
     },
     {
