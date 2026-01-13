@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Aerobill - Restaurant Management System",
-  description: "Modern restaurant management with digital ordering, kitchen display, and billing",
+  description: "Streamline your restaurant with Aerobill. QR code ordering, digital menu, kitchen display, billing & inventory management. Start free today!",
 };
 
 export default function RootLayout({
