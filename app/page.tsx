@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import TestimonialCarousel from "@/components/TestimonialCarousel"
 
 // SEO Metadata for Homepage
 export const metadata: Metadata = {
@@ -305,6 +306,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Testimonials Carousel */}
+        <TestimonialCarousel />
 
 
         {/* CTA */}

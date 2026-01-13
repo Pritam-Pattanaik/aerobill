@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getReadyOrders, billOrder, getOrderById } from "@/app/actions/orders"
+import { getReadyOrders, billOrder, getOrderById, getBillingHistory } from "@/app/actions/orders"
 import { getSettings } from "@/app/actions/tables"
 
 type OrderItem = {
@@ -20,6 +20,7 @@ type Order = {
     status: string
     totalAmount: number
     createdAt: string
+    updatedAt?: string
     table: {
         number: number
     }
@@ -32,6 +33,12 @@ type Settings = {
     taxRate: number
 }
 
+type BillingSummary = {
+    totalRevenue: number
+    totalOrders: number
+    date: string
+}
+
 export default function BillingPage() {
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
@@ -39,6 +46,13 @@ export default function BillingPage() {
     const [billingOrder, setBillingOrder] = useState<Order | null>(null)
     const [processing, setProcessing] = useState(false)
     const receiptRef = useRef<HTMLDivElement>(null)
+
+    // History Modal State
+    const [showHistory, setShowHistory] = useState(false)
+    const [historyDate, setHistoryDate] = useState(new Date().toISOString().split('T')[0])
+    const [historyOrders, setHistoryOrders] = useState<Order[]>([])
+    const [historySummary, setHistorySummary] = useState<BillingSummary | null>(null)
+    const [historyLoading, setHistoryLoading] = useState(false)
 
     const fetchData = async () => {
         try {
@@ -60,12 +74,33 @@ export default function BillingPage() {
         }
     }
 
+    const fetchHistory = async (date: string) => {
+        setHistoryLoading(true)
+        try {
+            const result = await getBillingHistory(date)
+            if (result.success) {
+                setHistoryOrders(result.orders as Order[])
+                setHistorySummary(result.summary)
+            }
+        } catch (error) {
+            console.error("Failed to fetch history:", error)
+        } finally {
+            setHistoryLoading(false)
+        }
+    }
+
     useEffect(() => {
         fetchData()
         // Poll every 10 seconds
         const interval = setInterval(fetchData, 10000)
         return () => clearInterval(interval)
     }, [])
+
+    useEffect(() => {
+        if (showHistory) {
+            fetchHistory(historyDate)
+        }
+    }, [showHistory, historyDate])
 
     const handleBillAndPrint = async (order: Order) => {
         setBillingOrder(order)
@@ -100,9 +135,22 @@ export default function BillingPage() {
         })
     }
 
+    const formatDateShort = (date: string) => {
+        return new Date(date).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        })
+    }
+
     const calculateTax = (amount: number) => {
         if (!settings) return 0
         return amount * (settings.taxRate / 100)
+    }
+
+    const isToday = (dateStr: string) => {
+        const today = new Date().toISOString().split('T')[0]
+        return dateStr === today
     }
 
     if (loading) {
@@ -116,11 +164,20 @@ export default function BillingPage() {
     return (
         <div className="p-8">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Billing</h1>
-                <p className="text-gray-400">
-                    Process payments and print receipts for ready orders
-                </p>
+            <div className="mb-8 flex items-start justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold mb-2">Billing</h1>
+                    <p className="text-gray-400">
+                        Process payments and print receipts for ready orders
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowHistory(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 rounded-xl hover:bg-indigo-500/30 transition-all"
+                >
+                    <span className="text-lg">📜</span>
+                    <span className="font-medium">History</span>
+                </button>
             </div>
 
             {/* Stats */}
@@ -197,6 +254,119 @@ export default function BillingPage() {
                             </button>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* History Modal */}
+            {showHistory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="glass-card w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col m-4">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between flex-shrink-0">
+                            <div>
+                                <h2 className="text-2xl font-bold">Billing History</h2>
+                                <p className="text-gray-400 text-sm">View past billings by date</p>
+                            </div>
+                            <button
+                                onClick={() => setShowHistory(false)}
+                                className="p-2 hover:bg-[var(--card-hover)] rounded-lg transition"
+                            >
+                                <span className="text-2xl">✕</span>
+                            </button>
+                        </div>
+
+                        {/* Date Picker */}
+                        <div className="p-4 border-b border-[var(--border)] flex items-center gap-4 flex-shrink-0">
+                            <label className="text-gray-400">Select Date:</label>
+                            <input
+                                type="date"
+                                value={historyDate}
+                                onChange={(e) => setHistoryDate(e.target.value)}
+                                max={new Date().toISOString().split('T')[0]}
+                                className="px-4 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-white focus:outline-none focus:border-[var(--primary)]"
+                            />
+                            <button
+                                onClick={() => setHistoryDate(new Date().toISOString().split('T')[0])}
+                                className={`px-4 py-2 rounded-lg transition ${isToday(historyDate)
+                                        ? "bg-[var(--primary)] text-white"
+                                        : "bg-[var(--card-hover)] text-gray-300 hover:bg-[var(--primary)]/50"
+                                    }`}
+                            >
+                                Today
+                            </button>
+                        </div>
+
+                        {/* Summary */}
+                        {historySummary && (
+                            <div className="p-4 border-b border-[var(--border)] flex items-center gap-8 bg-[var(--card-hover)]/30 flex-shrink-0">
+                                <div>
+                                    <p className="text-gray-400 text-sm">Date</p>
+                                    <p className="text-lg font-semibold">{formatDateShort(historySummary.date)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-400 text-sm">Total Orders</p>
+                                    <p className="text-2xl font-bold text-[var(--primary)]">{historySummary.totalOrders}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-400 text-sm">Total Revenue</p>
+                                    <p className="text-2xl font-bold text-green-400">₹{historySummary.totalRevenue.toFixed(0)}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Orders List */}
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {historyLoading ? (
+                                <div className="text-center py-10">
+                                    <div className="animate-pulse text-xl">Loading history...</div>
+                                </div>
+                            ) : historyOrders.length === 0 ? (
+                                <div className="text-center py-10">
+                                    <div className="text-4xl mb-3">📭</div>
+                                    <p className="text-gray-400">No billings found for this date</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {historyOrders.map((order) => (
+                                        <div
+                                            key={order.id}
+                                            className="p-4 bg-[var(--background)] rounded-xl border border-[var(--border)] hover:border-[var(--primary)]/30 transition"
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-xl font-bold">Table #{order.table.number}</span>
+                                                    <span className="text-sm text-gray-400">
+                                                        {order.id.slice(-6).toUpperCase()}
+                                                    </span>
+                                                    <span className="badge bg-green-500/20 text-green-400 text-xs">
+                                                        Billed
+                                                    </span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xl font-bold text-[var(--primary)]">
+                                                        ₹{order.totalAmount.toFixed(0)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {formatDate(order.updatedAt || order.createdAt)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {order.items.map((item) => (
+                                                    <span
+                                                        key={item.id}
+                                                        className="text-xs px-2 py-1 bg-[var(--card-hover)] rounded-lg text-gray-300"
+                                                    >
+                                                        {item.quantity}× {item.product.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 

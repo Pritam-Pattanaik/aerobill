@@ -123,3 +123,46 @@ export async function getOrderById(orderId: string) {
         return { success: false, error: "Failed to fetch order" }
     }
 }
+
+export async function getBillingHistory(date?: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        // Default to today if no date provided
+        const targetDate = date ? new Date(date) : new Date()
+        const startOfDay = new Date(targetDate)
+        startOfDay.setHours(0, 0, 0, 0)
+        const endOfDay = new Date(targetDate)
+        endOfDay.setHours(23, 59, 59, 999)
+
+        const orders = await prisma.order.findMany({
+            where: {
+                restaurantId,
+                status: "BILLED",
+                updatedAt: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                }
+            },
+            include: { items: { include: { product: true } }, table: true },
+            orderBy: { updatedAt: "desc" }
+        })
+
+        // Calculate totals for the day
+        const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0)
+        const totalOrders = orders.length
+
+        return {
+            success: true,
+            orders,
+            summary: {
+                totalRevenue,
+                totalOrders,
+                date: targetDate.toISOString().split('T')[0]
+            }
+        }
+    } catch (error) {
+        console.error("Failed to fetch billing history:", error)
+        return { success: false, error: "Failed to fetch billing history", orders: [], summary: null }
+    }
+}

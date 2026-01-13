@@ -1,0 +1,17 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin and protected areas from indexing
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /super-admin
+Disallow: /super-admin/*
+Disallow: /kitchen
+Disallow: /kitchen/*
+Disallow: /api/*
+Disallow: /login
+Disallow: /register
+
+# Sitemap location
+Sitemap: https://aerobill.vercel.app/sitemap.xml
