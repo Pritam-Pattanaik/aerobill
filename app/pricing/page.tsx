@@ -26,7 +26,7 @@ export default function PricingPage() {
         },
         {
             name: "Standard",
-            price: "₹499",
+            price: "₹299",
             period: "/month",
             tables: "10",
             products: "50",
@@ -59,7 +59,7 @@ export default function PricingPage() {
         },
         {
             name: "Elite",
-            price: "₹2,499",
+            price: "₹1,999",
             period: "/month",
             tables: "Unlimited",
             products: "Unlimited",

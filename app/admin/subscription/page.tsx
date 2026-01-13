@@ -24,7 +24,7 @@ const PLANS = [
     {
         id: "STARTER",
         name: "Standard",
-        price: "₹999",
+        price: "₹299",
         period: "/month",
         features: [
             "Up to 15 tables",
@@ -40,7 +40,7 @@ const PLANS = [
     {
         id: "BUSINESS",
         name: "Premium",
-        price: "₹1,999",
+        price: "₹999",
         period: "/month",
         popular: true,
         features: [
@@ -57,7 +57,7 @@ const PLANS = [
     {
         id: "ENTERPRISE",
         name: "Elite",
-        price: "₹3,999",
+        price: "₹1,999",
         period: "/month",
         features: [
             "Unlimited tables",

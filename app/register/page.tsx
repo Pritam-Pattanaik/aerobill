@@ -10,9 +10,9 @@ type Plan = "FREE" | "STARTER" | "BUSINESS" | "ENTERPRISE"
 
 const plans = [
     { id: "FREE" as Plan, name: "Free", price: "₹0", period: "/forever", tables: "5", products: "Basic", desc: "Perfect for getting started", paymentLink: null },
-    { id: "STARTER" as Plan, name: "Standard", price: "₹999", period: "/month", tables: "15", products: "Full", desc: "Great for small restaurants", paymentLink: "https://rzp.io/rzp/K9dlQCU" },
-    { id: "BUSINESS" as Plan, name: "Premium", price: "₹1,999", period: "/month", tables: "30", products: "Unlimited", desc: "For growing businesses", popular: true, paymentLink: "https://rzp.io/rzp/GmrQt8g" },
-    { id: "ENTERPRISE" as Plan, name: "Elite", price: "₹3,999", period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits", paymentLink: "https://rzp.io/rzp/u0AJIYPZ" },
+    { id: "STARTER" as Plan, name: "Standard", price: "₹299", period: "/month", tables: "15", products: "Full", desc: "Great for small restaurants", paymentLink: "https://rzp.io/rzp/K9dlQCU" },
+    { id: "BUSINESS" as Plan, name: "Premium", price: "₹999", period: "/month", tables: "30", products: "Unlimited", desc: "For growing businesses", popular: true, paymentLink: "https://rzp.io/rzp/GmrQt8g" },
+    { id: "ENTERPRISE" as Plan, name: "Elite", price: "₹1,999", period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits", paymentLink: "https://rzp.io/rzp/u0AJIYPZ" },
 ]
 
 export default function RegisterPage() {
