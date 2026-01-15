@@ -5,6 +5,22 @@ import Link from "next/link"
 import { getAllBlogPosts } from "@/app/actions/blog"
 import BlogPostActions from "./BlogPostActions"
 
+type BlogPost = {
+    id: string
+    title: string
+    slug: string
+    excerpt: string
+    content: string
+    coverImage: string | null
+    author: string
+    isPublished: boolean
+    metaTitle: string | null
+    metaDesc: string | null
+    keywords: string | null
+    createdAt: Date
+    updatedAt: Date
+}
+
 export default async function SuperAdminBlogPage() {
     const session = await getServerSession(authOptions)
 
@@ -13,7 +29,7 @@ export default async function SuperAdminBlogPage() {
     }
 
     const result = await getAllBlogPosts()
-    const posts = result.success ? result.data : []
+    const posts = result.success ? (result.data as BlogPost[]) : []
 
     return (
         <div className="p-8">
