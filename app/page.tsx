@@ -232,6 +232,7 @@ export default function HomePage() {
             <div className="hidden md:flex items-center gap-6">
               <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
               <Link href="/pricing" className="text-gray-300 hover:text-white transition">Pricing</Link>
+              <Link href="/blog" className="text-gray-300 hover:text-white transition">Blog</Link>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
@@ -329,6 +330,7 @@ export default function HomePage() {
             <div className="flex gap-6 text-gray-400 text-sm">
               <Link href="/about" className="hover:text-white">About</Link>
               <Link href="/pricing" className="hover:text-white">Pricing</Link>
+              <Link href="/blog" className="hover:text-white">Blog</Link>
               <Link href="#" className="hover:text-white">Privacy</Link>
             </div>
           </div>

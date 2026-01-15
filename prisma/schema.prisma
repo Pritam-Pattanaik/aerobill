@@ -211,3 +211,20 @@ model SuperAdmin {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+// Blog posts for SEO content
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String   // Short description for listings & meta
+  content     String   // Full markdown/HTML content
+  coverImage  String?  // Featured image URL
+  author      String   @default("Aerobill Team")
+  isPublished Boolean  @default(false)
+  metaTitle   String?  // Custom SEO title
+  metaDesc    String?  // Custom SEO description
+  keywords    String?  // Comma-separated keywords
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
