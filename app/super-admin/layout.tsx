@@ -26,7 +26,7 @@ function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-950/20 to-slate-900">
             {/* Sidebar */}
-            <aside className="w-72 bg-slate-900/80 backdrop-blur-xl border-r border-purple-500/20 flex flex-col">
+            <aside className="w-72 h-screen sticky top-0 bg-slate-900/80 backdrop-blur-xl border-r border-purple-500/20 flex flex-col">
                 {/* Logo */}
                 <div className="p-6 border-b border-purple-500/20">
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
