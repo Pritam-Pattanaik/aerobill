@@ -3,7 +3,15 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { createBlogPost, generateSlug } from "@/app/actions/blog"
+import { createBlogPost } from "@/app/actions/blog"
+
+// Local slug generator (client-side)
+function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+}
 
 export default function NewBlogPostPage() {
     const router = useRouter()
