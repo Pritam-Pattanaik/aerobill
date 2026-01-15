@@ -282,7 +282,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 href="/register"
                                 className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition"
                             >
-                                Start Your Free Trial →
+                                Start For Free →
                             </Link>
                             <Link
                                 href="/blog"
