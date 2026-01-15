@@ -295,6 +295,38 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            {/* Social Responsibility Banner */}
+            <section className="py-16 px-4">
+                <div className="max-w-4xl mx-auto">
+                    <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl" />
+                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl" />
+                        <div className="relative">
+                            <div className="inline-block px-4 py-1.5 bg-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-4">
+                                🌱 Social Responsibility
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                                Every Signup Feeds Someone in Need
+                            </h2>
+                            <p className="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
+                                For <span className="text-emerald-400 font-bold">every restaurant</span> that signs up with Aerobill,
+                                we donate <span className="text-emerald-400 font-bold">₹100</span> to local food banks.
+                            </p>
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                                <div className="flex items-center gap-3 text-gray-400">
+                                    <span className="text-3xl">🍽️</span>
+                                    <span>Feeding communities together</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-gray-400">
+                                    <span className="text-3xl">💚</span>
+                                    <span>Building a hunger-free India</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-20 px-4">
                 <div className="max-w-3xl mx-auto text-center">
