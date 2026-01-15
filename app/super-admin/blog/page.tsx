@@ -2,13 +2,13 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { getAllBlogPosts, deleteBlogPost, toggleBlogPostPublish } from "@/app/actions/blog"
+import { getAllBlogPosts } from "@/app/actions/blog"
 import BlogPostActions from "./BlogPostActions"
 
 export default async function SuperAdminBlogPage() {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user?.role !== "super-admin") {
+    if (!session?.user?.isSuperAdmin) {
         redirect("/super-admin/login")
     }
 
@@ -61,8 +61,8 @@ export default async function SuperAdminBlogPage() {
                                     </td>
                                     <td className="p-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${post.isPublished
-                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                            : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                                             }`}>
                                             {post.isPublished ? 'Published' : 'Draft'}
                                         </span>
