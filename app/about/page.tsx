@@ -53,8 +53,8 @@ export default function AboutPage() {
     ]
 
     const stats = [
-        { value: "500+", label: "Restaurants Trust Us" },
-        { value: "1M+", label: "Orders Processed" },
+        { value: "100+", label: "Restaurants Trust Us" },
+        { value: "5L+", label: "Orders Processed" },
         { value: "99.9%", label: "Uptime Guaranteed" },
         { value: "4.8★", label: "Customer Rating" },
     ]
