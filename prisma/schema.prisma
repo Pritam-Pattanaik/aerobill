@@ -162,6 +162,7 @@ model Order {
   id            String        @id @default(cuid())
   tableId       String
   table         Table         @relation(fields: [tableId], references: [id])
+  guestName     String?       // Optional: guest name for individual billing
   status        OrderStatus   @default(PENDING)
   totalAmount   Float
   paymentStatus PaymentStatus @default(UNPAID)

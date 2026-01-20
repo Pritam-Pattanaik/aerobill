@@ -6,7 +6,7 @@ import { requireRestaurantId } from "@/lib/session"
 
 export type CartItem = { productId: string; name: string; price: number; quantity: number }
 
-export async function placeOrder(tableId: string, items: CartItem[]) {
+export async function placeOrder(tableId: string, items: CartItem[], guestName?: string) {
     try {
         // Get restaurant from table
         const table = await prisma.table.findUnique({ where: { id: tableId } })
@@ -20,6 +20,7 @@ export async function placeOrder(tableId: string, items: CartItem[]) {
                 status: "PENDING",
                 paymentStatus: "UNPAID",
                 restaurantId: table.restaurantId,
+                guestName: guestName || null,
                 items: { create: items.map((item) => ({ productId: item.productId, quantity: item.quantity, priceAtTime: item.price })) }
             },
             include: { items: { include: { product: true } }, table: true }
@@ -164,5 +165,210 @@ export async function getBillingHistory(date?: string) {
     } catch (error) {
         console.error("Failed to fetch billing history:", error)
         return { success: false, error: "Failed to fetch billing history", orders: [], summary: null }
+    }
+}
+
+// Get ready orders grouped by table and guest for combined billing
+export async function getReadyOrdersByTable() {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const orders = await prisma.order.findMany({
+            where: { restaurantId, status: "READY", paymentStatus: "UNPAID" },
+            include: { items: { include: { product: true } }, table: true },
+            orderBy: { createdAt: "asc" }
+        })
+
+        // Group orders by table, then by guest
+        const tableGroups: Record<string, {
+            tableId: string
+            tableNumber: number
+            orders: typeof orders
+            totalAmount: number
+            totalItems: number
+            guests: Record<string, {
+                guestName: string
+                orders: typeof orders
+                totalAmount: number
+                totalItems: number
+            }>
+        }> = {}
+
+        for (const order of orders) {
+            const tableId = order.tableId
+            const guestName = order.guestName || "Guest"
+
+            if (!tableGroups[tableId]) {
+                tableGroups[tableId] = {
+                    tableId,
+                    tableNumber: order.table.number,
+                    orders: [],
+                    totalAmount: 0,
+                    totalItems: 0,
+                    guests: {}
+                }
+            }
+
+            // Add to table totals
+            tableGroups[tableId].orders.push(order)
+            tableGroups[tableId].totalAmount += order.totalAmount
+            tableGroups[tableId].totalItems += order.items.reduce((sum, item) => sum + item.quantity, 0)
+
+            // Add to guest grouping
+            if (!tableGroups[tableId].guests[guestName]) {
+                tableGroups[tableId].guests[guestName] = {
+                    guestName,
+                    orders: [],
+                    totalAmount: 0,
+                    totalItems: 0
+                }
+            }
+            tableGroups[tableId].guests[guestName].orders.push(order)
+            tableGroups[tableId].guests[guestName].totalAmount += order.totalAmount
+            tableGroups[tableId].guests[guestName].totalItems += order.items.reduce((sum, item) => sum + item.quantity, 0)
+        }
+
+        // Convert to array and sort by table number
+        const tables = Object.values(tableGroups).sort((a, b) => a.tableNumber - b.tableNumber)
+
+        return { success: true, tables }
+    } catch (error) {
+        console.error("Failed to fetch orders by table:", error)
+        return { success: false, error: "Failed to fetch orders by table", tables: [] }
+    }
+}
+
+// Bill all orders for a table at once
+export async function billTableOrders(tableId: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        const result = await prisma.$transaction(async (tx) => {
+            // Get all unpaid ready orders for this table
+            const orders = await tx.order.findMany({
+                where: { tableId, restaurantId, status: "READY", paymentStatus: "UNPAID" },
+                include: { items: { include: { product: { include: { inventory: true } } } }, table: true }
+            })
+
+            if (orders.length === 0) {
+                throw new Error("No orders to bill for this table")
+            }
+
+            // Deduct inventory for all orders
+            for (const order of orders) {
+                for (const item of order.items) {
+                    if (item.product.inventory) {
+                        await tx.inventory.update({
+                            where: { id: item.product.inventory.id },
+                            data: { quantity: { decrement: item.quantity } }
+                        })
+                    }
+                }
+            }
+
+            // Update all orders to BILLED
+            await tx.order.updateMany({
+                where: {
+                    id: { in: orders.map(o => o.id) },
+                    restaurantId
+                },
+                data: { status: "BILLED", paymentStatus: "PAID" }
+            })
+
+            // Return combined order data for receipt
+            const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0)
+            const allItems = orders.flatMap(order => order.items)
+
+            return {
+                tableNumber: orders[0].table.number,
+                orders: orders.map(o => ({
+                    id: o.id,
+                    createdAt: o.createdAt,
+                    items: o.items
+                })),
+                totalAmount,
+                allItems,
+                orderCount: orders.length
+            }
+        })
+
+        revalidatePath("/admin/billing")
+        revalidatePath("/admin/inventory")
+        return { success: true, ...result }
+    } catch (error) {
+        console.error("Failed to bill table orders:", error)
+        return { success: false, error: error instanceof Error ? error.message : "Failed to bill orders" }
+    }
+}
+
+// Bill orders for a specific guest at a table
+export async function billGuestOrders(tableId: string, guestName: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        // Normalize guest name for matching
+        const matchGuestName = guestName === "Guest" ? null : guestName
+
+        const result = await prisma.$transaction(async (tx) => {
+            // Get all unpaid ready orders for this guest at this table
+            const orders = await tx.order.findMany({
+                where: {
+                    tableId,
+                    restaurantId,
+                    status: "READY",
+                    paymentStatus: "UNPAID",
+                    guestName: matchGuestName
+                },
+                include: { items: { include: { product: { include: { inventory: true } } } }, table: true }
+            })
+
+            if (orders.length === 0) {
+                throw new Error("No orders to bill for this guest")
+            }
+
+            // Deduct inventory for all orders
+            for (const order of orders) {
+                for (const item of order.items) {
+                    if (item.product.inventory) {
+                        await tx.inventory.update({
+                            where: { id: item.product.inventory.id },
+                            data: { quantity: { decrement: item.quantity } }
+                        })
+                    }
+                }
+            }
+
+            // Update all orders to BILLED
+            await tx.order.updateMany({
+                where: {
+                    id: { in: orders.map(o => o.id) },
+                    restaurantId
+                },
+                data: { status: "BILLED", paymentStatus: "PAID" }
+            })
+
+            // Return order data for receipt
+            const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0)
+            const allItems = orders.flatMap(order => order.items)
+
+            return {
+                guestName: guestName,
+                tableNumber: orders[0].table.number,
+                orders: orders.map(o => ({
+                    id: o.id,
+                    createdAt: o.createdAt,
+                    items: o.items
+                })),
+                totalAmount,
+                allItems,
+                orderCount: orders.length
+            }
+        })
+
+        revalidatePath("/admin/billing")
+        revalidatePath("/admin/inventory")
+        return { success: true, ...result }
+    } catch (error) {
+        console.error("Failed to bill guest orders:", error)
+        return { success: false, error: error instanceof Error ? error.message : "Failed to bill orders" }
     }
 }

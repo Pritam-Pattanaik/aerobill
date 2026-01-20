@@ -24,6 +24,7 @@ export default function TableMenu() {
     const [orderPlaced, setOrderPlaced] = useState(false)
     const [ordering, setOrdering] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [guestName, setGuestName] = useState("")
 
     useEffect(() => {
         async function fetchData() {
@@ -49,6 +50,9 @@ export default function TableMenu() {
             }
         }
         fetchData()
+        // Load saved guest name from localStorage
+        const savedName = localStorage.getItem('guestName')
+        if (savedName) setGuestName(savedName)
     }, [slug, tableNumber])
 
     const addToCart = (product: Product) => {
@@ -69,8 +73,12 @@ export default function TableMenu() {
     const handlePlaceOrder = async () => {
         if (!tableDbId || cart.length === 0 || ordering) return
         setOrdering(true)
+        // Save guest name to localStorage for future orders
+        if (guestName.trim()) {
+            localStorage.setItem('guestName', guestName.trim())
+        }
         try {
-            const result = await placeOrder(tableDbId, cart)
+            const result = await placeOrder(tableDbId, cart, guestName.trim() || undefined)
             if (result.success) { setOrderPlaced(true); setCart([]); setIsCartOpen(false) }
             else setError(result.error || "Failed to place order")
         } catch { setError("Failed to place order") } finally {
@@ -176,6 +184,17 @@ export default function TableMenu() {
                         </div>
                         {cart.length > 0 && (
                             <div className="p-6 border-t border-[var(--border)]">
+                                {/* Guest Name Input */}
+                                <div className="mb-4">
+                                    <label className="block text-sm text-gray-400 mb-2">Your Name (for separate billing)</label>
+                                    <input
+                                        type="text"
+                                        value={guestName}
+                                        onChange={(e) => setGuestName(e.target.value)}
+                                        placeholder="e.g., Rahul"
+                                        className="w-full px-4 py-3 rounded-xl bg-[var(--card)] border border-[var(--border)] focus:border-[var(--primary)] outline-none transition"
+                                    />
+                                </div>
                                 <div className="flex justify-between mb-4 text-lg"><span>Total</span><span className="font-bold text-[var(--primary)]">₹{cartTotal.toFixed(0)}</span></div>
                                 <button onClick={handlePlaceOrder} disabled={ordering} className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                     {ordering ? (

@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react"
 import Link from "next/link"
 
 type OrderItem = { id: string; quantity: number; product: { name: string; isVeg: boolean } }
-type Order = { id: string; status: "PENDING" | "COOKING"; createdAt: string; table: { number: number }; items: OrderItem[] }
+type Order = { id: string; status: "PENDING" | "COOKING"; createdAt: string; guestName: string | null; table: { number: number }; items: OrderItem[] }
 
 export default function KitchenPage() {
     const [orders, setOrders] = useState<Order[]>([])
@@ -87,6 +87,11 @@ export default function KitchenPage() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className="text-2xl font-bold">#{order.table.number}</span>
+                                            {order.guestName && (
+                                                <span className="px-2 py-0.5 rounded-full bg-[var(--primary)]/20 text-[var(--primary)] text-xs font-medium">
+                                                    {order.guestName}
+                                                </span>
+                                            )}
                                             <span className={`badge text-xs ${order.status === "PENDING" ? "badge-pending" : "badge-cooking"}`}>{order.status}</span>
                                         </div>
                                         <p className="text-xs text-gray-400">ID: {order.id.slice(-6).toUpperCase()}</p>

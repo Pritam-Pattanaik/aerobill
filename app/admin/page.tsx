@@ -165,10 +165,10 @@ export default function AdminDashboard() {
     const restaurantName = session?.user?.restaurantName || "Restaurant"
 
     return (
-        <div className="p-6">
+        <div className="p-4 md:p-6">
             {/* Header - renders immediately */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">Dashboard</h1>
+            <div className="mb-4 md:mb-6">
+                <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
                 <p className="text-gray-400 text-sm">Welcome back, {restaurantName}!</p>
             </div>
 
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
             {isLoading || !data ? <StatsGridSkeleton /> : <StatsGrid stats={data.stats} />}
 
             {/* Quick Actions - renders immediately */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4 mb-4 md:mb-6">
                 <Link href="/kitchen" className="glass-card p-4 hover:border-[var(--primary)]" prefetch={true}>
                     <div className="text-2xl mb-2">🍳</div>
                     <h3 className="font-medium">Kitchen</h3>
