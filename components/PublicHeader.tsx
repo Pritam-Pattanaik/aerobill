@@ -8,6 +8,7 @@ const navLinks = [
     { href: "/about", label: "About" },
     { href: "/pricing", label: "Pricing" },
     { href: "/blog", label: "Blog" },
+    { href: "/contact", label: "Contact" },
 ]
 
 export default function PublicHeader() {
