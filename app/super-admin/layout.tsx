@@ -14,6 +14,7 @@ const navItems = [
     { href: "/super-admin/subscriptions", label: "Subscriptions", icon: "💳" },
     { href: "/super-admin/orders", label: "Orders", icon: "📦" },
     { href: "/super-admin/blog", label: "Blog", icon: "📝" },
+    { href: "/super-admin/contact", label: "Contact Page", icon: "📞" },
 ]
 
 function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {

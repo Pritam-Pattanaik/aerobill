@@ -229,3 +229,20 @@ model BlogPost {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Contact page content (singleton - only one row)
+model ContactInfo {
+  id          String   @id @default("contact-info")
+  email       String   @default("support@aerobill.in")
+  phone       String   @default("+91 8736098253")
+  whatsapp    String?  @default("+91 8736098253")
+  address     String   @default("Bhubaneswar, Odisha, India")
+  mapUrl      String?  // Google Maps embed URL
+  officeHours String   @default("Mon-Sat: 9AM - 6PM IST")
+  facebook    String?
+  twitter     String?
+  instagram   String?
+  linkedin    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
