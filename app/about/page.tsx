@@ -4,7 +4,25 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
     title: "About Aerobill - By ASSETMAGNETS | Restaurant Management Software",
-    description: "Learn about Aerobill by ASSETMAGNETS - India's most innovative restaurant management software with QR ordering, kitchen display, and smart billing.",
+    description: "Learn about Aerobill by ASSETMAGNETS - India's most innovative restaurant management software with QR ordering, kitchen display, and smart billing. Zero commission, 100% cloud-based.",
+    keywords: ["about aerobill", "assetmagnets", "restaurant software india", "qr code ordering", "restaurant management"],
+    openGraph: {
+        title: "About Aerobill - Restaurant Management Software by ASSETMAGNETS",
+        description: "India's most innovative restaurant management software. Zero commission, cloud-based QR ordering, kitchen display & billing.",
+        url: "https://aerobill.in/about",
+        siteName: "Aerobill",
+        type: "website",
+        images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "About Aerobill" }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "About Aerobill - Restaurant Management Software",
+        description: "Learn how Aerobill is revolutionizing restaurant management in India.",
+        images: ["/og-image.png"],
+    },
+    alternates: {
+        canonical: "https://aerobill.in/about",
+    },
 }
 
 export default function AboutPage() {

@@ -3,8 +3,26 @@ import Image from "next/image"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Pricing - Aerobill | Restaurant Management Software Plans",
-    description: "Simple, transparent pricing for Aerobill restaurant management software. Start free forever or upgrade for more features. No hidden fees, no commissions.",
+    title: "Pricing - Aerobill | Affordable Restaurant Management Software Plans",
+    description: "Simple, transparent pricing for Aerobill restaurant management software. Start free forever or upgrade for more features. No hidden fees, no commissions. Plans from ₹0/month.",
+    keywords: ["aerobill pricing", "restaurant software cost", "pos system pricing", "free restaurant management", "qr ordering price"],
+    openGraph: {
+        title: "Aerobill Pricing - Restaurant Management Software Plans",
+        description: "Start free forever. Plans from ₹0/month. No commissions, no hidden fees. Choose the plan that fits your restaurant.",
+        url: "https://aerobill.in/pricing",
+        siteName: "Aerobill",
+        type: "website",
+        images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Aerobill Pricing" }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Aerobill Pricing - Plans from ₹0/month",
+        description: "Simple, transparent pricing. Free forever plan available. No hidden fees.",
+        images: ["/og-image.png"],
+    },
+    alternates: {
+        canonical: "https://aerobill.in/pricing",
+    },
 }
 
 export default function PricingPage() {

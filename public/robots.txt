@@ -10,8 +10,6 @@ Disallow: /super-admin/*
 Disallow: /kitchen
 Disallow: /kitchen/*
 Disallow: /api/*
-Disallow: /login
-Disallow: /register
 
 # Sitemap location
-Sitemap: https://aerobill.vercel.app/sitemap.xml
+Sitemap: https://aerobill.in/sitemap.xml
