@@ -7,14 +7,14 @@ type ContactInfo = {
     id: string
     email: string
     phone: string
-    whatsapp: string | null
+    whatsapp: string
     address: string
-    mapUrl: string | null
+    mapUrl: string
     officeHours: string
-    facebook: string | null
-    twitter: string | null
-    instagram: string | null
-    linkedin: string | null
+    facebook: string
+    twitter: string
+    instagram: string
+    linkedin: string
 }
 
 export default function ContactManagementPage() {
@@ -59,7 +59,19 @@ export default function ContactManagementPage() {
         setSaving(true)
         setMessage(null)
 
-        const result = await updateContactInfo(form)
+        // Convert empty strings and nulls to undefined for the API
+        const result = await updateContactInfo({
+            email: form.email,
+            phone: form.phone,
+            whatsapp: form.whatsapp || undefined,
+            address: form.address,
+            mapUrl: form.mapUrl || undefined,
+            officeHours: form.officeHours,
+            facebook: form.facebook || undefined,
+            twitter: form.twitter || undefined,
+            instagram: form.instagram || undefined,
+            linkedin: form.linkedin || undefined,
+        })
 
         if (result.success) {
             setMessage({ type: "success", text: "Contact information updated successfully!" })
