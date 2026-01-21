@@ -24,6 +24,14 @@ type RecentOrder = {
     _count: { items: number }
 }
 
+type LowStockItem = {
+    id: string
+    name: string
+    quantity: number
+    unit: string
+    lowStockThreshold: number
+}
+
 // Skeleton components - shown during initial load
 function StatsGridSkeleton() {
     return (
@@ -133,11 +141,49 @@ function RecentOrdersList({ orders }: { orders: RecentOrder[] }) {
     )
 }
 
+// Low Stock Alerts Component
+function LowStockAlerts({ items }: { items: LowStockItem[] }) {
+    if (items.length === 0) return null
+
+    return (
+        <div className="glass-card p-4 border-[var(--warning)] mt-4">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <span className="text-xl">⚠️</span>
+                    <h2 className="font-semibold text-[var(--warning)]">Low Stock Alerts</h2>
+                </div>
+                <Link href="/admin/inventory" className="text-xs text-[var(--primary)]">Manage →</Link>
+            </div>
+            <div className="space-y-2">
+                {items.slice(0, 5).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-3 bg-[var(--warning)]/10 rounded-lg border border-[var(--warning)]/30">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[var(--warning)]/20 flex items-center justify-center text-sm">
+                                📦
+                            </div>
+                            <span className="font-medium">{item.name}</span>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm font-bold text-[var(--warning)]">{item.quantity} {item.unit}</p>
+                            <p className="text-xs text-gray-400">Min: {item.lowStockThreshold}</p>
+                        </div>
+                    </div>
+                ))}
+                {items.length > 5 && (
+                    <p className="text-center text-xs text-gray-400 pt-2">
+                        +{items.length - 5} more items need restocking
+                    </p>
+                )}
+            </div>
+        </div>
+    )
+}
+
 export default function AdminDashboard() {
     const { data: session, status } = useSession()
 
     // Fetch data with SWR - instant on repeat navigation
-    const { data, isLoading } = useSWR<{ stats: Stats; recentOrders: RecentOrder[] }>(
+    const { data, isLoading } = useSWR<{ stats: Stats; recentOrders: RecentOrder[]; lowStockItems: LowStockItem[] }>(
         status === "authenticated" ? "/api/stats" : null,
         {
             revalidateOnFocus: false,
@@ -197,6 +243,9 @@ export default function AdminDashboard() {
 
             {/* Recent Orders - shows cached data instantly */}
             {isLoading || !data ? <RecentOrdersSkeleton /> : <RecentOrdersList orders={data.recentOrders} />}
+
+            {/* Low Stock Alerts */}
+            {data?.lowStockItems && <LowStockAlerts items={data.lowStockItems} />}
         </div>
     )
 }

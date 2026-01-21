@@ -4,12 +4,19 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { unstable_cache } from "next/cache"
 import { requireRestaurantId } from "@/lib/session"
+import { LogType, POStatus } from "@prisma/client"
 
-// Cached query for inventory
+// =====================================
+// INVENTORY ITEMS
+// =====================================
+
 const getInventoryFromDb = async (restaurantId: string) => {
     return prisma.inventory.findMany({
         where: { restaurantId },
-        include: { products: { select: { id: true, name: true } } },
+        include: {
+            products: { select: { id: true, name: true } },
+            ingredients: { include: { product: { select: { id: true, name: true } } } }
+        },
         orderBy: { name: "asc" }
     })
 }
@@ -17,13 +24,11 @@ const getInventoryFromDb = async (restaurantId: string) => {
 export async function getInventory() {
     try {
         const restaurantId = await requireRestaurantId()
-
         const getCached = unstable_cache(
             () => getInventoryFromDb(restaurantId),
             [`inventory-${restaurantId}`],
             { revalidate: 30 }
         )
-
         const inventory = await getCached()
         return { success: true, inventory }
     } catch (error) {
@@ -32,13 +37,37 @@ export async function getInventory() {
     }
 }
 
-export async function createInventoryItem(data: { name: string; quantity: number; unit: string; pricePerUnit: number }) {
+export async function createInventoryItem(data: {
+    name: string;
+    quantity: number;
+    unit: string;
+    pricePerUnit: number;
+    lowStockThreshold?: number;
+}) {
     try {
         const restaurantId = await requireRestaurantId()
         const item = await prisma.inventory.create({
-            data: { ...data, restaurantId }
+            data: {
+                ...data,
+                lowStockThreshold: data.lowStockThreshold ?? 10,
+                restaurantId
+            }
         })
+
+        // Log the addition
+        await prisma.inventoryLog.create({
+            data: {
+                inventoryId: item.id,
+                type: LogType.ADDITION,
+                quantity: data.quantity,
+                previousQty: 0,
+                newQty: data.quantity,
+                reason: "Initial stock"
+            }
+        })
+
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
         return { success: true, item }
     } catch (error) {
         console.error("Failed to create inventory item:", error)
@@ -46,14 +75,44 @@ export async function createInventoryItem(data: { name: string; quantity: number
     }
 }
 
-export async function updateInventoryItem(id: string, data: { name: string; quantity: number; unit: string; pricePerUnit: number }) {
+export async function updateInventoryItem(id: string, data: {
+    name: string;
+    quantity: number;
+    unit: string;
+    pricePerUnit: number;
+    lowStockThreshold?: number;
+}) {
     try {
         const restaurantId = await requireRestaurantId()
+        const oldItem = await prisma.inventory.findUnique({ where: { id } })
+
         const item = await prisma.inventory.update({
             where: { id, restaurantId },
-            data: { name: data.name, quantity: data.quantity, unit: data.unit, pricePerUnit: data.pricePerUnit }
+            data: {
+                name: data.name,
+                quantity: data.quantity,
+                unit: data.unit,
+                pricePerUnit: data.pricePerUnit,
+                lowStockThreshold: data.lowStockThreshold ?? 10
+            }
         })
+
+        // Log if quantity changed
+        if (oldItem && oldItem.quantity !== data.quantity) {
+            await prisma.inventoryLog.create({
+                data: {
+                    inventoryId: id,
+                    type: LogType.ADJUSTMENT,
+                    quantity: data.quantity - oldItem.quantity,
+                    previousQty: oldItem.quantity,
+                    newQty: data.quantity,
+                    reason: "Manual update"
+                }
+            })
+        }
+
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
         return { success: true, item }
     } catch (error) {
         console.error("Failed to update inventory item:", error)
@@ -70,6 +129,7 @@ export async function deleteInventoryItem(id: string) {
         }
         await prisma.inventory.delete({ where: { id, restaurantId } })
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
         return { success: true }
     } catch (error) {
         console.error("Failed to delete inventory item:", error)
@@ -77,14 +137,31 @@ export async function deleteInventoryItem(id: string) {
     }
 }
 
-export async function adjustInventoryQuantity(id: string, adjustment: number) {
+export async function adjustInventoryQuantity(id: string, adjustment: number, reason?: string) {
     try {
         const restaurantId = await requireRestaurantId()
+        const oldItem = await prisma.inventory.findUnique({ where: { id } })
+        if (!oldItem) return { success: false, error: "Item not found" }
+
         const item = await prisma.inventory.update({
             where: { id, restaurantId },
             data: { quantity: { increment: adjustment } }
         })
+
+        // Log the adjustment
+        await prisma.inventoryLog.create({
+            data: {
+                inventoryId: id,
+                type: adjustment > 0 ? LogType.ADDITION : LogType.DEDUCTION,
+                quantity: adjustment,
+                previousQty: oldItem.quantity,
+                newQty: item.quantity,
+                reason: reason || "Manual adjustment"
+            }
+        })
+
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
         return { success: true, item }
     } catch (error) {
         console.error("Failed to adjust inventory quantity:", error)
@@ -92,28 +169,283 @@ export async function adjustInventoryQuantity(id: string, adjustment: number) {
     }
 }
 
-// Cached query for low stock items
-const getLowStockFromDb = async (restaurantId: string, threshold: number) => {
-    return prisma.inventory.findMany({
-        where: { restaurantId, quantity: { lte: threshold } },
-        orderBy: { quantity: "asc" }
-    })
-}
+// =====================================
+// LOW STOCK NOTIFICATIONS
+// =====================================
 
-export async function getLowStockItems(threshold: number = 10) {
+export async function getLowStockItems() {
     try {
         const restaurantId = await requireRestaurantId()
-
-        const getCached = unstable_cache(
-            () => getLowStockFromDb(restaurantId, threshold),
-            [`lowstock-${restaurantId}-${threshold}`],
-            { revalidate: 30 }
-        )
-
-        const items = await getCached()
+        // Get items where quantity <= lowStockThreshold
+        const items = await prisma.inventory.findMany({
+            where: {
+                restaurantId,
+                quantity: { lte: prisma.inventory.fields.lowStockThreshold }
+            },
+            orderBy: { quantity: "asc" }
+        })
         return { success: true, items }
+    } catch {
+        // Fallback: manual comparison
+        try {
+            const restaurantId = await requireRestaurantId()
+            const allItems = await prisma.inventory.findMany({ where: { restaurantId } })
+            const lowStock = allItems.filter(item => item.quantity <= item.lowStockThreshold)
+            return { success: true, items: lowStock }
+        } catch (error) {
+            console.error("Failed to fetch low stock items:", error)
+            return { success: false, error: "Failed to fetch low stock items", items: [] }
+        }
+    }
+}
+
+export async function getLowStockCount() {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const allItems = await prisma.inventory.findMany({ where: { restaurantId } })
+        const count = allItems.filter(item => item.quantity <= item.lowStockThreshold).length
+        return { success: true, count }
     } catch (error) {
-        console.error("Failed to fetch low stock items:", error)
-        return { success: false, error: "Failed to fetch low stock items", items: [] }
+        console.error("Failed to get low stock count:", error)
+        return { success: false, count: 0 }
+    }
+}
+
+// =====================================
+// PRODUCT INGREDIENTS (RECIPES)
+// =====================================
+
+export async function getProductIngredients(productId: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const ingredients = await prisma.productIngredient.findMany({
+            where: { productId, restaurantId },
+            include: { inventory: true }
+        })
+        return { success: true, ingredients }
+    } catch (error) {
+        console.error("Failed to fetch product ingredients:", error)
+        return { success: false, error: "Failed to fetch ingredients", ingredients: [] }
+    }
+}
+
+export async function addProductIngredient(productId: string, inventoryId: string, quantity: number) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const ingredient = await prisma.productIngredient.create({
+            data: { productId, inventoryId, quantity, restaurantId }
+        })
+        revalidatePath("/admin/menu")
+        return { success: true, ingredient }
+    } catch (error) {
+        console.error("Failed to add ingredient:", error)
+        return { success: false, error: "Failed to add ingredient" }
+    }
+}
+
+export async function updateProductIngredient(id: string, quantity: number) {
+    try {
+        const ingredient = await prisma.productIngredient.update({
+            where: { id },
+            data: { quantity }
+        })
+        revalidatePath("/admin/menu")
+        return { success: true, ingredient }
+    } catch (error) {
+        console.error("Failed to update ingredient:", error)
+        return { success: false, error: "Failed to update ingredient" }
+    }
+}
+
+export async function removeProductIngredient(id: string) {
+    try {
+        await prisma.productIngredient.delete({ where: { id } })
+        revalidatePath("/admin/menu")
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to remove ingredient:", error)
+        return { success: false, error: "Failed to remove ingredient" }
+    }
+}
+
+// Auto-deduct inventory when order is completed
+export async function deductInventoryForOrder(orderId: string) {
+    try {
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            include: { ingredients: true }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!order) return { success: false, error: "Order not found" }
+
+        // For each order item, deduct ingredients
+        for (const item of order.items) {
+            for (const ingredient of item.product.ingredients) {
+                const deductQty = ingredient.quantity * item.quantity
+                const inv = await prisma.inventory.findUnique({ where: { id: ingredient.inventoryId } })
+                if (!inv) continue
+
+                await prisma.inventory.update({
+                    where: { id: ingredient.inventoryId },
+                    data: { quantity: { decrement: deductQty } }
+                })
+
+                await prisma.inventoryLog.create({
+                    data: {
+                        inventoryId: ingredient.inventoryId,
+                        type: LogType.ORDER_DEDUCTION,
+                        quantity: -deductQty,
+                        previousQty: inv.quantity,
+                        newQty: inv.quantity - deductQty,
+                        reason: `Order #${orderId.slice(-6)}`
+                    }
+                })
+            }
+        }
+
+        revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to deduct inventory:", error)
+        return { success: false, error: "Failed to deduct inventory" }
+    }
+}
+
+// =====================================
+// PURCHASE ORDERS
+// =====================================
+
+export async function getPurchaseOrders() {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const orders = await prisma.purchaseOrder.findMany({
+            where: { restaurantId },
+            include: { items: { include: { inventory: true } } },
+            orderBy: { createdAt: "desc" }
+        })
+        return { success: true, orders }
+    } catch (error) {
+        console.error("Failed to fetch purchase orders:", error)
+        return { success: false, error: "Failed to fetch purchase orders", orders: [] }
+    }
+}
+
+export async function createPurchaseOrder(data: {
+    supplierName?: string;
+    notes?: string;
+    items: Array<{ inventoryId: string; quantity: number; unitPrice: number }>;
+}) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const orderNumber = `PO-${Date.now().toString().slice(-8)}`
+        const totalAmount = data.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+
+        const order = await prisma.purchaseOrder.create({
+            data: {
+                orderNumber,
+                supplierName: data.supplierName,
+                notes: data.notes,
+                totalAmount,
+                restaurantId,
+                items: {
+                    create: data.items.map(item => ({
+                        inventoryId: item.inventoryId,
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice
+                    }))
+                }
+            },
+            include: { items: true }
+        })
+
+        revalidatePath("/admin/purchase-orders")
+        return { success: true, order }
+    } catch (error) {
+        console.error("Failed to create purchase order:", error)
+        return { success: false, error: "Failed to create purchase order" }
+    }
+}
+
+export async function updatePurchaseOrderStatus(id: string, status: POStatus) {
+    try {
+        const order = await prisma.purchaseOrder.update({
+            where: { id },
+            data: { status },
+            include: { items: { include: { inventory: true } } }
+        })
+
+        // If received, add to inventory
+        if (status === POStatus.RECEIVED) {
+            for (const item of order.items) {
+                const inv = item.inventory
+                await prisma.inventory.update({
+                    where: { id: item.inventoryId },
+                    data: { quantity: { increment: item.quantity } }
+                })
+
+                await prisma.inventoryLog.create({
+                    data: {
+                        inventoryId: item.inventoryId,
+                        type: LogType.PURCHASE_RECEIVED,
+                        quantity: item.quantity,
+                        previousQty: inv.quantity,
+                        newQty: inv.quantity + item.quantity,
+                        reason: `Purchase Order ${order.orderNumber}`
+                    }
+                })
+            }
+        }
+
+        revalidatePath("/admin/purchase-orders")
+        revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
+        return { success: true, order }
+    } catch (error) {
+        console.error("Failed to update purchase order:", error)
+        return { success: false, error: "Failed to update purchase order" }
+    }
+}
+
+export async function deletePurchaseOrder(id: string) {
+    try {
+        await prisma.purchaseOrder.delete({ where: { id } })
+        revalidatePath("/admin/purchase-orders")
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to delete purchase order:", error)
+        return { success: false, error: "Failed to delete purchase order" }
+    }
+}
+
+// =====================================
+// INVENTORY LOGS
+// =====================================
+
+export async function getInventoryLogs(inventoryId?: string, limit: number = 50) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const inventoryIds = inventoryId
+            ? [inventoryId]
+            : (await prisma.inventory.findMany({ where: { restaurantId }, select: { id: true } })).map(i => i.id)
+
+        const logs = await prisma.inventoryLog.findMany({
+            where: { inventoryId: { in: inventoryIds } },
+            include: { inventory: { select: { name: true, unit: true } } },
+            orderBy: { createdAt: "desc" },
+            take: limit
+        })
+        return { success: true, logs }
+    } catch (error) {
+        console.error("Failed to fetch inventory logs:", error)
+        return { success: false, error: "Failed to fetch logs", logs: [] }
     }
 }

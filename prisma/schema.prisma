@@ -108,36 +108,41 @@ model Category {
 }
 
 model Inventory {
-  id           String      @id @default(cuid())
-  name         String
-  quantity     Float
-  unit         String
-  pricePerUnit Float
-  restaurantId String
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  products     Product[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id                String              @id @default(cuid())
+  name              String
+  quantity          Float
+  unit              String
+  pricePerUnit      Float
+  lowStockThreshold Float               @default(10)
+  restaurantId      String
+  restaurant        Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  products          Product[]
+  ingredients       ProductIngredient[]
+  purchaseItems     PurchaseOrderItem[]
+  logs              InventoryLog[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@index([restaurantId])
 }
 
 model Product {
-  id           String      @id @default(cuid())
+  id           String              @id @default(cuid())
   name         String
   price        Float
-  isVeg        Boolean     @default(true)
-  isAvailable  Boolean     @default(true)
+  isVeg        Boolean             @default(true)
+  isAvailable  Boolean             @default(true)
   image        String?
   categoryId   String
-  category     Category    @relation(fields: [categoryId], references: [id])
+  category     Category            @relation(fields: [categoryId], references: [id])
   inventoryId  String?
-  inventory    Inventory?  @relation(fields: [inventoryId], references: [id])
+  inventory    Inventory?          @relation(fields: [inventoryId], references: [id])
   restaurantId String
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   orderItems   OrderItem[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  ingredients  ProductIngredient[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
   @@index([categoryId])
   @@index([inventoryId])
@@ -246,3 +251,86 @@ model ContactInfo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// =====================================
+// INVENTORY MANAGEMENT FEATURES
+// =====================================
+
+enum POStatus {
+  PENDING
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+enum LogType {
+  ADDITION
+  DEDUCTION
+  ADJUSTMENT
+  PURCHASE_RECEIVED
+  ORDER_DEDUCTION
+  WASTAGE
+}
+
+// Recipe: Ingredients needed per product
+model ProductIngredient {
+  id           String    @id @default(cuid())
+  productId    String
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryId  String
+  inventory    Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  quantity     Float     // Amount of inventory item needed per unit of product
+  restaurantId String
+
+  @@unique([productId, inventoryId])
+  @@index([productId])
+  @@index([inventoryId])
+}
+
+// Purchase Order for restocking
+model PurchaseOrder {
+  id           String              @id @default(cuid())
+  orderNumber  String
+  status       POStatus            @default(PENDING)
+  supplierName String?
+  notes        String?
+  totalAmount  Float               @default(0)
+  restaurantId String
+  items        PurchaseOrderItem[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([restaurantId])
+  @@index([status])
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  inventoryId     String
+  inventory       Inventory     @relation(fields: [inventoryId], references: [id])
+  quantity        Float
+  unitPrice       Float
+  createdAt       DateTime      @default(now())
+
+  @@index([purchaseOrderId])
+  @@index([inventoryId])
+}
+
+// Inventory activity log for audit trail
+model InventoryLog {
+  id           String   @id @default(cuid())
+  inventoryId  String
+  inventory    Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  type         LogType
+  quantity     Float    // Positive for addition, negative for deduction
+  previousQty  Float
+  newQty       Float
+  reason       String?  // e.g., "Order #123", "Purchase Order #456", "Manual adjustment"
+  createdAt    DateTime @default(now())
+
+  @@index([inventoryId])
+  @@index([createdAt])
+}
+

@@ -20,8 +20,8 @@ export async function GET() {
             pendingOrders,
             todayRevenue,
             totalProducts,
-            lowStockCount,
             totalTables,
+            allInventory,
         ] = await prisma.$transaction([
             prisma.order.count({ where: { restaurantId } }),
             prisma.order.count({ where: { restaurantId, status: { in: ["PENDING", "COOKING"] } } }),
@@ -30,9 +30,15 @@ export async function GET() {
                 _sum: { totalAmount: true },
             }),
             prisma.product.count({ where: { restaurantId } }),
-            prisma.inventory.count({ where: { restaurantId, quantity: { lte: 10 } } }),
             prisma.table.count({ where: { restaurantId, isActive: true } }),
+            prisma.inventory.findMany({
+                where: { restaurantId },
+                select: { id: true, name: true, quantity: true, unit: true, lowStockThreshold: true }
+            }),
         ])
+
+        // Filter low stock items (quantity <= threshold)
+        const lowStockItems = allInventory.filter(item => item.quantity <= item.lowStockThreshold)
 
         // Get recent orders
         const recentOrders = await prisma.order.findMany({
@@ -55,13 +61,13 @@ export async function GET() {
                 pendingOrders,
                 todayRevenue: todayRevenue._sum.totalAmount || 0,
                 totalProducts,
-                lowStockCount,
+                lowStockCount: lowStockItems.length,
                 totalTables,
             },
             recentOrders,
+            lowStockItems,
         }, {
             headers: {
-                // Cache for 30 seconds on CDN edge
                 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
             }
         })
@@ -70,3 +76,4 @@ export async function GET() {
         return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
     }
 }
+

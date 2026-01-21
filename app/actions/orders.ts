@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { requireRestaurantId } from "@/lib/session"
+import { deductInventoryForOrder } from "./inventory"
 
 export type CartItem = { productId: string; name: string; price: number; quantity: number }
 
@@ -83,27 +84,20 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
 export async function billOrder(orderId: string) {
     try {
         const restaurantId = await requireRestaurantId()
-        const order = await prisma.$transaction(async (tx) => {
-            const orderData = await tx.order.findUnique({
-                where: { id: orderId, restaurantId },
-                include: { items: { include: { product: { include: { inventory: true } } } } }
-            })
-            if (!orderData) throw new Error("Order not found")
 
-            for (const item of orderData.items) {
-                if (item.product.inventory) {
-                    await tx.inventory.update({ where: { id: item.product.inventory.id }, data: { quantity: { decrement: item.quantity } } })
-                }
-            }
-
-            return await tx.order.update({
-                where: { id: orderId, restaurantId },
-                data: { status: "BILLED", paymentStatus: "PAID" },
-                include: { items: { include: { product: true } }, table: true }
-            })
+        // Update order status
+        const order = await prisma.order.update({
+            where: { id: orderId, restaurantId },
+            data: { status: "BILLED", paymentStatus: "PAID" },
+            include: { items: { include: { product: true } }, table: true }
         })
+
+        // Deduct inventory based on recipe ingredients (with logging)
+        await deductInventoryForOrder(orderId)
+
         revalidatePath("/admin/billing")
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin")
         return { success: true, order }
     } catch (error) {
         console.error("Failed to bill order:", error)
