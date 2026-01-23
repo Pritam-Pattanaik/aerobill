@@ -48,6 +48,9 @@ type Settings = {
     cafeName: string
     feedbackLink: string | null
     taxRate: number
+    cgst: number
+    sgst: number
+    whatsappEnabled: boolean
 }
 
 type BillingSummary = {
@@ -83,6 +86,11 @@ export default function BillingPage() {
     const [historyOrders, setHistoryOrders] = useState<Order[]>([])
     const [historySummary, setHistorySummary] = useState<BillingSummary | null>(null)
     const [historyLoading, setHistoryLoading] = useState(false)
+
+    // Phone Modal State
+    const [showPhoneModal, setShowPhoneModal] = useState(false)
+    const [customerPhone, setCustomerPhone] = useState("")
+    const [pendingBill, setPendingBill] = useState<{ type: 'table' | 'guest'; tableId: string; tableNumber: number; guestName?: string } | null>(null)
 
     const fetchData = async () => {
         try {
@@ -133,15 +141,21 @@ export default function BillingPage() {
     }, [showHistory, historyDate])
 
     const handleBillTable = async (tableId: string, tableNumber: number) => {
-        if (!confirm(`Bill all orders for Table #${tableNumber}?`)) return
+        // If WhatsApp enabled, show phone modal first
+        if (settings?.whatsappEnabled) {
+            setPendingBill({ type: 'table', tableId, tableNumber })
+            setShowPhoneModal(true)
+            return
+        }
+        await processBillTable(tableId, tableNumber)
+    }
 
+    const processBillTable = async (tableId: string, tableNumber: number, phone?: string) => {
         setProcessing(tableId)
-
         try {
-            const result = await billTableOrders(tableId)
+            const result = await billTableOrders(tableId, phone)
             if (result.success) {
                 setBillingReceipt(result as unknown as BillingReceipt)
-                // Wait a moment for the receipt to render
                 setTimeout(() => {
                     window.print()
                     setBillingReceipt(null)
@@ -159,15 +173,21 @@ export default function BillingPage() {
     }
 
     const handleBillGuest = async (tableId: string, guestName: string, tableNumber: number) => {
-        if (!confirm(`Bill ${guestName}'s orders at Table #${tableNumber}?`)) return
+        // If WhatsApp enabled, show phone modal first
+        if (settings?.whatsappEnabled) {
+            setPendingBill({ type: 'guest', tableId, tableNumber, guestName })
+            setShowPhoneModal(true)
+            return
+        }
+        await processBillGuest(tableId, guestName, tableNumber)
+    }
 
+    const processBillGuest = async (tableId: string, guestName: string, tableNumber: number, phone?: string) => {
         setProcessing(`${tableId}-${guestName}`)
-
         try {
             const result = await billGuestOrders(tableId, guestName)
             if (result.success) {
                 setBillingReceipt(result as unknown as BillingReceipt)
-                // Wait a moment for the receipt to render
                 setTimeout(() => {
                     window.print()
                     setBillingReceipt(null)
@@ -182,6 +202,22 @@ export default function BillingPage() {
         } finally {
             setProcessing(null)
         }
+    }
+
+    const handlePhoneSubmit = async () => {
+        setShowPhoneModal(false)
+        if (!pendingBill) return
+
+        const phone = customerPhone.trim() || undefined
+
+        if (pendingBill.type === 'table') {
+            await processBillTable(pendingBill.tableId, pendingBill.tableNumber, phone)
+        } else {
+            await processBillGuest(pendingBill.tableId, pendingBill.guestName!, pendingBill.tableNumber, phone)
+        }
+
+        setCustomerPhone("")
+        setPendingBill(null)
     }
 
     const formatDate = (date: string | Date) => {
@@ -549,6 +585,46 @@ export default function BillingPage() {
                         {settings?.feedbackLink && (
                             <p>Feedback: {settings.feedbackLink}</p>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Phone Input Modal */}
+            {showPhoneModal && pendingBill && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="glass-card p-6 w-full max-w-md">
+                        <h2 className="text-xl font-bold mb-2">📱 Send WhatsApp Receipt</h2>
+                        <p className="text-gray-400 text-sm mb-6">
+                            Enter customer phone to send thank you message (optional)
+                        </p>
+
+                        <input
+                            type="tel"
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                            className="input w-full mb-4"
+                            placeholder="Phone number (e.g., 9876543210)"
+                            autoFocus
+                        />
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowPhoneModal(false)
+                                    setCustomerPhone("")
+                                    setPendingBill(null)
+                                }}
+                                className="btn-secondary flex-1"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handlePhoneSubmit}
+                                className="btn-primary flex-1"
+                            >
+                                {customerPhone ? "Bill & Send" : "Bill Without WhatsApp"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

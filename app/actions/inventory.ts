@@ -321,7 +321,7 @@ export async function deductInventoryForOrder(orderId: string) {
 }
 
 // =====================================
-// PURCHASE ORDERS
+// PURCHASE ORDERS (Marketplace Orders)
 // =====================================
 
 export async function getPurchaseOrders() {
@@ -329,7 +329,7 @@ export async function getPurchaseOrders() {
         const restaurantId = await requireRestaurantId()
         const orders = await prisma.purchaseOrder.findMany({
             where: { restaurantId },
-            include: { items: { include: { inventory: true } } },
+            include: { items: { include: { marketplaceProduct: true } } },
             orderBy: { createdAt: "desc" }
         })
         return { success: true, orders }
@@ -339,26 +339,30 @@ export async function getPurchaseOrders() {
     }
 }
 
-export async function createPurchaseOrder(data: {
-    supplierName?: string;
+export async function createMarketplaceOrder(data: {
     notes?: string;
-    items: Array<{ inventoryId: string; quantity: number; unitPrice: number }>;
+    items: Array<{ marketplaceProductId: string; quantity: number; unitPrice: number }>;
 }) {
     try {
         const restaurantId = await requireRestaurantId()
         const orderNumber = `PO-${Date.now().toString().slice(-8)}`
         const totalAmount = data.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
 
+        // 48 hours from now
+        const estimatedDelivery = new Date()
+        estimatedDelivery.setHours(estimatedDelivery.getHours() + 48)
+
         const order = await prisma.purchaseOrder.create({
             data: {
                 orderNumber,
-                supplierName: data.supplierName,
                 notes: data.notes,
                 totalAmount,
                 restaurantId,
+                status: "ORDERED", // Immediately ordered from marketplace
+                estimatedDelivery,
                 items: {
                     create: data.items.map(item => ({
-                        inventoryId: item.inventoryId,
+                        marketplaceProductId: item.marketplaceProductId,
                         quantity: item.quantity,
                         unitPrice: item.unitPrice
                     }))
@@ -370,43 +374,87 @@ export async function createPurchaseOrder(data: {
         revalidatePath("/admin/purchase-orders")
         return { success: true, order }
     } catch (error) {
-        console.error("Failed to create purchase order:", error)
-        return { success: false, error: "Failed to create purchase order" }
+        console.error("Failed to create marketplace order:", error)
+        return { success: false, error: "Failed to create order" }
     }
 }
 
 export async function updatePurchaseOrderStatus(id: string, status: POStatus) {
     try {
+        const restaurantId = await requireRestaurantId()
+
         const order = await prisma.purchaseOrder.update({
-            where: { id },
+            where: { id, restaurantId },
             data: { status },
-            include: { items: { include: { inventory: true } } }
+            include: { items: { include: { marketplaceProduct: true } } }
         })
 
-        // If received, add to inventory
-        if (status === POStatus.RECEIVED) {
+        // If status is RECEIVED, add items to restaurant's inventory
+        if (status === "RECEIVED") {
             for (const item of order.items) {
-                const inv = item.inventory
-                await prisma.inventory.update({
-                    where: { id: item.inventoryId },
-                    data: { quantity: { increment: item.quantity } }
-                })
+                const product = item.marketplaceProduct
 
-                await prisma.inventoryLog.create({
-                    data: {
-                        inventoryId: item.inventoryId,
-                        type: LogType.PURCHASE_RECEIVED,
-                        quantity: item.quantity,
-                        previousQty: inv.quantity,
-                        newQty: inv.quantity + item.quantity,
-                        reason: `Purchase Order ${order.orderNumber}`
+                // Try to find existing inventory item with same name
+                let inventoryItem = await prisma.inventory.findFirst({
+                    where: {
+                        restaurantId: order.restaurantId,
+                        name: product.name
                     }
                 })
+
+                if (inventoryItem) {
+                    // Add quantity to existing inventory item
+                    const previousQty = inventoryItem.quantity
+                    inventoryItem = await prisma.inventory.update({
+                        where: { id: inventoryItem.id },
+                        data: {
+                            quantity: { increment: item.quantity },
+                            pricePerUnit: item.unitPrice
+                        }
+                    })
+
+                    // Log the addition
+                    await prisma.inventoryLog.create({
+                        data: {
+                            inventoryId: inventoryItem.id,
+                            type: LogType.PURCHASE_RECEIVED,
+                            quantity: item.quantity,
+                            previousQty: previousQty,
+                            newQty: inventoryItem.quantity,
+                            reason: `Purchase Order ${order.orderNumber}`
+                        }
+                    })
+                } else {
+                    // Create new inventory item
+                    inventoryItem = await prisma.inventory.create({
+                        data: {
+                            name: product.name,
+                            quantity: item.quantity,
+                            unit: product.unit,
+                            pricePerUnit: item.unitPrice,
+                            lowStockThreshold: 10,
+                            restaurantId: order.restaurantId
+                        }
+                    })
+
+                    // Log the addition
+                    await prisma.inventoryLog.create({
+                        data: {
+                            inventoryId: inventoryItem.id,
+                            type: LogType.PURCHASE_RECEIVED,
+                            quantity: item.quantity,
+                            previousQty: 0,
+                            newQty: item.quantity,
+                            reason: `Purchase Order ${order.orderNumber} (New Item)`
+                        }
+                    })
+                }
             }
+
+            revalidatePath("/admin/inventory")
         }
 
         revalidatePath("/admin/purchase-orders")
-        revalidatePath("/admin/inventory")
         revalidatePath("/admin")
         return { success: true, order }
     } catch (error) {
@@ -447,5 +495,148 @@ export async function getInventoryLogs(inventoryId?: string, limit: number = 50)
     } catch (error) {
         console.error("Failed to fetch inventory logs:", error)
         return { success: false, error: "Failed to fetch logs", logs: [] }
+    }
+}
+
+// =====================================
+// DAILY PURCHASES (Manual entries)
+// =====================================
+
+export async function createDailyPurchase(data: {
+    name: string
+    quantity: number
+    unit: string
+    price: number
+}) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const purchase = await prisma.dailyPurchase.create({
+            data: {
+                name: data.name,
+                quantity: data.quantity,
+                unit: data.unit,
+                price: data.price,
+                restaurantId
+            }
+        })
+        revalidatePath("/admin/purchase-orders")
+        return { success: true, purchase }
+    } catch (error) {
+        console.error("Failed to create daily purchase:", error)
+        return { success: false, error: "Failed to create daily purchase" }
+    }
+}
+
+export async function getDailyPurchases(date?: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        // If date provided, filter by that date
+        const targetDate = date ? new Date(date) : new Date()
+        const startOfDay = new Date(targetDate)
+        startOfDay.setHours(0, 0, 0, 0)
+        const endOfDay = new Date(targetDate)
+        endOfDay.setHours(23, 59, 59, 999)
+
+        const purchases = await prisma.dailyPurchase.findMany({
+            where: {
+                restaurantId,
+                createdAt: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        const total = purchases.reduce((sum, p) => sum + p.price, 0)
+
+        return { success: true, purchases, total }
+    } catch (error) {
+        console.error("Failed to fetch daily purchases:", error)
+        return { success: false, error: "Failed to fetch daily purchases", purchases: [], total: 0 }
+    }
+}
+
+export async function deleteDailyPurchase(id: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        await prisma.dailyPurchase.delete({
+            where: { id, restaurantId }
+        })
+        revalidatePath("/admin/purchase-orders")
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to delete daily purchase:", error)
+        return { success: false, error: "Failed to delete daily purchase" }
+    }
+}
+
+// Get purchase history for a specific date (both marketplace + daily)
+export async function getPurchaseHistory(date: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        const targetDate = new Date(date)
+        const startOfDay = new Date(targetDate)
+        startOfDay.setHours(0, 0, 0, 0)
+        const endOfDay = new Date(targetDate)
+        endOfDay.setHours(23, 59, 59, 999)
+
+        // Get marketplace purchase orders for this date
+        const marketplaceOrders = await prisma.purchaseOrder.findMany({
+            where: {
+                restaurantId,
+                createdAt: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                }
+            },
+            include: {
+                items: {
+                    include: {
+                        marketplaceProduct: true
+                    }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        // Get daily purchases for this date
+        const dailyPurchases = await prisma.dailyPurchase.findMany({
+            where: {
+                restaurantId,
+                createdAt: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        const marketplaceTotal = marketplaceOrders.reduce((sum, o) => sum + o.totalAmount, 0)
+        const dailyTotal = dailyPurchases.reduce((sum, p) => sum + p.price, 0)
+
+        return {
+            success: true,
+            marketplaceOrders,
+            dailyPurchases,
+            summary: {
+                marketplaceTotal,
+                dailyTotal,
+                grandTotal: marketplaceTotal + dailyTotal,
+                marketplaceCount: marketplaceOrders.length,
+                dailyCount: dailyPurchases.length
+            }
+        }
+    } catch (error) {
+        console.error("Failed to fetch purchase history:", error)
+        return {
+            success: false,
+            error: "Failed to fetch purchase history",
+            marketplaceOrders: [],
+            dailyPurchases: [],
+            summary: { marketplaceTotal: 0, dailyTotal: 0, grandTotal: 0, marketplaceCount: 0, dailyCount: 0 }
+        }
     }
 }

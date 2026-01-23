@@ -42,26 +42,27 @@ enum SubStatus {
 
 // Multi-tenant Restaurant model
 model Restaurant {
-  id           String        @id @default(cuid())
-  name         String
-  slug         String        @unique
-  email        String        @unique
-  phone        String?
-  address      String?
-  gstNumber    String?
-  fssaiLicense String?
-  logo         String?
-  isActive     Boolean       @default(true)
-  subscription Subscription?
-  users        User[]
-  categories   Category[]
-  products     Product[]
-  tables       Table[]
-  orders       Order[]
-  inventory    Inventory[]
-  settings     Settings?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  email          String          @unique
+  phone          String?
+  address        String?
+  gstNumber      String?
+  fssaiLicense   String?
+  logo           String?
+  isActive       Boolean         @default(true)
+  subscription   Subscription?
+  users          User[]
+  categories     Category[]
+  products       Product[]
+  tables         Table[]
+  orders         Order[]
+  inventory      Inventory[]
+  settings       Settings?
+  dailyPurchases DailyPurchase[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 // Subscription for each restaurant
@@ -118,7 +119,6 @@ model Inventory {
   restaurant        Restaurant          @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   products          Product[]
   ingredients       ProductIngredient[]
-  purchaseItems     PurchaseOrderItem[]
   logs              InventoryLog[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -197,14 +197,22 @@ model OrderItem {
 }
 
 model Settings {
-  id           String      @id @default(cuid())
-  cafeName     String      @default("My Restaurant")
-  feedbackLink String?
-  taxRate      Float       @default(0)
-  restaurantId String      @unique
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id               String     @id @default(cuid())
+  cafeName         String     @default("My Restaurant")
+  feedbackLink     String?
+  taxRate          Float      @default(0)
+  // Separate GST fields
+  cgst             Float      @default(0)
+  sgst             Float      @default(0)
+  // WhatsApp Green API
+  whatsappEnabled  Boolean    @default(false)
+  whatsappInstance String?    // Green API instance ID
+  whatsappToken    String?    // Green API token
+  whatsappMessage  String     @default("Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!")
+  restaurantId     String     @unique
+  restaurant       Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 }
 
 // Super Admin for platform management (company developers)
@@ -287,35 +295,55 @@ model ProductIngredient {
   @@index([inventoryId])
 }
 
-// Purchase Order for restocking
+// =====================================
+// MARKETPLACE SYSTEM (Super Admin sells to Restaurants)
+// =====================================
+
+// Products listed by Super Admin for restaurants to order
+model MarketplaceProduct {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float    // Price per unit
+  unit        String   // e.g., "kg", "L", "pcs"
+  category    String?  // e.g., "Vegetables", "Spices", "Dairy"
+  image       String?
+  inStock     Boolean  @default(true)
+  minOrder    Int      @default(1)
+  items       PurchaseOrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Purchase Order for restaurants ordering from marketplace
 model PurchaseOrder {
-  id           String              @id @default(cuid())
-  orderNumber  String
-  status       POStatus            @default(PENDING)
-  supplierName String?
-  notes        String?
-  totalAmount  Float               @default(0)
-  restaurantId String
-  items        PurchaseOrderItem[]
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id                String              @id @default(cuid())
+  orderNumber       String
+  status            POStatus            @default(PENDING)
+  notes             String?
+  totalAmount       Float               @default(0)
+  restaurantId      String
+  estimatedDelivery DateTime?           // 48 hours from order
+  items             PurchaseOrderItem[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@index([restaurantId])
   @@index([status])
 }
 
 model PurchaseOrderItem {
-  id              String        @id @default(cuid())
-  purchaseOrderId String
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  inventoryId     String
-  inventory       Inventory     @relation(fields: [inventoryId], references: [id])
-  quantity        Float
-  unitPrice       Float
-  createdAt       DateTime      @default(now())
+  id                   String             @id @default(cuid())
+  purchaseOrderId      String
+  purchaseOrder        PurchaseOrder      @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  marketplaceProductId String
+  marketplaceProduct   MarketplaceProduct @relation(fields: [marketplaceProductId], references: [id])
+  quantity             Int
+  unitPrice            Float
+  createdAt            DateTime           @default(now())
 
   @@index([purchaseOrderId])
-  @@index([inventoryId])
+  @@index([marketplaceProductId])
 }
 
 // Inventory activity log for audit trail
@@ -334,3 +362,17 @@ model InventoryLog {
   @@index([createdAt])
 }
 
+// Daily manual purchases (not from marketplace)
+model DailyPurchase {
+  id           String     @id @default(cuid())
+  name         String     // Item name
+  quantity     Float      // Quantity purchased
+  unit         String     // e.g., "kg", "L", "pcs"
+  price        Float      // Total price paid
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId])
+  @@index([createdAt])
+}

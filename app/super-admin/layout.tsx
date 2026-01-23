@@ -11,6 +11,8 @@ import { MobileNavProvider, HamburgerButton, MobileSidebar } from "@/components/
 const navItems = [
     { href: "/super-admin", label: "Dashboard", icon: "🏠" },
     { href: "/super-admin/restaurants", label: "Restaurants", icon: "🍽️" },
+    { href: "/super-admin/marketplace", label: "Marketplace", icon: "🛒" },
+    { href: "/super-admin/purchase-orders", label: "Purchase Orders", icon: "📋" },
     { href: "/super-admin/subscriptions", label: "Subscriptions", icon: "💳" },
     { href: "/super-admin/orders", label: "Orders", icon: "📦" },
     { href: "/super-admin/blog", label: "Blog", icon: "📝" },

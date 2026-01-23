@@ -4,6 +4,45 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { requireRestaurantId } from "@/lib/session"
 import { deductInventoryForOrder } from "./inventory"
+import { sendWhatsAppMessage, formatThankYouMessage } from "@/lib/whatsapp"
+
+// Helper: Send WhatsApp notification after billing
+async function sendBillingWhatsApp(restaurantId: string, customerPhone: string | null, totalAmount: number) {
+    if (!customerPhone) return // No phone, skip
+
+    try {
+        const settings = await prisma.settings.findUnique({
+            where: { restaurantId },
+            select: {
+                whatsappEnabled: true,
+                whatsappInstance: true,
+                whatsappToken: true,
+                whatsappMessage: true,
+                cafeName: true
+            }
+        })
+
+        if (!settings?.whatsappEnabled || !settings.whatsappInstance || !settings.whatsappToken) {
+            return // WhatsApp not configured
+        }
+
+        const message = formatThankYouMessage(
+            settings.whatsappMessage,
+            settings.cafeName,
+            totalAmount
+        )
+
+        await sendWhatsAppMessage(customerPhone, message, {
+            instanceId: settings.whatsappInstance,
+            token: settings.whatsappToken
+        })
+
+        console.log(`WhatsApp sent to ${customerPhone} for ₹${totalAmount}`)
+    } catch (error) {
+        console.error("Failed to send WhatsApp:", error)
+        // Don't throw - billing should still succeed even if WhatsApp fails
+    }
+}
 
 export type CartItem = { productId: string; name: string; price: number; quantity: number }
 
@@ -81,7 +120,7 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
     }
 }
 
-export async function billOrder(orderId: string) {
+export async function billOrder(orderId: string, customerPhone?: string) {
     try {
         const restaurantId = await requireRestaurantId()
 
@@ -94,6 +133,11 @@ export async function billOrder(orderId: string) {
 
         // Deduct inventory based on recipe ingredients (with logging)
         await deductInventoryForOrder(orderId)
+
+        // Send WhatsApp notification (non-blocking)
+        if (customerPhone) {
+            sendBillingWhatsApp(restaurantId, customerPhone, order.totalAmount)
+        }
 
         revalidatePath("/admin/billing")
         revalidatePath("/admin/inventory")
@@ -232,7 +276,7 @@ export async function getReadyOrdersByTable() {
 }
 
 // Bill all orders for a table at once
-export async function billTableOrders(tableId: string) {
+export async function billTableOrders(tableId: string, customerPhone?: string) {
     try {
         const restaurantId = await requireRestaurantId()
 
@@ -284,6 +328,11 @@ export async function billTableOrders(tableId: string) {
                 orderCount: orders.length
             }
         })
+
+        // Send WhatsApp notification (non-blocking)
+        if (customerPhone) {
+            sendBillingWhatsApp(restaurantId, customerPhone, result.totalAmount)
+        }
 
         revalidatePath("/admin/billing")
         revalidatePath("/admin/inventory")

@@ -8,7 +8,10 @@ import {
     createProduct,
     updateProduct,
     deleteProduct,
-    toggleProductAvailability
+    toggleProductAvailability,
+    getProductIngredients,
+    addProductIngredient,
+    removeProductIngredient
 } from "@/app/actions/menu"
 
 type Product = {
@@ -55,8 +58,12 @@ export default function MenuManagement() {
 
     const [showProductModal, setShowProductModal] = useState(false)
     const [showCategoryModal, setShowCategoryModal] = useState(false)
+    const [showRecipeModal, setShowRecipeModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+    const [recipeProduct, setRecipeProduct] = useState<Product | null>(null)
+    const [recipeIngredients, setRecipeIngredients] = useState<Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>>([])
     const [filterCategory, setFilterCategory] = useState<string>("all")
+    const [newIngredient, setNewIngredient] = useState({ inventoryId: "", quantity: "" })
 
     // Form states
     const [productForm, setProductForm] = useState({
@@ -126,6 +133,33 @@ export default function MenuManagement() {
     const handleToggleAvailability = async (id: string) => {
         await toggleProductAvailability(id)
         refreshData()
+    }
+
+    // Recipe management
+    const openRecipeModal = async (product: Product) => {
+        setRecipeProduct(product)
+        const res = await getProductIngredients(product.id)
+        if (res.success) {
+            setRecipeIngredients(res.ingredients as Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>)
+        }
+        setShowRecipeModal(true)
+    }
+
+    const handleAddIngredient = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!recipeProduct || !newIngredient.inventoryId || !newIngredient.quantity) return
+        await addProductIngredient(recipeProduct.id, newIngredient.inventoryId, parseFloat(newIngredient.quantity))
+        const res = await getProductIngredients(recipeProduct.id)
+        if (res.success) setRecipeIngredients(res.ingredients as Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>)
+        setNewIngredient({ inventoryId: "", quantity: "" })
+    }
+
+    const handleRemoveIngredient = async (ingredientId: string) => {
+        await removeProductIngredient(ingredientId)
+        if (recipeProduct) {
+            const res = await getProductIngredients(recipeProduct.id)
+            if (res.success) setRecipeIngredients(res.ingredients as Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>)
+        }
     }
 
     const editProduct = (product: Product) => {
@@ -268,6 +302,12 @@ export default function MenuManagement() {
                                 {product.isAvailable ? "Available" : "Unavailable"}
                             </button>
                             <div className="flex gap-2">
+                                <button
+                                    onClick={() => openRecipeModal(product)}
+                                    className="text-sm text-purple-400 hover:text-purple-300"
+                                >
+                                    Recipe
+                                </button>
                                 <button
                                     onClick={() => editProduct(product)}
                                     className="text-sm text-blue-400 hover:text-blue-300"
@@ -428,6 +468,78 @@ export default function MenuManagement() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Recipe Modal */}
+            {showRecipeModal && recipeProduct && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowRecipeModal(false)} />
+                    <div className="glass-card p-6 w-full max-w-lg relative z-10 animate-fadeIn max-h-[80vh] overflow-y-auto">
+                        <h2 className="text-xl font-bold mb-2">Recipe: {recipeProduct.name}</h2>
+                        <p className="text-sm text-gray-400 mb-6">Define ingredients used per serving. When orders are billed, these will be auto-deducted from inventory.</p>
+
+                        {/* Current Ingredients */}
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-gray-400 mb-3">Ingredients</h3>
+                            {recipeIngredients.length === 0 ? (
+                                <p className="text-gray-500 text-sm">No ingredients defined yet</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {recipeIngredients.map((ing) => (
+                                        <div key={ing.id} className="flex items-center justify-between p-3 bg-[var(--background)] rounded-lg">
+                                            <div>
+                                                <span className="font-medium">{ing.inventory.name}</span>
+                                                <span className="text-gray-400 ml-2">{ing.quantity} {ing.inventory.unit}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleRemoveIngredient(ing.id)}
+                                                className="text-red-400 hover:text-red-300"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Add Ingredient Form */}
+                        <form onSubmit={handleAddIngredient} className="mb-4">
+                            <h3 className="text-sm font-medium text-gray-400 mb-3">Add Ingredient</h3>
+                            <div className="grid gap-3 grid-cols-3">
+                                <select
+                                    value={newIngredient.inventoryId}
+                                    onChange={(e) => setNewIngredient({ ...newIngredient, inventoryId: e.target.value })}
+                                    className="input col-span-2"
+                                    required
+                                >
+                                    <option value="">Select inventory item</option>
+                                    {inventory
+                                        .filter(item => !recipeIngredients.some(ing => ing.inventory.id === item.id))
+                                        .map((item) => (
+                                            <option key={item.id} value={item.id}>{item.name}</option>
+                                        ))}
+                                </select>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Qty"
+                                    value={newIngredient.quantity}
+                                    onChange={(e) => setNewIngredient({ ...newIngredient, quantity: e.target.value })}
+                                    className="input"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn-secondary w-full mt-3">
+                                + Add Ingredient
+                            </button>
+                        </form>
+
+                        <button onClick={() => setShowRecipeModal(false)} className="btn-primary w-full">
+                            Done
+                        </button>
                     </div>
                 </div>
             )}

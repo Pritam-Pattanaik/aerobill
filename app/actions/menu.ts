@@ -202,3 +202,89 @@ export async function toggleProductAvailability(id: string) {
         return { success: false, error: "Failed to toggle availability" }
     }
 }
+
+// =====================================
+// RECIPE MANAGEMENT (Product Ingredients)
+// =====================================
+
+export async function getProductIngredients(productId: string) {
+    try {
+        const restaurantId = await requireRestaurantId()
+        const ingredients = await prisma.productIngredient.findMany({
+            where: { productId, restaurantId },
+            include: {
+                inventory: {
+                    select: { id: true, name: true, unit: true, quantity: true }
+                }
+            }
+        })
+        return { success: true, ingredients }
+    } catch (error) {
+        console.error("Failed to fetch product ingredients:", error)
+        return { success: false, error: "Failed to fetch ingredients", ingredients: [] }
+    }
+}
+
+export async function addProductIngredient(productId: string, inventoryId: string, quantity: number) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        // Check if ingredient already exists for this product
+        const existing = await prisma.productIngredient.findUnique({
+            where: { productId_inventoryId: { productId, inventoryId } }
+        })
+
+        if (existing) {
+            // Update quantity instead
+            const updated = await prisma.productIngredient.update({
+                where: { id: existing.id },
+                data: { quantity }
+            })
+            revalidatePath("/admin/menu")
+            return { success: true, ingredient: updated }
+        }
+
+        const ingredient = await prisma.productIngredient.create({
+            data: {
+                productId,
+                inventoryId,
+                quantity,
+                restaurantId
+            }
+        })
+        revalidatePath("/admin/menu")
+        return { success: true, ingredient }
+    } catch (error) {
+        console.error("Failed to add product ingredient:", error)
+        return { success: false, error: "Failed to add ingredient" }
+    }
+}
+
+export async function updateProductIngredient(ingredientId: string, quantity: number) {
+    try {
+        await requireRestaurantId()
+        const ingredient = await prisma.productIngredient.update({
+            where: { id: ingredientId },
+            data: { quantity }
+        })
+        revalidatePath("/admin/menu")
+        return { success: true, ingredient }
+    } catch (error) {
+        console.error("Failed to update product ingredient:", error)
+        return { success: false, error: "Failed to update ingredient" }
+    }
+}
+
+export async function removeProductIngredient(ingredientId: string) {
+    try {
+        await requireRestaurantId()
+        await prisma.productIngredient.delete({
+            where: { id: ingredientId }
+        })
+        revalidatePath("/admin/menu")
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to remove product ingredient:", error)
+        return { success: false, error: "Failed to remove ingredient" }
+    }
+}

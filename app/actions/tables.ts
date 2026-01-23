@@ -85,13 +85,44 @@ export async function getSettings() {
     }
 }
 
-export async function updateSettings(data: { cafeName: string; feedbackLink?: string; taxRate: number }) {
+export async function updateSettings(data: {
+    cafeName: string
+    feedbackLink?: string
+    taxRate: number
+    cgst: number
+    sgst: number
+    whatsappEnabled: boolean
+    whatsappInstance?: string
+    whatsappToken?: string
+    whatsappMessage?: string
+}) {
     try {
         const restaurantId = await requireRestaurantId()
         const settings = await prisma.settings.upsert({
             where: { restaurantId },
-            update: { cafeName: data.cafeName, feedbackLink: data.feedbackLink || null, taxRate: data.taxRate },
-            create: { cafeName: data.cafeName, feedbackLink: data.feedbackLink || null, taxRate: data.taxRate, restaurantId }
+            update: {
+                cafeName: data.cafeName,
+                feedbackLink: data.feedbackLink || null,
+                taxRate: data.taxRate,
+                cgst: data.cgst,
+                sgst: data.sgst,
+                whatsappEnabled: data.whatsappEnabled,
+                whatsappInstance: data.whatsappInstance || null,
+                whatsappToken: data.whatsappToken || null,
+                whatsappMessage: data.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!"
+            },
+            create: {
+                cafeName: data.cafeName,
+                feedbackLink: data.feedbackLink || null,
+                taxRate: data.taxRate,
+                cgst: data.cgst,
+                sgst: data.sgst,
+                whatsappEnabled: data.whatsappEnabled,
+                whatsappInstance: data.whatsappInstance || null,
+                whatsappToken: data.whatsappToken || null,
+                whatsappMessage: data.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!",
+                restaurantId
+            }
         })
         revalidatePath("/admin/settings")
         return { success: true, settings }

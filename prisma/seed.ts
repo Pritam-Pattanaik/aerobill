@@ -158,6 +158,67 @@ async function main() {
     })
     console.log('✅ Created super admin: super@aerobill.com / superadmin123')
 
+    // Create marketplace products for super admin
+    const marketplaceProducts = [
+        // Vegetables
+        { name: 'Fresh Tomatoes', description: 'Farm-fresh red tomatoes, perfect for curries and salads', price: 40, unit: 'kg', category: 'Vegetables', inStock: true, minOrder: 5 },
+        { name: 'Onions', description: 'Premium quality onions for everyday cooking', price: 35, unit: 'kg', category: 'Vegetables', inStock: true, minOrder: 5 },
+        { name: 'Potatoes', description: 'Fresh potatoes ideal for frying and curries', price: 30, unit: 'kg', category: 'Vegetables', inStock: true, minOrder: 10 },
+        { name: 'Green Capsicum', description: 'Crunchy bell peppers for stir-fries and salads', price: 80, unit: 'kg', category: 'Vegetables', inStock: true, minOrder: 2 },
+        { name: 'Carrots', description: 'Sweet and fresh carrots', price: 45, unit: 'kg', category: 'Vegetables', inStock: true, minOrder: 3 },
+
+        // Spices
+        { name: 'Turmeric Powder', description: 'Pure turmeric powder for authentic Indian cooking', price: 180, unit: 'kg', category: 'Spices', inStock: true, minOrder: 1 },
+        { name: 'Red Chilli Powder', description: 'Spicy red chilli powder for that perfect heat', price: 220, unit: 'kg', category: 'Spices', inStock: true, minOrder: 1 },
+        { name: 'Garam Masala', description: 'Aromatic blend of premium spices', price: 350, unit: 'kg', category: 'Spices', inStock: true, minOrder: 1 },
+        { name: 'Cumin Seeds', description: 'Whole cumin seeds for tempering', price: 280, unit: 'kg', category: 'Spices', inStock: true, minOrder: 1 },
+        { name: 'Coriander Powder', description: 'Freshly ground coriander powder', price: 160, unit: 'kg', category: 'Spices', inStock: true, minOrder: 1 },
+
+        // Dairy
+        { name: 'Fresh Paneer', description: 'Soft and fresh cottage cheese', price: 320, unit: 'kg', category: 'Dairy', inStock: true, minOrder: 2 },
+        { name: 'Butter', description: 'Creamy butter for cooking and garnishing', price: 480, unit: 'kg', category: 'Dairy', inStock: true, minOrder: 1 },
+        { name: 'Curd', description: 'Fresh homestyle curd', price: 60, unit: 'L', category: 'Dairy', inStock: true, minOrder: 5 },
+        { name: 'Fresh Cream', description: 'Rich cream for gravies and desserts', price: 280, unit: 'L', category: 'Dairy', inStock: true, minOrder: 2 },
+
+        // Grains & Pulses
+        { name: 'Basmati Rice', description: 'Premium long-grain basmati rice', price: 120, unit: 'kg', category: 'Grains & Pulses', inStock: true, minOrder: 10 },
+        { name: 'Wheat Flour (Atta)', description: 'Whole wheat flour for rotis and parathas', price: 45, unit: 'kg', category: 'Grains & Pulses', inStock: true, minOrder: 10 },
+        { name: 'Toor Dal', description: 'Split pigeon peas for dal preparations', price: 140, unit: 'kg', category: 'Grains & Pulses', inStock: true, minOrder: 5 },
+        { name: 'Chana Dal', description: 'Bengal gram for curries and snacks', price: 110, unit: 'kg', category: 'Grains & Pulses', inStock: true, minOrder: 5 },
+
+        // Oils
+        { name: 'Sunflower Oil', description: 'Refined sunflower oil for cooking', price: 150, unit: 'L', category: 'Oils', inStock: true, minOrder: 5 },
+        { name: 'Mustard Oil', description: 'Pure mustard oil for authentic flavors', price: 180, unit: 'L', category: 'Oils', inStock: true, minOrder: 5 },
+        { name: 'Ghee', description: 'Pure desi ghee for rich taste', price: 550, unit: 'kg', category: 'Oils', inStock: true, minOrder: 2 },
+
+        // Beverages
+        { name: 'Tea Leaves', description: 'Premium Assam tea leaves', price: 400, unit: 'kg', category: 'Beverages', inStock: true, minOrder: 1 },
+        { name: 'Coffee Powder', description: 'Aromatic filter coffee powder', price: 450, unit: 'kg', category: 'Beverages', inStock: true, minOrder: 1 },
+
+        // Packaging
+        { name: 'Food Containers (500ml)', description: 'Disposable food containers with lids', price: 8, unit: 'pcs', category: 'Packaging', inStock: true, minOrder: 100 },
+        { name: 'Paper Napkins', description: 'Soft paper napkins pack of 100', price: 45, unit: 'pack', category: 'Packaging', inStock: true, minOrder: 10 },
+        { name: 'Takeaway Bags', description: 'Eco-friendly paper bags for takeaway', price: 5, unit: 'pcs', category: 'Packaging', inStock: true, minOrder: 100 },
+    ]
+
+    for (const product of marketplaceProducts) {
+        await prisma.marketplaceProduct.upsert({
+            where: { id: `marketplace-${product.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}` },
+            update: {},
+            create: {
+                id: `marketplace-${product.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                unit: product.unit,
+                category: product.category,
+                inStock: product.inStock,
+                minOrder: product.minOrder,
+            },
+        })
+    }
+    console.log('✅ Created', marketplaceProducts.length, 'marketplace products')
+
     console.log('')
     console.log('🎉 Seed completed!')
     console.log('')
