@@ -22,7 +22,8 @@ export type BlogPostInput = {
 // Helper to validate super admin session
 async function validateSuperAdmin() {
     const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== "super-admin") {
+    // Check for either isSuperAdmin flag (preferred) or SUPER_ADMIN role (fallback)
+    if (!session || (!session.user?.isSuperAdmin && session.user?.role !== "SUPER_ADMIN")) {
         throw new Error("Unauthorized: Super admin access required")
     }
     return session
