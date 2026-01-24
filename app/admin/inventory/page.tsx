@@ -8,6 +8,7 @@ import {
     deleteInventoryItem,
     adjustInventoryQuantity,
 } from "@/app/actions/inventory"
+import { getSettings, updateSettings } from "@/app/actions/tables"
 
 type InventoryItem = {
     id: string
@@ -25,6 +26,7 @@ export default function InventoryManagement() {
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
     const [adjustingId, setAdjustingId] = useState<string | null>(null)
     const [adjustAmount, setAdjustAmount] = useState("")
+    const [autoDeduction, setAutoDeduction] = useState(true)
 
     const [form, setForm] = useState({
         name: "",
@@ -35,14 +37,46 @@ export default function InventoryManagement() {
 
     const fetchInventory = async () => {
         try {
-            const result = await getInventory()
-            if (result.success) {
-                setInventory(result.inventory as InventoryItem[])
+            const [invRes, settingsRes] = await Promise.all([
+                getInventory(),
+                getSettings()
+            ])
+
+            if (invRes.success) {
+                setInventory(invRes.inventory as InventoryItem[])
+            }
+            if (settingsRes.success && settingsRes.settings) {
+                setAutoDeduction(settingsRes.settings.inventoryDeduction ?? true)
             }
         } catch (error) {
             console.error("Failed to fetch inventory:", error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const toggleAutoDeduction = async () => {
+        const newValue = !autoDeduction
+        setAutoDeduction(newValue)
+        try {
+            // We need to fetch current settings first to preserve other fields
+            const currentSettings = await getSettings()
+            if (currentSettings.success && currentSettings.settings) {
+                const settings = currentSettings.settings as any
+                await updateSettings({
+                    ...settings,
+                    // Ensure required fields are present (with defaults if missing)
+                    cafeName: settings.cafeName,
+                    taxRate: settings.taxRate,
+                    cgst: settings.cgst || 0,
+                    sgst: settings.sgst || 0,
+                    whatsappEnabled: settings.whatsappEnabled || false,
+                    inventoryDeduction: newValue
+                })
+            }
+        } catch (error) {
+            console.error("Failed to update settings:", error)
+            setAutoDeduction(!newValue) // Revert on error
         }
     }
 
@@ -120,21 +154,38 @@ export default function InventoryManagement() {
     return (
         <div className="p-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold mb-2">Inventory Management</h1>
                     <p className="text-gray-400">Track and manage your stock levels</p>
                 </div>
-                <button
-                    onClick={() => {
-                        resetForm()
-                        setEditingItem(null)
-                        setShowModal(true)
-                    }}
-                    className="btn-primary"
-                >
-                    + Add Item
-                </button>
+                <div className="flex items-center gap-4">
+                    {/* Auto Deduction Toggle */}
+                    <div className="flex items-center gap-3 bg-[var(--card)] px-4 py-2 rounded-xl border border-[var(--border)]">
+                        <span className="text-sm font-medium">Auto-Deduct on Billing</span>
+                        <button
+                            onClick={toggleAutoDeduction}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${autoDeduction ? "bg-[var(--primary)]" : "bg-gray-600"
+                                }`}
+                        >
+                            <span
+                                className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${autoDeduction ? "translate-x-6" : "translate-x-0"
+                                    }`}
+                            />
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            resetForm()
+                            setEditingItem(null)
+                            setShowModal(true)
+                        }}
+                        className="btn-primary whitespace-nowrap"
+                    >
+                        + Add Item
+                    </button>
+                </div>
             </div>
 
             {/* Low stock alert */}

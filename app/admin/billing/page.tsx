@@ -51,6 +51,12 @@ type Settings = {
     cgst: number
     sgst: number
     whatsappEnabled: boolean
+    address: string | null
+    phone: string | null
+    email: string | null
+    gstin: string | null
+    fssai: string | null
+    logo: string | null
 }
 
 type BillingSummary = {
@@ -532,10 +538,23 @@ export default function BillingPage() {
             )}
 
             {/* Receipt for printing */}
+            {/* Receipt for printing */}
             {billingReceipt && (
                 <div className="receipt" ref={receiptRef}>
                     <div className="receipt-header">
+                        {settings?.logo && (
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                                <img src={settings.logo} alt="Logo" style={{ maxHeight: '60px', maxWidth: '100%' }} />
+                            </div>
+                        )}
                         <h1>{settings?.cafeName || "Aerobill Cafe"}</h1>
+                        {settings?.address && <p style={{ fontSize: '12px', color: '#666' }}>{settings.address}</p>}
+                        {settings?.phone && <p style={{ fontSize: '12px', color: '#666' }}>Phone: {settings.phone}</p>}
+                        {settings?.gstin && <p style={{ fontSize: '12px', color: '#666' }}>GSTIN: {settings.gstin}</p>}
+                        {settings?.fssai && <p style={{ fontSize: '12px', color: '#666' }}>FSSAI: {settings.fssai}</p>}
+
+                        <div style={{ margin: '10px 0', borderTop: '1px dashed #ccc' }}></div>
+
                         <p>{formatDate(new Date())}</p>
                         <p>Table: {billingReceipt.tableNumber}</p>
                         {billingReceipt.orderCount > 1 && (
@@ -585,6 +604,7 @@ export default function BillingPage() {
                         {settings?.feedbackLink && (
                             <p>Feedback: {settings.feedbackLink}</p>
                         )}
+                        <p style={{ fontSize: '10px', marginTop: '10px', color: '#888' }}>Powered by Aerobill</p>
                     </div>
                 </div>
             )}

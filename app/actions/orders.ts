@@ -131,8 +131,11 @@ export async function billOrder(orderId: string, customerPhone?: string) {
             include: { items: { include: { product: true } }, table: true }
         })
 
-        // Deduct inventory based on recipe ingredients (with logging)
-        await deductInventoryForOrder(orderId)
+        // Deduct inventory if enabled
+        const settings = await prisma.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
+        if (settings?.inventoryDeduction !== false) {
+            await deductInventoryForOrder(orderId)
+        }
 
         // Send WhatsApp notification (non-blocking)
         if (customerPhone) {
@@ -291,14 +294,18 @@ export async function billTableOrders(tableId: string, customerPhone?: string) {
                 throw new Error("No orders to bill for this table")
             }
 
-            // Deduct inventory for all orders
-            for (const order of orders) {
-                for (const item of order.items) {
-                    if (item.product.inventory) {
-                        await tx.inventory.update({
-                            where: { id: item.product.inventory.id },
-                            data: { quantity: { decrement: item.quantity } }
-                        })
+            // Deduct inventory for all orders if enabled
+            const settings = await tx.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
+
+            if (settings?.inventoryDeduction !== false) {
+                for (const order of orders) {
+                    for (const item of order.items) {
+                        if (item.product.inventory) {
+                            await tx.inventory.update({
+                                where: { id: item.product.inventory.id },
+                                data: { quantity: { decrement: item.quantity } }
+                            })
+                        }
                     }
                 }
             }
@@ -368,14 +375,18 @@ export async function billGuestOrders(tableId: string, guestName: string) {
                 throw new Error("No orders to bill for this guest")
             }
 
-            // Deduct inventory for all orders
-            for (const order of orders) {
-                for (const item of order.items) {
-                    if (item.product.inventory) {
-                        await tx.inventory.update({
-                            where: { id: item.product.inventory.id },
-                            data: { quantity: { decrement: item.quantity } }
-                        })
+            // Deduct inventory for all orders if enabled
+            const settings = await tx.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
+
+            if (settings?.inventoryDeduction !== false) {
+                for (const order of orders) {
+                    for (const item of order.items) {
+                        if (item.product.inventory) {
+                            await tx.inventory.update({
+                                where: { id: item.product.inventory.id },
+                                data: { quantity: { decrement: item.quantity } }
+                            })
+                        }
                     }
                 }
             }

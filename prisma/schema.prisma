@@ -204,6 +204,20 @@ model Settings {
   // Separate GST fields
   cgst             Float      @default(0)
   sgst             Float      @default(0)
+
+  // Inventory Settings
+  inventoryDeduction Boolean    @default(true)
+
+  // Restaurant Details
+  address          String?
+  phone            String?
+  email            String?
+  gstin            String?
+  fssai            String?
+  logo             String?
+  gstCertificate   String?
+  fssaiCertificate String?
+
   // WhatsApp Green API
   whatsappEnabled  Boolean    @default(false)
   whatsappInstance String?    // Green API instance ID

@@ -14,6 +14,85 @@ type Settings = {
     whatsappInstance: string | null
     whatsappToken: string | null
     whatsappMessage: string
+    inventoryDeduction: boolean
+    address: string | null
+    phone: string | null
+    email: string | null
+    gstin: string | null
+    fssai: string | null
+    logo: string | null
+    gstCertificate: string | null
+    fssaiCertificate: string | null
+}
+
+function FileUploader({ label, value, onChange, accept = "image/*" }: { label: string, value: string | null, onChange: (url: string) => void, accept?: string }) {
+    const [uploading, setUploading] = useState(false)
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploading(true)
+        const formData = new FormData()
+        formData.append("file", file)
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            })
+            const data = await res.json()
+            if (data.success) {
+                onChange(data.url)
+            } else {
+                alert("Upload failed")
+            }
+        } catch (error) {
+            console.error("Upload error:", error)
+            alert("Upload failed")
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    return (
+        <div>
+            <label className="block text-sm font-medium mb-2">{label}</label>
+            <div className="flex items-center gap-4">
+                {value && (
+                    <div className="relative group">
+                        {accept.startsWith("image") ? (
+                            <img src={value} alt="Preview" className="w-16 h-16 object-cover rounded-lg border border-[var(--border)]" />
+                        ) : (
+                            <div className="w-16 h-16 flex items-center justify-center bg-[var(--card)] rounded-lg border border-[var(--border)]">
+                                <span className="text-2xl">📄</span>
+                            </div>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => onChange("")}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
+                <label className="flex-1 cursor-pointer">
+                    <div className={`border-2 border-dashed border-[var(--border)] rounded-lg p-4 text-center hover:border-[var(--primary)] transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <span className="text-sm text-gray-400">
+                            {uploading ? "Uploading..." : value ? "Change File" : "Click to upload"}
+                        </span>
+                        <input type="file" className="hidden" accept={accept} onChange={handleUpload} />
+                    </div>
+                </label>
+            </div>
+            {value && !accept.startsWith("image") && (
+                <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--primary)] mt-1 inline-block hover:underline">
+                    View Uploaded File
+                </a>
+            )}
+        </div>
+    )
 }
 
 export default function SettingsPage() {
@@ -32,7 +111,16 @@ export default function SettingsPage() {
         whatsappEnabled: false,
         whatsappInstance: "",
         whatsappToken: "",
-        whatsappMessage: "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!"
+        whatsappMessage: "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!",
+        inventoryDeduction: true,
+        address: "",
+        phone: "",
+        email: "",
+        gstin: "",
+        fssai: "",
+        logo: "",
+        gstCertificate: "",
+        fssaiCertificate: ""
     })
 
     useEffect(() => {
@@ -40,7 +128,7 @@ export default function SettingsPage() {
             try {
                 const result = await getSettings()
                 if (result.success && result.settings) {
-                    const s = result.settings as Settings
+                    const s = result.settings as unknown as Settings
                     setSettings(s)
                     setForm({
                         cafeName: s.cafeName,
@@ -51,7 +139,16 @@ export default function SettingsPage() {
                         whatsappEnabled: s.whatsappEnabled || false,
                         whatsappInstance: s.whatsappInstance || "",
                         whatsappToken: s.whatsappToken || "",
-                        whatsappMessage: s.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!"
+                        whatsappMessage: s.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!",
+                        inventoryDeduction: s.inventoryDeduction ?? true,
+                        address: s.address || "",
+                        phone: s.phone || "",
+                        email: s.email || "",
+                        gstin: s.gstin || "",
+                        fssai: s.fssai || "",
+                        logo: s.logo || "",
+                        gstCertificate: s.gstCertificate || "",
+                        fssaiCertificate: s.fssaiCertificate || ""
                     })
                 }
             } catch (error) {
@@ -78,13 +175,22 @@ export default function SettingsPage() {
                 whatsappEnabled: form.whatsappEnabled,
                 whatsappInstance: form.whatsappInstance || undefined,
                 whatsappToken: form.whatsappToken || undefined,
-                whatsappMessage: form.whatsappMessage || undefined
+                whatsappMessage: form.whatsappMessage || undefined,
+                inventoryDeduction: form.inventoryDeduction,
+                address: form.address || undefined,
+                phone: form.phone || undefined,
+                email: form.email || undefined,
+                gstin: form.gstin || undefined,
+                fssai: form.fssai || undefined,
+                logo: form.logo || undefined,
+                gstCertificate: form.gstCertificate || undefined,
+                fssaiCertificate: form.fssaiCertificate || undefined
             })
 
             if (result.success) {
                 setMessage({ type: "success", text: "Settings saved successfully!" })
                 if (result.settings) {
-                    setSettings(result.settings as Settings)
+                    setSettings(result.settings as unknown as Settings)
                 }
             } else {
                 setMessage({ type: "error", text: result.error || "Failed to save settings" })
@@ -124,8 +230,8 @@ export default function SettingsPage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
-                                ? "bg-[var(--primary)] text-white"
-                                : "bg-[var(--card)] text-gray-400 hover:text-white"
+                            ? "bg-[var(--primary)] text-white"
+                            : "bg-[var(--card)] text-gray-400 hover:text-white"
                             }`}
                     >
                         {tab.icon} {tab.label}
@@ -133,23 +239,106 @@ export default function SettingsPage() {
                 ))}
             </div>
 
-            <div className="max-w-2xl">
+            <div className="max-w-3xl">
                 <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6">
 
                     {/* Restaurant Tab */}
                     {activeTab === "restaurant" && (
-                        <>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Restaurant Name</label>
+                                    <input
+                                        type="text"
+                                        value={form.cafeName}
+                                        onChange={(e) => setForm({ ...form, cafeName: e.target.value })}
+                                        className="input"
+                                        placeholder="Your Restaurant Name"
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Appears on receipts and bills</p>
+                                </div>
+
+                                <div>
+                                    <FileUploader
+                                        label="Restaurant Logo"
+                                        value={form.logo}
+                                        onChange={(url) => setForm({ ...form, logo: url })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Phone</label>
+                                    <input
+                                        type="text"
+                                        value={form.phone}
+                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                        className="input"
+                                        placeholder="Restaurant Phone"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        value={form.email}
+                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                        className="input"
+                                        placeholder="restaurant@example.com"
+                                    />
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Restaurant Name</label>
-                                <input
-                                    type="text"
-                                    value={form.cafeName}
-                                    onChange={(e) => setForm({ ...form, cafeName: e.target.value })}
-                                    className="input"
-                                    placeholder="Your Restaurant Name"
-                                    required
+                                <label className="block text-sm font-medium mb-2">Address</label>
+                                <textarea
+                                    value={form.address}
+                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                    className="input min-h-[80px]"
+                                    placeholder="Full restaurant address"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Appears on receipts and bills</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">GSTIN</label>
+                                        <input
+                                            type="text"
+                                            value={form.gstin}
+                                            onChange={(e) => setForm({ ...form, gstin: e.target.value })}
+                                            className="input uppercase mb-2"
+                                            placeholder="GST Number"
+                                        />
+                                    </div>
+                                    <FileUploader
+                                        label="GST Certificate"
+                                        value={form.gstCertificate}
+                                        onChange={(url) => setForm({ ...form, gstCertificate: url })}
+                                        accept=".pdf,image/*"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">FSSAI License</label>
+                                        <input
+                                            type="text"
+                                            value={form.fssai}
+                                            onChange={(e) => setForm({ ...form, fssai: e.target.value })}
+                                            className="input mb-2"
+                                            placeholder="FSSAI Number"
+                                        />
+                                    </div>
+                                    <FileUploader
+                                        label="FSSAI License"
+                                        value={form.fssaiCertificate}
+                                        onChange={(url) => setForm({ ...form, fssaiCertificate: url })}
+                                        accept=".pdf,image/*"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -161,9 +350,8 @@ export default function SettingsPage() {
                                     className="input"
                                     placeholder="https://your-feedback-form.com"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Google Form or feedback page URL</p>
                             </div>
-                        </>
+                        </div>
                     )}
 
                     {/* Tax Tab */}

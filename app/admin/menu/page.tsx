@@ -42,6 +42,7 @@ type MenuData = {
     products: Product[]
     categories: Category[]
     inventory: InventoryItem[]
+    inventoryDeduction: boolean
 }
 
 export default function MenuManagement() {
@@ -55,6 +56,7 @@ export default function MenuManagement() {
     const products = data?.products || []
     const categories = data?.categories || []
     const inventory = data?.inventory || []
+    const inventoryDeduction = data?.inventoryDeduction ?? true
 
     const [showProductModal, setShowProductModal] = useState(false)
     const [showCategoryModal, setShowCategoryModal] = useState(false)
@@ -304,7 +306,12 @@ export default function MenuManagement() {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => openRecipeModal(product)}
-                                    className="text-sm text-purple-400 hover:text-purple-300"
+                                    disabled={!inventoryDeduction}
+                                    className={`text-sm ${inventoryDeduction
+                                            ? "text-purple-400 hover:text-purple-300"
+                                            : "text-gray-600 cursor-not-allowed"
+                                        }`}
+                                    title={!inventoryDeduction ? "Enable Auto-Deduction in Inventory to manage recipes" : ""}
                                 >
                                     Recipe
                                 </button>

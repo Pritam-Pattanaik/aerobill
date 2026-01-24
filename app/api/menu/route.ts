@@ -13,7 +13,7 @@ export async function GET() {
 
         const restaurantId = session.user.restaurantId
 
-        const [products, categories, inventory] = await prisma.$transaction([
+        const [products, categories, inventory, settings] = await prisma.$transaction([
             prisma.product.findMany({
                 where: { restaurantId },
                 orderBy: { name: "asc" },
@@ -31,12 +31,17 @@ export async function GET() {
                 select: { id: true, name: true },
                 orderBy: { name: "asc" },
             }),
+            prisma.settings.findUnique({
+                where: { restaurantId },
+                select: { inventoryDeduction: true }
+            })
         ])
 
         return NextResponse.json({
             products,
             categories,
             inventory,
+            inventoryDeduction: settings?.inventoryDeduction ?? true
         }, {
             headers: {
                 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',

@@ -95,6 +95,15 @@ export async function updateSettings(data: {
     whatsappInstance?: string
     whatsappToken?: string
     whatsappMessage?: string
+    inventoryDeduction: boolean
+    address?: string
+    phone?: string
+    email?: string
+    gstin?: string
+    fssai?: string
+    logo?: string
+    gstCertificate?: string
+    fssaiCertificate?: string
 }) {
     try {
         const restaurantId = await requireRestaurantId()
@@ -109,7 +118,16 @@ export async function updateSettings(data: {
                 whatsappEnabled: data.whatsappEnabled,
                 whatsappInstance: data.whatsappInstance || null,
                 whatsappToken: data.whatsappToken || null,
-                whatsappMessage: data.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!"
+                whatsappMessage: data.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!",
+                inventoryDeduction: data.inventoryDeduction,
+                address: data.address || null,
+                phone: data.phone || null,
+                email: data.email || null,
+                gstin: data.gstin || null,
+                fssai: data.fssai || null,
+                logo: data.logo || null,
+                gstCertificate: data.gstCertificate || null,
+                fssaiCertificate: data.fssaiCertificate || null
             },
             create: {
                 cafeName: data.cafeName,
@@ -121,10 +139,20 @@ export async function updateSettings(data: {
                 whatsappInstance: data.whatsappInstance || null,
                 whatsappToken: data.whatsappToken || null,
                 whatsappMessage: data.whatsappMessage || "Thank you for visiting {restaurant}! 🙏 Your bill of ₹{amount} has been paid. Visit again!",
-                restaurantId
+                restaurantId,
+                inventoryDeduction: data.inventoryDeduction,
+                address: data.address || null,
+                phone: data.phone || null,
+                email: data.email || null,
+                gstin: data.gstin || null,
+                fssai: data.fssai || null,
+                logo: data.logo || null,
+                gstCertificate: data.gstCertificate || null,
+                fssaiCertificate: data.fssaiCertificate || null
             }
         })
         revalidatePath("/admin/settings")
+        revalidatePath("/admin/inventory")
         return { success: true, settings }
     } catch (error) {
         console.error("Failed to update settings:", error)
