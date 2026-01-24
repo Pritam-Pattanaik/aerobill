@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
@@ -217,7 +218,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-blockquote:border-l-[#ff6b35] prose-blockquote:bg-[#1a1a2e] prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:rounded-r-xl
                                 prose-code:text-[#ff6b35] prose-code:bg-[#1a1a2e] prose-code:px-2 prose-code:py-1 prose-code:rounded
                             ">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
                                 {post.content}
                             </ReactMarkdown>
                         </div>
