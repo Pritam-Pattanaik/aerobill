@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
@@ -203,8 +205,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         )}
 
                         {/* Content */}
-                        <div
-                            className="prose prose-invert prose-lg max-w-none
+                        <div className="prose prose-invert prose-lg max-w-none
                                 prose-headings:text-white prose-headings:font-bold
                                 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
                                 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
@@ -215,9 +216,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-li:mb-2
                                 prose-blockquote:border-l-[#ff6b35] prose-blockquote:bg-[#1a1a2e] prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:rounded-r-xl
                                 prose-code:text-[#ff6b35] prose-code:bg-[#1a1a2e] prose-code:px-2 prose-code:py-1 prose-code:rounded
-                            "
-                            dangerouslySetInnerHTML={{ __html: post.content }}
-                        />
+                            ">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {post.content}
+                            </ReactMarkdown>
+                        </div>
 
                         {/* Keywords Tags */}
                         {post.keywords && (
