@@ -61,6 +61,7 @@ model Restaurant {
   inventory      Inventory[]
   settings       Settings?
   dailyPurchases DailyPurchase[]
+  customers      Customer[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -168,6 +169,8 @@ model Order {
   tableId       String
   table         Table         @relation(fields: [tableId], references: [id])
   guestName     String?       // Optional: guest name for individual billing
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
   status        OrderStatus   @default(PENDING)
   totalAmount   Float
   paymentStatus PaymentStatus @default(UNPAID)
@@ -389,4 +392,18 @@ model DailyPurchase {
 
   @@index([restaurantId])
   @@index([createdAt])
+}
+
+model Customer {
+  id           String      @id @default(cuid())
+  name         String
+  phone        String
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orders       Order[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([restaurantId, phone])
+  @@index([restaurantId])
 }

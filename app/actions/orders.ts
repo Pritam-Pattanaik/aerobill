@@ -46,11 +46,36 @@ async function sendBillingWhatsApp(restaurantId: string, customerPhone: string |
 
 export type CartItem = { productId: string; name: string; price: number; quantity: number }
 
-export async function placeOrder(tableId: string, items: CartItem[], guestName?: string) {
+// Phone is optional
+export async function placeOrder(tableId: string, items: CartItem[], guestName?: string, customerPhone?: string) {
     try {
         // Get restaurant from table
         const table = await prisma.table.findUnique({ where: { id: tableId } })
         if (!table) return { success: false, error: "Table not found" }
+
+        // Find or create customer if phone provided
+        let customerId: string | undefined
+        if (customerPhone && guestName) {
+            try {
+                const customer = await prisma.customer.upsert({
+                    where: {
+                        restaurantId_phone: {
+                            restaurantId: table.restaurantId,
+                            phone: customerPhone
+                        }
+                    },
+                    update: { name: guestName }, // Update name to latest
+                    create: {
+                        name: guestName,
+                        phone: customerPhone,
+                        restaurantId: table.restaurantId
+                    }
+                })
+                customerId = customer.id
+            } catch (e) {
+                console.error("Failed to create/link customer", e)
+            }
+        }
 
         const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
         const order = await prisma.order.create({
@@ -61,10 +86,17 @@ export async function placeOrder(tableId: string, items: CartItem[], guestName?:
                 paymentStatus: "UNPAID",
                 restaurantId: table.restaurantId,
                 guestName: guestName || null,
+                customerId,
                 items: { create: items.map((item) => ({ productId: item.productId, quantity: item.quantity, priceAtTime: item.price })) }
             },
             include: { items: { include: { product: true } }, table: true }
         })
+
+        // Handle Customer Creation/Linking (Fire and forget or await)
+        if (guestName || (items as any).phone) { // Casting items to any to access phone if passed, wait, I need to update signature.
+            // Moving logic outside to keep placeOrder clean, or I should update signature.
+        }
+
         revalidatePath("/kitchen")
         return { success: true, order }
     } catch (error) {
@@ -424,5 +456,104 @@ export async function billGuestOrders(tableId: string, guestName: string) {
     } catch (error) {
         console.error("Failed to bill guest orders:", error)
         return { success: false, error: error instanceof Error ? error.message : "Failed to bill orders" }
+    }
+}
+
+// Update order items (add/remove/update quantity) - Manual Edit
+export async function updateOrderItems(orderId: string, items: { productId: string; quantity: number }[]) {
+    try {
+        const restaurantId = await requireRestaurantId()
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId, restaurantId },
+            include: { items: true }
+        })
+
+        if (!order) return { success: false, error: "Order not found" }
+        if (order.status === "BILLED" || order.paymentStatus === "PAID") {
+            return { success: false, error: "Cannot edit billed orders" }
+        }
+
+        await prisma.$transaction(async (tx) => {
+            // Process each item update
+            for (const item of items) {
+                if (item.quantity <= 0) {
+                    // Remove item
+                    await tx.orderItem.deleteMany({
+                        where: { orderId, productId: item.productId }
+                    })
+                } else {
+                    // Get current product price
+                    const product = await tx.product.findUnique({
+                        where: { id: item.productId }
+                    })
+
+                    if (!product) continue
+
+                    // Upsert item
+                    const existingItem = order.items.find(i => i.productId === item.productId)
+                    if (existingItem) {
+                        await tx.orderItem.update({
+                            where: { id: existingItem.id },
+                            data: { quantity: item.quantity }
+                        })
+                    } else {
+                        await tx.orderItem.create({
+                            data: {
+                                orderId,
+                                productId: item.productId,
+                                quantity: item.quantity,
+                                priceAtTime: product.price
+                            }
+                        })
+                    }
+                }
+            }
+
+            // Recalculate total amount
+            const updatedItems = await tx.orderItem.findMany({
+                where: { orderId }
+            })
+            const newTotalAmount = updatedItems.reduce((sum, item) => sum + (item.priceAtTime * item.quantity), 0)
+
+            // Update order total
+            await tx.order.update({
+                where: { id: orderId },
+                data: { totalAmount: newTotalAmount }
+            })
+        })
+
+        revalidatePath("/kitchen")
+        revalidatePath("/admin/billing")
+
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to update order items:", error)
+        return { success: false, error: "Failed to update order items" }
+    }
+}
+
+// Get active order for tracking by customer/table
+export async function getActiveOrderForTable(tableId: string) {
+    try {
+        // Fetch the most recent active order for the table
+        const order = await prisma.order.findFirst({
+            where: {
+                tableId,
+                status: { in: ["PENDING", "COOKING", "READY"] },
+                paymentStatus: "UNPAID"
+            },
+            include: {
+                items: { include: { product: true } },
+                customer: { select: { name: true } }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        if (!order) return { success: true, order: null }
+        return { success: true, order }
+    } catch (error) {
+        console.error("Failed to fetch active order:", error)
+        return { success: false, error: "Failed to fetch active order" }
     }
 }

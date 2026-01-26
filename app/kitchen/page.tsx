@@ -94,7 +94,12 @@ export default function KitchenPage() {
                                             )}
                                             <span className={`badge text-xs ${order.status === "PENDING" ? "badge-pending" : "badge-cooking"}`}>{order.status}</span>
                                         </div>
-                                        <p className="text-xs text-gray-400">ID: {order.id.slice(-6).toUpperCase()}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs text-gray-400">ID: {order.id.slice(-6).toUpperCase()}</p>
+                                            <Link href={`/admin/orders/${order.id}/edit`} className="text-xs text-[var(--primary)] hover:underline">
+                                                Edit
+                                            </Link>
+                                        </div>
                                     </div>
                                     <span className="text-xs text-gray-400">⏱️ {getTime(order.createdAt)}</span>
                                 </div>
