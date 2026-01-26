@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { getBlogPostById, updateBlogPost } from "@/app/actions/blog"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -14,6 +15,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
     const contentRef = useRef<HTMLTextAreaElement>(null)
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
+    const [imageUploading, setImageUploading] = useState(false)
     const [error, setError] = useState("")
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write")
 
@@ -54,11 +56,42 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
         fetchPost()
     }, [resolvedParams.id])
 
+    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        if (!e.target.files || !e.target.files[0]) return
+
+        setImageUploading(true)
+        setError("")
+        const file = e.target.files[0]
+        const data = new FormData()
+        data.append("file", file)
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: data,
+            })
+
+            if (!res.ok) throw new Error("Upload failed")
+
+            const json = await res.json()
+            if (json.success) {
+                setFormData({ ...formData, coverImage: json.url })
+            } else {
+                setError(json.error || "Upload failed")
+            }
+        } catch (err) {
+            setError("Failed to upload image")
+        } finally {
+            setImageUploading(false)
+        }
+    }
+
     function handleFormat(type: string) {
         if (!contentRef.current) return
         const start = contentRef.current.selectionStart
         const end = contentRef.current.selectionEnd
         const text = formData.content
+        const scrollTop = contentRef.current.scrollTop
         let replacement = ""
         let cursorOffset = 0
 
@@ -74,11 +107,12 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
         const newContent = text.substring(0, start) + replacement + text.substring(end)
         setFormData({ ...formData, content: newContent })
 
-        // Focus back
+        // Focus back and restore scroll position
         setTimeout(() => {
             if (contentRef.current) {
                 contentRef.current.focus()
                 contentRef.current.setSelectionRange(start + cursorOffset, start + cursorOffset + (end - start))
+                contentRef.current.scrollTop = scrollTop
             }
         }, 0)
     }
@@ -259,15 +293,44 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Cover Image URL
+                                Cover Image
                             </label>
-                            <input
-                                type="url"
-                                value={formData.coverImage}
-                                onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                                className="w-full px-4 py-3 bg-slate-800/50 border border-purple-500/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
-                                placeholder="https://example.com/image.jpg"
-                            />
+                            {formData.coverImage ? (
+                                <div className="relative h-40 rounded-xl overflow-hidden group border border-purple-500/20">
+                                    <Image
+                                        src={formData.coverImage}
+                                        alt="Cover"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, coverImage: "" })}
+                                        className="absolute top-2 right-2 p-1 bg-red-500/80 rounded-full text-white opacity-0 group-hover:opacity-100 transition"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="border border-dashed border-gray-600 rounded-xl h-40 flex flex-col items-center justify-center p-4 hover:border-purple-500/50 transition bg-slate-800/50">
+                                    {imageUploading ? (
+                                        <div className="text-purple-400 animate-pulse">Uploading...</div>
+                                    ) : (
+                                        <label className="cursor-pointer text-center">
+                                            <span className="block text-sm text-gray-400 mb-2">Click to upload image</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                            />
+                                            <div className="px-4 py-2 bg-slate-700/50 rounded-lg text-xs text-gray-300 hover:bg-slate-700 transition inline-block">
+                                                Choose File
+                                            </div>
+                                        </label>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
