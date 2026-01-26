@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server"
 import { v2 as cloudinary } from "cloudinary"
 
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-})
-
 export async function POST(request: Request) {
     try {
+        // validate config
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        const apiKey = process.env.CLOUDINARY_API_KEY
+        const apiSecret = process.env.CLOUDINARY_API_SECRET
+
+        if (!cloudName || !apiKey || !apiSecret) {
+            console.error("Cloudinary credentials missing")
+            return NextResponse.json(
+                { error: "Server configuration error: Missing Cloudinary credentials" },
+                { status: 500 }
+            )
+        }
+
+        // Configure Cloudinary
+        cloudinary.config({
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+        })
+
         const formData = await request.formData()
         const file = formData.get("file") as File
 
@@ -24,7 +37,7 @@ export async function POST(request: Request) {
         const result = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
-                    folder: "aerobill-blog", // Organize uploads in a folder
+                    folder: "aerobill-blog",
                 },
                 (error, result) => {
                     if (error) reject(error)
@@ -34,14 +47,16 @@ export async function POST(request: Request) {
             uploadStream.end(buffer)
         })
 
-        // Return the secure URL from Cloudinary
-        // @ts-ignore - Cloudinary result type is loosely typed in strict mode
+        // @ts-ignore
         const fileUrl = result.secure_url
 
         return NextResponse.json({ success: true, url: fileUrl })
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Upload failed:", error)
-        return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+        return NextResponse.json(
+            { error: error.message || "Upload failed due to an unexpected error" },
+            { status: 500 }
+        )
     }
 }

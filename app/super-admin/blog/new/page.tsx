@@ -48,21 +48,28 @@ export default function NewBlogPostPage() {
         data.append("file", file)
 
         try {
+            console.log("Uploading file...")
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: data,
             })
 
-            if (!res.ok) throw new Error("Upload failed")
-
             const json = await res.json()
+
+            if (!res.ok) {
+                console.error("Upload failed server response:", json)
+                throw new Error(json.error || "Upload failed")
+            }
+
             if (json.success) {
+                console.log("Upload success:", json.url)
                 setFormData({ ...formData, coverImage: json.url })
             } else {
                 setError(json.error || "Upload failed")
             }
-        } catch (err) {
-            setError("Failed to upload image")
+        } catch (err: any) {
+            console.error("Upload exception:", err)
+            setError(err.message || "Failed to upload image")
         } finally {
             setImageUploading(false)
         }
