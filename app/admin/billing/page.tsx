@@ -324,7 +324,7 @@ export default function BillingPage() {
                                     <p className="text-sm text-gray-400 flex items-center gap-2">
                                         <span>{table.orders.length} order{table.orders.length > 1 ? 's' : ''} • {table.totalItems} items</span>
                                         {table.orders.length > 0 && (
-                                            <a href={`/admin/orders/${table.orders[0].id}/edit`} className="text-[var(--primary)] opacity-50 hover:opacity-100 transition">
+                                            <a href={`/orders/${table.orders[0].id}/edit`} className="text-[var(--primary)] opacity-50 hover:opacity-100 transition">
                                                 ✎
                                             </a>
                                         )}
@@ -513,7 +513,7 @@ export default function BillingPage() {
                                                     <span className="badge bg-green-500/20 text-green-400 text-xs">
                                                         Billed
                                                     </span>
-                                                    <a href={`/admin/orders/${order.id}/edit`} className="text-xs text-[var(--primary)] hover:underline">Edit</a>
+                                                    <a href={`/orders/${order.id}/edit`} className="text-xs text-[var(--primary)] hover:underline">Edit</a>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-xl font-bold text-[var(--primary)]">

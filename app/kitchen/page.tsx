@@ -96,7 +96,7 @@ export default function KitchenPage() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <p className="text-xs text-gray-400">ID: {order.id.slice(-6).toUpperCase()}</p>
-                                            <Link href={`/admin/orders/${order.id}/edit`} className="text-xs text-[var(--primary)] hover:underline">
+                                            <Link href={`/orders/${order.id}/edit`} className="text-xs text-[var(--primary)] hover:underline">
                                                 Edit
                                             </Link>
                                         </div>
