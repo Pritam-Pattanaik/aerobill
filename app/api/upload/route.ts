@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
-import { v4 as uuidv4 } from "uuid"
+import { v2 as cloudinary } from "cloudinary"
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(request: Request) {
     try {
@@ -15,24 +20,24 @@ export async function POST(request: Request) {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
-        // Create upload directory if it doesn't exist
-        const uploadDir = join(process.cwd(), "public/uploads")
-        try {
-            await mkdir(uploadDir, { recursive: true })
-        } catch (error) {
-            // Ignore error if directory already exists
-        }
+        // Upload to Cloudinary using a stream
+        const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "aerobill-blog", // Organize uploads in a folder
+                },
+                (error, result) => {
+                    if (error) reject(error)
+                    else resolve(result)
+                }
+            )
+            uploadStream.end(buffer)
+        })
 
-        // Generate unique filename
-        const ext = file.name.split(".").pop()
-        const fileName = `${uuidv4()}.${ext}`
-        const filePath = join(uploadDir, fileName)
+        // Return the secure URL from Cloudinary
+        // @ts-ignore - Cloudinary result type is loosely typed in strict mode
+        const fileUrl = result.secure_url
 
-        // Save file
-        await writeFile(filePath, buffer)
-
-        // Return public URL
-        const fileUrl = `/uploads/${fileName}`
         return NextResponse.json({ success: true, url: fileUrl })
 
     } catch (error) {
