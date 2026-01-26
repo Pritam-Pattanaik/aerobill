@@ -1,9 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createBlogPost } from "@/app/actions/blog"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
 
 // Local slug generator (client-side)
 function generateSlug(title: string): string {
@@ -15,8 +18,10 @@ function generateSlug(title: string): string {
 
 export default function NewBlogPostPage() {
     const router = useRouter()
+    const contentRef = useRef<HTMLTextAreaElement>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [activeTab, setActiveTab] = useState<"write" | "preview">("write")
 
     const [formData, setFormData] = useState({
         title: "",
@@ -30,6 +35,35 @@ export default function NewBlogPostPage() {
         keywords: "",
         isPublished: false,
     })
+
+    function handleFormat(type: string) {
+        if (!contentRef.current) return
+        const start = contentRef.current.selectionStart
+        const end = contentRef.current.selectionEnd
+        const text = formData.content
+        let replacement = ""
+        let cursorOffset = 0
+
+        switch (type) {
+            case "h2": replacement = `## ${text.substring(start, end)}`; cursorOffset = 3; break;
+            case "h3": replacement = `### ${text.substring(start, end)}`; cursorOffset = 4; break;
+            case "bold": replacement = `**${text.substring(start, end)}**`; cursorOffset = 2; break;
+            case "italic": replacement = `*${text.substring(start, end)}*`; cursorOffset = 1; break;
+            case "list": replacement = `- ${text.substring(start, end)}`; cursorOffset = 2; break;
+            case "link": replacement = `[${text.substring(start, end)}](url)`; cursorOffset = 1; break;
+        }
+
+        const newContent = text.substring(0, start) + replacement + text.substring(end)
+        setFormData({ ...formData, content: newContent })
+
+        // Focus back
+        setTimeout(() => {
+            if (contentRef.current) {
+                contentRef.current.focus()
+                contentRef.current.setSelectionRange(start + cursorOffset, start + cursorOffset + (end - start))
+            }
+        }, 0)
+    }
 
     function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const title = e.target.value
@@ -72,7 +106,7 @@ export default function NewBlogPostPage() {
     }
 
     return (
-        <div className="p-8 max-w-4xl">
+        <div className="p-8 max-w-5xl">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
                 <Link
@@ -146,17 +180,63 @@ export default function NewBlogPostPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Content <span className="text-red-400">*</span>
-                        </label>
-                        <textarea
-                            value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            required
-                            rows={15}
-                            className="w-full px-4 py-3 bg-slate-800/50 border border-purple-500/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none font-mono text-sm"
-                            placeholder="Write your blog post content here. HTML is supported."
-                        />
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm font-medium text-gray-300">
+                                Content <span className="text-red-400">*</span>
+                            </label>
+                            <div className="flex bg-slate-800/50 p-1 rounded-lg border border-purple-500/20">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("write")}
+                                    className={`px-3 py-1 text-xs font-medium rounded-md transition ${activeTab === "write" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                                >
+                                    Write
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("preview")}
+                                    className={`px-3 py-1 text-xs font-medium rounded-md transition ${activeTab === "preview" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                                >
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+
+                        {activeTab === "write" ? (
+                            <div className="space-y-2">
+                                {/* Markdown Helpers */}
+                                <div className="flex flex-wrap gap-2 p-2 bg-slate-800/30 rounded-t-xl border border-purple-500/20 border-b-0">
+                                    <button type="button" onClick={() => handleFormat("h2")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white">H2</button>
+                                    <button type="button" onClick={() => handleFormat("h3")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white">H3</button>
+                                    <button type="button" onClick={() => handleFormat("bold")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs font-bold text-white">B</button>
+                                    <button type="button" onClick={() => handleFormat("italic")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs italic text-white">I</button>
+                                    <button type="button" onClick={() => handleFormat("list")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white">List</button>
+                                    <button type="button" onClick={() => handleFormat("link")} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white">Link</button>
+                                </div>
+                                <textarea
+                                    ref={contentRef}
+                                    value={formData.content}
+                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                    required
+                                    rows={15}
+                                    className="w-full px-4 py-3 bg-slate-800/50 border border-purple-500/20 rounded-b-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none font-mono text-sm"
+                                    placeholder="Write your blog post content here. Use double Enter for new paragraphs. Markdown is supported."
+                                />
+                                <p className="text-[10px] text-gray-500 italic mt-1">
+                                    Tip: Use double Enter/Return to start a new paragraph.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="w-full h-[400px] overflow-y-auto px-6 py-4 bg-slate-800/50 border border-purple-500/20 rounded-xl prose prose-invert prose-sm max-w-none">
+                                {formData.content ? (
+                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                                        {formData.content}
+                                    </ReactMarkdown>
+                                ) : (
+                                    <p className="text-gray-500 italic">Nothing to preview yet...</p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
