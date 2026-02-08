@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "About Aerobill - Restaurant Management Software by ASSETMAGNETS",
         description: "India's most innovative restaurant management software. Zero commission, cloud-based QR ordering, kitchen display & billing.",
-        url: "https://aerobill.in/about",
+        url: "https://www.aerobill.in/about",
         siteName: "Aerobill",
         type: "website",
         images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "About Aerobill" }],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         images: ["/og-image.png"],
     },
     alternates: {
-        canonical: "https://aerobill.in/about",
+        canonical: "https://www.aerobill.in/about",
     },
 }
 

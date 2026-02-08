@@ -15,7 +15,7 @@ type BlogPost = {
 
 // SEO Metadata for Blog Page
 export const metadata: Metadata = {
-    metadataBase: new URL("https://aerobill.in"),
+    metadataBase: new URL("https://www.aerobill.in"),
     title: "Blog | Aerobill - Restaurant Management Tips & Insights",
     description: "Discover expert tips on restaurant management, QR code ordering, kitchen display systems, smart billing, and digital menu strategies. Learn how to grow your restaurant business.",
     keywords: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "en_IN",
-        url: "https://aerobill.in/blog",
+        url: "https://www.aerobill.in/blog",
         siteName: "Aerobill",
         title: "Blog | Aerobill - Restaurant Management Tips & Insights",
         description: "Expert insights on restaurant management, QR ordering, and digital solutions for modern restaurants.",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
         images: ["/og-image.png"],
     },
     alternates: {
-        canonical: "https://aerobill.in/blog",
+        canonical: "https://www.aerobill.in/blog",
     },
 }
 
@@ -63,13 +63,13 @@ const jsonLd = {
     "@type": "Blog",
     name: "Aerobill Blog",
     description: "Expert tips and insights on restaurant management, QR code ordering, and digital solutions for modern restaurants.",
-    url: "https://aerobill.in/blog",
+    url: "https://www.aerobill.in/blog",
     publisher: {
         "@type": "Organization",
         name: "Aerobill",
         logo: {
             "@type": "ImageObject",
-            url: "https://aerobill.in/logo.png",
+            url: "https://www.aerobill.in/logo.png",
         },
     },
 }

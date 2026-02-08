@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Contact Aerobill - Get in Touch",
         description: "Reach out for support, sales, or partnership inquiries. We're here to help!",
-        url: "https://aerobill.in/contact",
+        url: "https://www.aerobill.in/contact",
         siteName: "Aerobill",
         type: "website",
         images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Contact Aerobill" }],
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         images: ["/og-image.png"],
     },
     alternates: {
-        canonical: "https://aerobill.in/contact",
+        canonical: "https://www.aerobill.in/contact",
     },
 }
 

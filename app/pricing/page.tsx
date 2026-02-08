@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Aerobill Pricing - Restaurant Management Software Plans",
         description: "Start free forever. Plans from ₹0/month. No commissions, no hidden fees. Choose the plan that fits your restaurant.",
-        url: "https://aerobill.in/pricing",
+        url: "https://www.aerobill.in/pricing",
         siteName: "Aerobill",
         type: "website",
         images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Aerobill Pricing" }],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         images: ["/og-image.png"],
     },
     alternates: {
-        canonical: "https://aerobill.in/pricing",
+        canonical: "https://www.aerobill.in/pricing",
     },
 }
 

@@ -12,4 +12,4 @@ Disallow: /kitchen/*
 Disallow: /api/*
 
 # Sitemap location
-Sitemap: https://aerobill.in/sitemap.xml
+Sitemap: https://www.aerobill.in/sitemap.xml
