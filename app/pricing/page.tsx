@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     alternates: {
         canonical: "https://www.aerobill.in/pricing",
     },
+    robots: {
+        index: true,
+        follow: true,
+    },
 }
 
 export default function PricingPage() {

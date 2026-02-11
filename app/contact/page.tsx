@@ -25,6 +25,10 @@ export const metadata: Metadata = {
     alternates: {
         canonical: "https://www.aerobill.in/contact",
     },
+    robots: {
+        index: true,
+        follow: true,
+    },
 }
 
 export default async function ContactPage() {
@@ -157,7 +161,7 @@ export default async function ContactPage() {
                                     <h3 className="font-semibold mb-2">🆕 New to Aerobill?</h3>
                                     <p className="text-gray-400 text-sm mb-3">Get started with our free plan and explore all features.</p>
                                     <Link href="/register" className="text-[#ff6b35] text-sm font-medium hover:underline">
-                                        Create free account →
+                                        Create free account &rarr;
                                     </Link>
                                 </div>
 
@@ -165,7 +169,7 @@ export default async function ContactPage() {
                                     <h3 className="font-semibold mb-2">💰 Pricing Questions?</h3>
                                     <p className="text-gray-400 text-sm mb-3">Check our transparent pricing with no hidden fees.</p>
                                     <Link href="/pricing" className="text-[#ff6b35] text-sm font-medium hover:underline">
-                                        View pricing →
+                                        View pricing &rarr;
                                     </Link>
                                 </div>
 
@@ -173,7 +177,7 @@ export default async function ContactPage() {
                                     <h3 className="font-semibold mb-2">🏢 Enterprise Solutions?</h3>
                                     <p className="text-gray-400 text-sm mb-3">Custom solutions for restaurant chains.</p>
                                     <a href={`mailto:${contact?.email}?subject=Enterprise Inquiry`} className="text-[#ff6b35] text-sm font-medium hover:underline">
-                                        Contact sales →
+                                        Contact sales &rarr;
                                     </a>
                                 </div>
                             </div>
@@ -193,7 +197,7 @@ export default async function ContactPage() {
                         href="/register"
                         className="inline-block bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition"
                     >
-                        Start For Free →
+                        Start For Free &rarr;
                     </Link>
                 </div>
             </section>

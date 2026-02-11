@@ -57,6 +57,10 @@ export const metadata: Metadata = {
     alternates: {
         canonical: "https://www.aerobill.in/blog",
     },
+    robots: {
+        index: true,
+        follow: true,
+    },
 }
 
 // JSON-LD for Blog Page
@@ -148,7 +152,7 @@ export default async function BlogPage() {
                                                     </p>
                                                     <div className="mt-4 text-[#ff6b35] font-medium flex items-center gap-2">
                                                         Read More
-                                                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                                        <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -247,7 +251,7 @@ export default async function BlogPage() {
                             href="/register"
                             className="inline-block bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition"
                         >
-                            Start For Free →
+                            Start For Free &rarr;
                         </Link>
                     </div>
                 </section>
