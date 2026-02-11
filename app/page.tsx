@@ -3,6 +3,7 @@ import Image from "next/image"
 import type { Metadata } from "next"
 import TestimonialCarousel from "@/components/TestimonialCarousel"
 import PublicHeader from "@/components/PublicHeader"
+import PublicFooter from "@/components/PublicFooter"
 
 // SEO Metadata for Homepage
 export const metadata: Metadata = {
@@ -242,7 +243,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register" className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
-                Start For Free →
+                Start For Free &rarr;
               </Link>
               <Link href="/pricing" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
                 View Pricing
@@ -333,23 +334,13 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Restaurant?</h2>
             <p className="text-gray-400 mb-8">Join hundreds of restaurants already using Aerobill to streamline their operations.</p>
             <Link href="/register" className="inline-block bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
-              Start For Free →
+              Start For Free &rarr;
             </Link>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="py-8 px-4 border-t border-white/10">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-gray-400 text-sm">© 2026 Aerobill by <a href="https://www.assetmagnets.com/" target="_blank" rel="noopener noreferrer" className="text-[#ff6b35] hover:underline">ASSETMAGNETS</a>. All rights reserved.</div>
-            <div className="flex gap-6 text-gray-400 text-sm">
-              <Link href="/about" className="hover:text-white">About</Link>
-              <Link href="/pricing" className="hover:text-white">Pricing</Link>
-              <Link href="/blog" className="hover:text-white">Blog</Link>
-              <Link href="#" className="hover:text-white">Privacy</Link>
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   )

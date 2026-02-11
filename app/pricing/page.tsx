@@ -1,6 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
 import type { Metadata } from "next"
+import PublicHeader from "@/components/PublicHeader"
+import PublicFooter from "@/components/PublicFooter"
 
 export const metadata: Metadata = {
     title: "Pricing - Aerobill | Affordable Restaurant Management Software Plans",
@@ -124,24 +125,8 @@ export default function PricingPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center">
-                        <Image src="/logo.png" alt="Aerobill" width={150} height={50} className="h-12 w-auto" />
-                    </Link>
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
-                        <Link href="/pricing" className="text-white font-medium">Pricing</Link>
-                        <Link href="/blog" className="text-gray-300 hover:text-white transition">Blog</Link>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
-                        <Link href="/register" className="bg-[#ff6b35] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#ff8c5a] transition">
-                            Get Started
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            {/* Navigation */}
+            <PublicHeader />
 
             {/* Hero */}
             <section className="pt-32 pb-12 px-4">
@@ -294,7 +279,7 @@ export default function PricingPage() {
                             href="/register"
                             className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition"
                         >
-                            Start For Free →
+                            Start For Free &rarr;
                         </Link>
                         <Link
                             href="/about"
@@ -307,24 +292,7 @@ export default function PricingPage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-8 px-4 border-t border-white/10">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="text-gray-400 text-sm">
-                        © 2026 Aerobill by{" "}
-                        <a href="https://www.assetmagnets.com/" target="_blank" rel="noopener noreferrer" className="text-[#ff6b35] hover:underline">
-                            ASSETMAGNETS
-                        </a>
-                        . All rights reserved.
-                    </div>
-                    <div className="flex gap-6 text-gray-400 text-sm">
-                        <Link href="/" className="hover:text-white">Home</Link>
-                        <Link href="/about" className="hover:text-white">About</Link>
-                        <Link href="/pricing" className="hover:text-white">Pricing</Link>
-                        <Link href="/blog" className="hover:text-white">Blog</Link>
-                        <Link href="#" className="hover:text-white">Privacy</Link>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter />
         </div>
     )
 }

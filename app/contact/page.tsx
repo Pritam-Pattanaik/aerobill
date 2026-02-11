@@ -1,7 +1,8 @@
 import Link from "next/link"
-import Image from "next/image"
 import type { Metadata } from "next"
 import { getContactInfo } from "@/app/actions/contact"
+import PublicHeader from "@/components/PublicHeader"
+import PublicFooter from "@/components/PublicFooter"
 
 export const metadata: Metadata = {
     title: "Contact Us - Aerobill | Get in Touch",
@@ -32,25 +33,8 @@ export default async function ContactPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center">
-                        <Image src="/logo.png" alt="Aerobill" width={150} height={50} className="h-12 w-auto" />
-                    </Link>
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
-                        <Link href="/pricing" className="text-gray-300 hover:text-white transition">Pricing</Link>
-                        <Link href="/blog" className="text-gray-300 hover:text-white transition">Blog</Link>
-                        <Link href="/contact" className="text-white font-medium">Contact</Link>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
-                        <Link href="/register" className="bg-[#ff6b35] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#ff8c5a] transition">
-                            Get Started
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            {/* Navigation */}
+            <PublicHeader />
 
             {/* Hero Section */}
             <section className="pt-32 pb-12 px-4">
@@ -215,24 +199,8 @@ export default async function ContactPage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-8 px-4 border-t border-white/10">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="text-gray-400 text-sm">
-                        © 2026 Aerobill by{" "}
-                        <a href="https://www.assetmagnets.com/" target="_blank" rel="noopener noreferrer" className="text-[#ff6b35] hover:underline">
-                            ASSETMAGNETS
-                        </a>
-                        . All rights reserved.
-                    </div>
-                    <div className="flex gap-6 text-gray-400 text-sm">
-                        <Link href="/" className="hover:text-white">Home</Link>
-                        <Link href="/about" className="hover:text-white">About</Link>
-                        <Link href="/pricing" className="hover:text-white">Pricing</Link>
-                        <Link href="/blog" className="hover:text-white">Blog</Link>
-                        <Link href="/contact" className="hover:text-white">Contact</Link>
-                    </div>
-                </div>
-            </footer>
+            {/* Footer */}
+            <PublicFooter />
         </div>
     )
 }
