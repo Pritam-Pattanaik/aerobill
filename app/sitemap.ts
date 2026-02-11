@@ -1,5 +1,4 @@
 import { MetadataRoute } from 'next'
-import { prisma } from '@/lib/prisma'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://www.aerobill.in'
@@ -48,24 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        // Blog post from user request
+        {
+            url: `${baseUrl}/blog/best-restaurant-management-software-india-small-restaurants`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.64,
+        }
     ]
 
-    // Dynamic blog post pages
-    let blogPages: MetadataRoute.Sitemap = []
-    try {
-        const posts = await prisma.blogPost.findMany({
-            where: { isPublished: true },
-            select: { slug: true, updatedAt: true },
-        })
-        blogPages = posts.map((post) => ({
-            url: `${baseUrl}/blog/${post.slug}`,
-            lastModified: post.updatedAt,
-            changeFrequency: 'weekly' as const,
-            priority: 0.64,
-        }))
-    } catch {
-        // If DB is unavailable, still return static pages
-    }
-
-    return [...staticPages, ...blogPages]
+    return staticPages
 }
