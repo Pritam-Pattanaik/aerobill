@@ -5,6 +5,9 @@ import { getPublishedBlogPosts } from "@/app/actions/blog"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
+export const dynamic = "force-dynamic"
+
+
 type BlogPost = {
     id: string
     title: string

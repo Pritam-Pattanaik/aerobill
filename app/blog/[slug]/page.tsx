@@ -7,21 +7,15 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getBlogPostBySlug, getPublishedBlogPosts } from "@/app/actions/blog"
 
+export const dynamic = "force-dynamic"
+
 type BlogPostSummary = {
     id: string
     title: string
     slug: string
 }
 
-// Generate static params for SSG
-export async function generateStaticParams() {
-    const result = await getPublishedBlogPosts()
-    if (!result.success || !result.data) return []
 
-    return result.data.map((post: BlogPostSummary) => ({
-        slug: post.slug,
-    }))
-}
 
 // Dynamic SEO Metadata
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
