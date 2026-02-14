@@ -2,13 +2,18 @@ FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat is needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-# Omit --production so we can also install devDependencies (like prisma) which might be needed for build
+
+# --- FIX STARTS HERE ---
+# Copy the prisma folder so the postinstall script can find schema.prisma
+COPY prisma ./prisma
+# --- FIX ENDS HERE ---
+
+# Omit --production so we can also install devDependencies
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -21,7 +26,7 @@ COPY . .
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
-# Generate Prisma Client
+# Generate Prisma Client (This is safe to keep, ensuring it's fresh)
 RUN npx prisma generate
 
 # Disable telemetry during build
@@ -45,8 +50,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
 # Copy built application
-# Note: If you enable "output: 'standalone'" in next.config.ts, you would copy .next/standalone instead
-# For now, copying the entire .next folder and node_modules as per standard build
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 
