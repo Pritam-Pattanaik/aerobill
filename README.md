@@ -71,7 +71,7 @@ In Vercel project settings, add these environment variables:
 |----------|-------|
 | `DATABASE_URL` | Your Neon PostgreSQL connection string |
 | `NEXTAUTH_SECRET` | A random 32+ character string |
-| `NEXTAUTH_URL` | Your Vercel domain (e.g., `https://aerobill.vercel.app`) |
+| `NEXTAUTH_URL` | Your Vercel domain (e.g., `https://aerobill.in`) |
 
 > ⚠️ **Important:** Without these environment variables, the app will show "Server error"!
 
