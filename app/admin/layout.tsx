@@ -18,6 +18,7 @@ const navItems = [
     { href: "/admin/users", label: "Staff", icon: "👥" },
     { href: "/admin/subscription", label: "Subscription", icon: "💳" },
     { href: "/admin/reports", label: "Reports", icon: "📊" },
+    { href: "/admin/social-media", label: "Social Media", icon: "📱" },
     { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ]
 

@@ -40,6 +40,18 @@ enum SubStatus {
   CANCELLED
 }
 
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+}
+
+enum SocialPostStatus {
+  DRAFT
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
 // Multi-tenant Restaurant model
 model Restaurant {
   id             String          @id @default(cuid())
@@ -62,6 +74,8 @@ model Restaurant {
   settings       Settings?
   dailyPurchases DailyPurchase[]
   customers      Customer[]
+  socialAccounts SocialMediaAccount[]
+  socialPosts    SocialPost[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -258,6 +272,45 @@ model BlogPost {
   keywords    String?  // Comma-separated keywords
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Connected social media accounts
+model SocialMediaAccount {
+  id            String         @id @default(cuid())
+  platform      SocialPlatform
+  accountId     String         // Platform-specific account/page ID
+  accountName   String         // Display name (Page name or IG username)
+  accessToken   String         // Long-lived access token
+  tokenExpiry   DateTime?      // When token expires
+  profileImage  String?        // Account profile picture URL
+  pageId        String?        // Facebook Page ID (needed for IG posting)
+  isActive      Boolean        @default(true)
+  restaurantId  String
+  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([restaurantId, platform, accountId])
+  @@index([restaurantId])
+}
+
+// Social media posts published from Aerobill
+model SocialPost {
+  id           String             @id @default(cuid())
+  content      String             // Post text/caption
+  imageUrl     String?            // Image URL for the post
+  platforms    String             // Comma-separated platforms: "FACEBOOK,INSTAGRAM"
+  status       SocialPostStatus   @default(DRAFT)
+  publishedAt  DateTime?
+  platformIds  Json?              // { facebook: "post_id", instagram: "post_id" }
+  error        String?            // Error message if failed
+  restaurantId String
+  restaurant   Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([restaurantId])
+  @@index([status])
 }
 
 // Contact page content (singleton - only one row)
