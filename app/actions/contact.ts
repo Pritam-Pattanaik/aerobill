@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, unstable_noStore } from "next/cache"
 
 // Default contact info used when no record exists
 const defaultContactInfo = {
@@ -20,6 +20,7 @@ const defaultContactInfo = {
 
 // Get contact info (public)
 export async function getContactInfo() {
+    unstable_noStore() // Ensure we always get fresh data
     try {
         let contact = await prisma.contactInfo.findUnique({
             where: { id: "contact-info" }
@@ -82,8 +83,12 @@ export async function updateContactInfo(data: {
             }
         })
 
-        revalidatePath("/contact")
-        revalidatePath("/super-admin/contact")
+        // Invalidating all paths to ensure the footer and contact page update immediately
+        try {
+            revalidatePath("/", "layout")
+        } catch (error) {
+            console.warn("Failed to revalidate path (likely due to standalone context):", error)
+        }
 
         return { success: true, contact }
     } catch (error) {

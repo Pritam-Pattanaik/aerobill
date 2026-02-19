@@ -48,7 +48,6 @@ export default function NewBlogPostPage() {
         data.append("file", file)
 
         try {
-            console.log("Uploading file...")
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: data,
@@ -62,7 +61,6 @@ export default function NewBlogPostPage() {
             }
 
             if (json.success) {
-                console.log("Upload success:", json.url)
                 setFormData({ ...formData, coverImage: json.url })
             } else {
                 setError(json.error || "Upload failed")

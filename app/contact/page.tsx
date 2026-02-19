@@ -184,6 +184,24 @@ export default async function ContactPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Map Section */}
+                {contact?.mapUrl && (
+                    <div className="max-w-5xl mx-auto mt-12">
+                        <div className="glass-card p-2 overflow-hidden h-[400px]">
+                            <iframe
+                                src={contact.mapUrl}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0, borderRadius: '0.75rem' }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Office Location"
+                            ></iframe>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* CTA */}
