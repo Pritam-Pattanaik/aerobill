@@ -27,6 +27,7 @@ export default function RegisterPage() {
     const [restaurant, setRestaurant] = useState({ name: "", address: "", phone: "", gst: "", fssai: "" })
     // Step 3: Subscription
     const [selectedPlan, setSelectedPlan] = useState<Plan>("FREE")
+    const [acceptedTerms, setAcceptedTerms] = useState(false)
 
     const validateStep1 = () => {
         if (!personal.name || !personal.email || !personal.password) {
@@ -67,6 +68,13 @@ export default function RegisterPage() {
     const handleSubmit = async () => {
         setLoading(true)
         setError("")
+
+        if (!acceptedTerms) {
+            setError("You must accept the Privacy Policy and Terms to continue")
+            setLoading(false)
+            return
+        }
+
         try {
             // Always register with FREE plan first
             // For paid plans, webhook will upgrade after successful payment
@@ -219,6 +227,20 @@ export default function RegisterPage() {
                                     </div>
                                 ))}
                             </div>
+
+
+                            <div className="mt-6 flex items-start gap-3">
+                                <input
+                                    type="checkbox"
+                                    id="privacy"
+                                    className="mt-1 w-4 h-4 rounded border-gray-600 bg-transparent text-[#ff6b35] focus:ring-[#ff6b35]"
+                                    checked={acceptedTerms}
+                                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                />
+                                <label htmlFor="privacy" className="text-sm text-gray-400">
+                                    I agree to the <Link href="/terms" className="text-[#ff6b35] hover:underline">Terms of Service</Link> and <Link href="/privacy-policy" target="_blank" className="text-[#ff6b35] hover:underline">Privacy Policy</Link>. I understand that my personal data will be processed in accordance with the Privacy Policy.
+                                </label>
+                            </div>
                         </div>
                     )}
 
@@ -244,10 +266,6 @@ export default function RegisterPage() {
                         Already have an account? <Link href="/login" className="text-[#ff6b35] hover:underline">Sign in</Link>
                     </p>
                 </div>
-
-                <p className="text-center text-xs text-gray-500 mt-4">
-                    By signing up, you agree to our Terms and Privacy Policy
-                </p>
             </div>
         </div>
     )

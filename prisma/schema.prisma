@@ -460,3 +460,10 @@ model Customer {
   @@unique([restaurantId, phone])
   @@index([restaurantId])
 }
+
+// Privacy Policy (Singleton)
+model PrivacyPolicy {
+  id        String   @id @default("privacy-policy")
+  content   String   // Markdown/HTML content
+  updatedAt DateTime @updatedAt
+}
