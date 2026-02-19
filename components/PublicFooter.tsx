@@ -17,7 +17,7 @@ export default function PublicFooter() {
                     <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
                     <Link href="/blog" className="hover:text-white transition">Blog</Link>
                     <Link href="/contact" className="hover:text-white transition">Contact</Link>
-                    <Link href="#" className="hover:text-white transition">Privacy</Link>
+                    <Link href="/privacy-policy" className="hover:text-white transition">Privacy Policy</Link>
                 </div>
             </div>
         </footer>
