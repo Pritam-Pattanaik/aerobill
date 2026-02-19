@@ -224,11 +224,18 @@ export default function SettingsPage() {
                 {[
                     { id: "restaurant" as const, label: "Restaurant", icon: "🏪" },
                     { id: "tax" as const, label: "Tax Settings", icon: "💰" },
-                    { id: "whatsapp" as const, label: "WhatsApp", icon: "📱" }
+                    { id: "whatsapp" as const, label: "WhatsApp", icon: "📱" },
+                    { id: "data-deletion" as const, label: "Data Privacy", icon: "🔒" }
                 ].map(tab => (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => {
+                            if (tab.id === "data-deletion") {
+                                window.location.href = "/admin/settings/data-deletion"
+                            } else {
+                                setActiveTab(tab.id as any)
+                            }
+                        }}
                         className={`px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
                             ? "bg-[var(--primary)] text-white"
                             : "bg-[var(--card)] text-gray-400 hover:text-white"

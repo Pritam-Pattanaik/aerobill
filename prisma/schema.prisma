@@ -76,6 +76,7 @@ model Restaurant {
   customers      Customer[]
   socialAccounts SocialMediaAccount[]
   socialPosts    SocialPost[]
+  deletionRequests DataDeletionRequest[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -466,4 +467,26 @@ model PrivacyPolicy {
   id        String   @id @default("privacy-policy")
   content   String   // Markdown/HTML content
   updatedAt DateTime @updatedAt
+}
+
+enum DeletionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+// Data Deletion Request
+model DataDeletionRequest {
+  id           String         @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  reason       String
+  status       DeletionStatus @default(PENDING)
+  adminNote    String?        // Note from super admin
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([restaurantId])
+  @@index([status])
 }
