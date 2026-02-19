@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { getSettings, updateSettings } from "@/app/actions/tables"
+import { requestDataDeletion, getMyDeletionRequest } from "@/app/actions/compliance"
+import { useSession } from "next-auth/react"
 
 type Settings = {
     id: string
@@ -100,7 +102,13 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-    const [activeTab, setActiveTab] = useState<"restaurant" | "tax" | "whatsapp">("restaurant")
+    const [activeTab, setActiveTab] = useState<"restaurant" | "tax" | "whatsapp" | "data-deletion">("restaurant")
+
+    // Data Deletion State
+    const { data: session } = useSession()
+    const [deletionReason, setDeletionReason] = useState("")
+    const [deletionRequest, setDeletionRequest] = useState<any>(null)
+    const [deletionLoading, setDeletionLoading] = useState(false)
 
     const [form, setForm] = useState({
         cafeName: "",
@@ -160,6 +168,22 @@ export default function SettingsPage() {
         fetchSettings()
     }, [])
 
+    useEffect(() => {
+        if (activeTab === "data-deletion") {
+            async function fetchDeletionRequest() {
+                try {
+                    const result = await getMyDeletionRequest()
+                    if (result.success) {
+                        setDeletionRequest(result.request)
+                    }
+                } catch (error) {
+                    console.error(error)
+                }
+            }
+            fetchDeletionRequest()
+        }
+    }, [activeTab])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setSaving(true)
@@ -203,6 +227,27 @@ export default function SettingsPage() {
         }
     }
 
+    const handleDeletionSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setDeletionLoading(true)
+        setMessage(null)
+
+        try {
+            const result = await requestDataDeletion(deletionReason)
+            if (result.success) {
+                setMessage({ type: "success", text: "Deletion request submitted successfully." })
+                setDeletionRequest(result.request)
+                setDeletionReason("")
+            } else {
+                setMessage({ type: "error", text: result.error || "Failed to submit request." })
+            }
+        } catch {
+            setMessage({ type: "error", text: "An unexpected error occurred." })
+        } finally {
+            setDeletionLoading(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="p-8 flex items-center justify-center">
@@ -229,13 +274,7 @@ export default function SettingsPage() {
                 ].map(tab => (
                     <button
                         key={tab.id}
-                        onClick={() => {
-                            if (tab.id === "data-deletion") {
-                                window.location.href = "/admin/settings/data-deletion"
-                            } else {
-                                setActiveTab(tab.id as any)
-                            }
-                        }}
+                        onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id
                             ? "bg-[var(--primary)] text-white"
                             : "bg-[var(--card)] text-gray-400 hover:text-white"
@@ -246,262 +285,327 @@ export default function SettingsPage() {
                 ))}
             </div>
 
+
             <div className="max-w-3xl">
-                <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6">
+                {activeTab === "data-deletion" ? (
+                    <div className="p-8 max-w-3xl">
+                        <h1 className="text-3xl font-bold mb-2">Data Deletion</h1>
+                        <p className="text-gray-400 mb-8">Request permanent deletion of your restaurant's data.</p>
 
-                    {/* Restaurant Tab */}
-                    {activeTab === "restaurant" && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Restaurant Name</label>
-                                    <input
-                                        type="text"
-                                        value={form.cafeName}
-                                        onChange={(e) => setForm({ ...form, cafeName: e.target.value })}
-                                        className="input"
-                                        placeholder="Your Restaurant Name"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Appears on receipts and bills</p>
+                        {deletionRequest && deletionRequest.status !== "REJECTED" ? (
+                            <div className="glass-card p-6 border border-[var(--border)]">
+                                <h2 className="text-xl font-semibold mb-4">Current Request Status</h2>
+                                <div className="flex items-center gap-4 mb-4">
+                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${deletionRequest.status === "PENDING" ? "bg-yellow-500/10 text-yellow-500" :
+                                        deletionRequest.status === "PROCESSING" ? "bg-blue-500/10 text-blue-500" :
+                                            "bg-green-500/10 text-green-500"
+                                        }`}>
+                                        {deletionRequest.status}
+                                    </span>
+                                    <span className="text-gray-400 text-sm">
+                                        Submitted on {new Date(deletionRequest.createdAt).toLocaleDateString()}
+                                    </span>
                                 </div>
-
-                                <div>
-                                    <FileUploader
-                                        label="Restaurant Logo"
-                                        value={form.logo}
-                                        onChange={(url) => setForm({ ...form, logo: url })}
-                                    />
+                                <div className="bg-[var(--background)] p-4 rounded-lg">
+                                    <p className="text-sm text-gray-400 mb-1">Reason:</p>
+                                    <p>{deletionRequest.reason}</p>
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Phone</label>
-                                    <input
-                                        type="text"
-                                        value={form.phone}
-                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                        className="input"
-                                        placeholder="Restaurant Phone"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Email</label>
-                                    <input
-                                        type="email"
-                                        value={form.email}
-                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                        className="input"
-                                        placeholder="restaurant@example.com"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Address</label>
-                                <textarea
-                                    value={form.address}
-                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                                    className="input min-h-[80px]"
-                                    placeholder="Full restaurant address"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">GSTIN</label>
-                                        <input
-                                            type="text"
-                                            value={form.gstin}
-                                            onChange={(e) => setForm({ ...form, gstin: e.target.value })}
-                                            className="input uppercase mb-2"
-                                            placeholder="GST Number"
-                                        />
+                                {deletionRequest.status === "COMPLETED" && (
+                                    <div className="mt-4 p-4 bg-red-500/10 border border-red-500/50 text-red-400 rounded-lg">
+                                        Your data has been scheduled for deletion. You will lose access to your account shortly.
                                     </div>
-                                    <FileUploader
-                                        label="GST Certificate"
-                                        value={form.gstCertificate}
-                                        onChange={(url) => setForm({ ...form, gstCertificate: url })}
-                                        accept=".pdf,image/*"
-                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <div className="glass-card p-8">
+                                <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg mb-6">
+                                    <h3 className="font-bold flex items-center gap-2">⚠️ Warning</h3>
+                                    <p className="mt-2 text-sm">
+                                        This action is irreversible. All your restaurant data, including orders, menu items, and customer records will be permanently deleted.
+                                        We may retain some data for legal compliance as required by law.
+                                    </p>
                                 </div>
 
-                                <div className="space-y-4">
+                                <form onSubmit={handleDeletionSubmit} className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">FSSAI License</label>
-                                        <input
-                                            type="text"
-                                            value={form.fssai}
-                                            onChange={(e) => setForm({ ...form, fssai: e.target.value })}
-                                            className="input mb-2"
-                                            placeholder="FSSAI Number"
-                                        />
-                                    </div>
-                                    <FileUploader
-                                        label="FSSAI License"
-                                        value={form.fssaiCertificate}
-                                        onChange={(url) => setForm({ ...form, fssaiCertificate: url })}
-                                        accept=".pdf,image/*"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Feedback Link (Optional)</label>
-                                <input
-                                    type="url"
-                                    value={form.feedbackLink}
-                                    onChange={(e) => setForm({ ...form, feedbackLink: e.target.value })}
-                                    className="input"
-                                    placeholder="https://your-feedback-form.com"
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Tax Tab */}
-                    {activeTab === "tax" && (
-                        <>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">CGST (%)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="50"
-                                        value={form.cgst}
-                                        onChange={(e) => setForm({ ...form, cgst: e.target.value })}
-                                        className="input"
-                                        placeholder="2.5"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">SGST (%)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="50"
-                                        value={form.sgst}
-                                        onChange={(e) => setForm({ ...form, sgst: e.target.value })}
-                                        className="input"
-                                        placeholder="2.5"
-                                    />
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500">Total GST: {(parseFloat(form.cgst || "0") + parseFloat(form.sgst || "0")).toFixed(2)}%</p>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Legacy Tax Rate (%) - Deprecated</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="100"
-                                    value={form.taxRate}
-                                    onChange={(e) => setForm({ ...form, taxRate: e.target.value })}
-                                    className="input"
-                                    placeholder="0"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Use CGST + SGST instead</p>
-                            </div>
-                        </>
-                    )}
-
-                    {/* WhatsApp Tab */}
-                    {activeTab === "whatsapp" && (
-                        <>
-                            <div className="flex items-center justify-between p-4 bg-[var(--background)] rounded-lg">
-                                <div>
-                                    <h3 className="font-medium">Enable WhatsApp Notifications</h3>
-                                    <p className="text-sm text-gray-400">Send thank you message after billing</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.whatsappEnabled}
-                                        onChange={(e) => setForm({ ...form, whatsappEnabled: e.target.checked })}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
-                                </label>
-                            </div>
-
-                            {form.whatsappEnabled && (
-                                <>
-                                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                        <p className="text-sm text-green-400">
-                                            <strong>Green API Setup:</strong> Get your Instance ID and Token from{" "}
-                                            <a href="https://green-api.com" target="_blank" rel="noopener noreferrer" className="underline">
-                                                green-api.com
-                                            </a>
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Instance ID</label>
-                                        <input
-                                            type="text"
-                                            value={form.whatsappInstance}
-                                            onChange={(e) => setForm({ ...form, whatsappInstance: e.target.value })}
-                                            className="input font-mono"
-                                            placeholder="7107487998"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">API Token</label>
-                                        <input
-                                            type="password"
-                                            value={form.whatsappToken}
-                                            onChange={(e) => setForm({ ...form, whatsappToken: e.target.value })}
-                                            className="input font-mono"
-                                            placeholder="Your API Token"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Message Template</label>
+                                        <label className="block text-sm font-medium mb-2">Reason for Deletion</label>
                                         <textarea
-                                            value={form.whatsappMessage}
-                                            onChange={(e) => setForm({ ...form, whatsappMessage: e.target.value })}
-                                            className="input min-h-[100px]"
-                                            placeholder="Thank you for visiting!"
+                                            value={deletionReason}
+                                            onChange={(e) => setDeletionReason(e.target.value)}
+                                            className="input min-h-[120px]"
+                                            placeholder="Please tell us why you want to delete your data..."
+                                            required
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Use <code className="bg-[var(--background)] px-1 rounded">{"{restaurant}"}</code> for restaurant name and{" "}
-                                            <code className="bg-[var(--background)] px-1 rounded">{"{amount}"}</code> for bill amount
-                                        </p>
                                     </div>
-                                </>
-                            )}
-                        </>
-                    )}
 
-                    {/* Message */}
-                    {message && (
-                        <div
-                            className={`p-4 rounded-lg ${message.type === "success"
-                                ? "bg-green-500/10 border border-green-500/50 text-green-400"
-                                : "bg-red-500/10 border border-red-500/50 text-red-400"
-                                }`}
+                                    <button
+                                        type="submit"
+                                        disabled={deletionLoading}
+                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        {deletionLoading ? "Submitting..." : "Submit Deletion Request"}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6">
+
+                        {/* Restaurant Tab */}
+                        {activeTab === "restaurant" && (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Restaurant Name</label>
+                                        <input
+                                            type="text"
+                                            value={form.cafeName}
+                                            onChange={(e) => setForm({ ...form, cafeName: e.target.value })}
+                                            className="input"
+                                            placeholder="Your Restaurant Name"
+                                            required
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Appears on receipts and bills</p>
+                                    </div>
+
+                                    <div>
+                                        <FileUploader
+                                            label="Restaurant Logo"
+                                            value={form.logo}
+                                            onChange={(url) => setForm({ ...form, logo: url })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Phone</label>
+                                        <input
+                                            type="text"
+                                            value={form.phone}
+                                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                            className="input"
+                                            placeholder="Restaurant Phone"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Email</label>
+                                        <input
+                                            type="email"
+                                            value={form.email}
+                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                            className="input"
+                                            placeholder="restaurant@example.com"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Address</label>
+                                    <textarea
+                                        value={form.address}
+                                        onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                        className="input min-h-[80px]"
+                                        placeholder="Full restaurant address"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">GSTIN</label>
+                                            <input
+                                                type="text"
+                                                value={form.gstin}
+                                                onChange={(e) => setForm({ ...form, gstin: e.target.value })}
+                                                className="input uppercase mb-2"
+                                                placeholder="GST Number"
+                                            />
+                                        </div>
+                                        <FileUploader
+                                            label="GST Certificate"
+                                            value={form.gstCertificate}
+                                            onChange={(url) => setForm({ ...form, gstCertificate: url })}
+                                            accept=".pdf,image/*"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">FSSAI License</label>
+                                            <input
+                                                type="text"
+                                                value={form.fssai}
+                                                onChange={(e) => setForm({ ...form, fssai: e.target.value })}
+                                                className="input mb-2"
+                                                placeholder="FSSAI Number"
+                                            />
+                                        </div>
+                                        <FileUploader
+                                            label="FSSAI License"
+                                            value={form.fssaiCertificate}
+                                            onChange={(url) => setForm({ ...form, fssaiCertificate: url })}
+                                            accept=".pdf,image/*"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Feedback Link (Optional)</label>
+                                    <input
+                                        type="url"
+                                        value={form.feedbackLink}
+                                        onChange={(e) => setForm({ ...form, feedbackLink: e.target.value })}
+                                        className="input"
+                                        placeholder="https://your-feedback-form.com"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tax Tab */}
+                        {activeTab === "tax" && (
+                            <>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">CGST (%)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="50"
+                                            value={form.cgst}
+                                            onChange={(e) => setForm({ ...form, cgst: e.target.value })}
+                                            className="input"
+                                            placeholder="2.5"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">SGST (%)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="50"
+                                            value={form.sgst}
+                                            onChange={(e) => setForm({ ...form, sgst: e.target.value })}
+                                            className="input"
+                                            placeholder="2.5"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500">Total GST: {(parseFloat(form.cgst || "0") + parseFloat(form.sgst || "0")).toFixed(2)}%</p>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Legacy Tax Rate (%) - Deprecated</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        value={form.taxRate}
+                                        onChange={(e) => setForm({ ...form, taxRate: e.target.value })}
+                                        className="input"
+                                        placeholder="0"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Use CGST + SGST instead</p>
+                                </div>
+                            </>
+                        )}
+
+                        {/* WhatsApp Tab */}
+                        {activeTab === "whatsapp" && (
+                            <>
+                                <div className="flex items-center justify-between p-4 bg-[var(--background)] rounded-lg">
+                                    <div>
+                                        <h3 className="font-medium">Enable WhatsApp Notifications</h3>
+                                        <p className="text-sm text-gray-400">Send thank you message after billing</p>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.whatsappEnabled}
+                                            onChange={(e) => setForm({ ...form, whatsappEnabled: e.target.checked })}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
+                                    </label>
+                                </div>
+
+                                {form.whatsappEnabled && (
+                                    <>
+                                        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                            <p className="text-sm text-green-400">
+                                                <strong>Green API Setup:</strong> Get your Instance ID and Token from{" "}
+                                                <a href="https://green-api.com" target="_blank" rel="noopener noreferrer" className="underline">
+                                                    green-api.com
+                                                </a>
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Instance ID</label>
+                                            <input
+                                                type="text"
+                                                value={form.whatsappInstance}
+                                                onChange={(e) => setForm({ ...form, whatsappInstance: e.target.value })}
+                                                className="input font-mono"
+                                                placeholder="7107487998"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">API Token</label>
+                                            <input
+                                                type="password"
+                                                value={form.whatsappToken}
+                                                onChange={(e) => setForm({ ...form, whatsappToken: e.target.value })}
+                                                className="input font-mono"
+                                                placeholder="Your API Token"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Message Template</label>
+                                            <textarea
+                                                value={form.whatsappMessage}
+                                                onChange={(e) => setForm({ ...form, whatsappMessage: e.target.value })}
+                                                className="input min-h-[100px]"
+                                                placeholder="Thank you for visiting!"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Use <code className="bg-[var(--background)] px-1 rounded">{"{restaurant}"}</code> for restaurant name and{" "}
+                                                <code className="bg-[var(--background)] px-1 rounded">{"{amount}"}</code> for bill amount
+                                            </p>
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        )}
+
+                        {/* Message */}
+                        {message && (
+                            <div
+                                className={`p-4 rounded-lg ${message.type === "success"
+                                    ? "bg-green-500/10 border border-green-500/50 text-green-400"
+                                    : "bg-red-500/10 border border-red-500/50 text-red-400"
+                                    }`}
+                            >
+                                {message.text}
+                            </div>
+                        )}
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="btn-primary w-full"
                         >
-                            {message.text}
-                        </div>
-                    )}
-
-                    {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="btn-primary w-full"
-                    >
-                        {saving ? "Saving..." : "Save Settings"}
-                    </button>
-                </form>
+                            {saving ? "Saving..." : "Save Settings"}
+                        </button>
+                    </form>
+                )}
             </div>
         </div>
     )
