@@ -171,13 +171,25 @@ export default function ContactManagementPage() {
                         <div>
                             <label className="block text-sm text-gray-400 mb-2">Google Maps Embed URL</label>
                             <input
-                                type="url"
+                                type="text"
                                 value={form.mapUrl}
-                                onChange={(e) => setForm({ ...form, mapUrl: e.target.value })}
+                                onChange={(e) => {
+                                    let val = e.target.value;
+                                    // If user pastes full iframe code, try to extract src
+                                    if (val.includes("<iframe") && val.includes("src=")) {
+                                        const match = val.match(/src="([^"]+)"/);
+                                        if (match && match[1]) {
+                                            val = match[1];
+                                        }
+                                    }
+                                    setForm({ ...form, mapUrl: val })
+                                }}
                                 className="w-full px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] focus:border-[var(--primary)] outline-none"
                                 placeholder="https://www.google.com/maps/embed?..."
                             />
-                            <p className="text-xs text-gray-500 mt-1">Optional: Get embed URL from Google Maps → Share → Embed</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                <strong>How to get this:</strong> Go to Google Maps → Find your location → Click "Share" → Select "Embed a map" tab → Click "Copy HTML" → Paste it here (we'll extract the link).
+                            </p>
                         </div>
                     </div>
                 </div>
