@@ -47,11 +47,12 @@ function FileUploader({ label, value, onChange, accept = "image/*" }: { label: s
             if (data.success) {
                 onChange(data.url)
             } else {
-                alert("Upload failed")
+                console.error("Upload failed:", data.error)
+                alert(`Upload failed: ${data.error || "Unknown error"}`)
             }
         } catch (error) {
             console.error("Upload error:", error)
-            alert("Upload failed")
+            alert("Upload failed. Please check your internet connection or try again.")
         } finally {
             setUploading(false)
         }

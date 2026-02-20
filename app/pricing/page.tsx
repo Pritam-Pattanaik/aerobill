@@ -35,9 +35,10 @@ export default function PricingPage() {
         {
             name: "Free",
             price: "₹0",
+            originalPrice: null,
             period: "/forever",
             tables: "5",
-            products: "15",
+            products: "30",
             features: [
                 "Basic QR ordering",
                 "Customer menu",
@@ -50,9 +51,10 @@ export default function PricingPage() {
         {
             name: "Standard",
             price: "₹299",
+            originalPrice: "₹499",
             period: "/month",
             tables: "10",
-            products: "50",
+            products: "100",
             features: [
                 "Everything in Free",
                 "Kitchen display",
@@ -66,6 +68,7 @@ export default function PricingPage() {
         {
             name: "Premium",
             price: "₹999",
+            originalPrice: null,
             period: "/month",
             tables: "25",
             products: "Unlimited",
@@ -83,6 +86,7 @@ export default function PricingPage() {
         {
             name: "Elite",
             price: "₹1,999",
+            originalPrice: null,
             period: "/month",
             tables: "Unlimited",
             products: "Unlimited",
@@ -165,7 +169,14 @@ export default function PricingPage() {
                                 )}
                                 <h3 className="text-xl font-bold mb-2">{p.name}</h3>
                                 <div className="mb-4">
-                                    <span className="text-4xl font-bold">{p.price}</span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-bold">{p.price}</span>
+                                        {p.originalPrice && (
+                                            <span className="text-lg text-gray-500 line-through decoration-red-500/50">
+                                                {p.originalPrice}
+                                            </span>
+                                        )}
+                                    </div>
                                     <span className="text-gray-400">{p.period}</span>
                                 </div>
                                 <div className="text-sm text-gray-400 mb-4 pb-4 border-b border-white/10">

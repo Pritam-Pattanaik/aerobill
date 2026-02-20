@@ -9,10 +9,10 @@ type Step = 1 | 2 | 3
 type Plan = "FREE" | "STARTER" | "BUSINESS" | "ENTERPRISE"
 
 const plans = [
-    { id: "FREE" as Plan, name: "Free", price: "₹0", period: "/forever", tables: "5", products: "Basic", desc: "Perfect for getting started", paymentLink: null },
-    { id: "STARTER" as Plan, name: "Standard", price: "₹299", period: "/month", tables: "15", products: "Full", desc: "Great for small restaurants", paymentLink: "https://rzp.io/rzp/K9dlQCU" },
-    { id: "BUSINESS" as Plan, name: "Premium", price: "₹999", period: "/month", tables: "30", products: "Unlimited", desc: "For growing businesses", popular: true, paymentLink: "https://rzp.io/rzp/GmrQt8g" },
-    { id: "ENTERPRISE" as Plan, name: "Elite", price: "₹1,999", period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits", paymentLink: "https://rzp.io/rzp/u0AJIYPZ" },
+    { id: "FREE" as Plan, name: "Free", price: "₹0", originalPrice: null, period: "/forever", tables: "5", products: "30", desc: "Perfect for getting started", paymentLink: null },
+    { id: "STARTER" as Plan, name: "Standard", price: "₹299", originalPrice: "₹499", period: "/month", tables: "10", products: "100", desc: "Great for small restaurants", paymentLink: "https://rzp.io/rzp/K9dlQCU" },
+    { id: "BUSINESS" as Plan, name: "Premium", price: "₹999", originalPrice: null, period: "/month", tables: "25", products: "Unlimited", desc: "For growing businesses", popular: true, paymentLink: "https://rzp.io/rzp/GmrQt8g" },
+    { id: "ENTERPRISE" as Plan, name: "Elite", price: "₹1,999", originalPrice: null, period: "/month", tables: "Unlimited", products: "Unlimited", desc: "Full power, no limits", paymentLink: "https://rzp.io/rzp/u0AJIYPZ" },
 ]
 
 export default function RegisterPage() {
@@ -215,8 +215,13 @@ export default function RegisterPage() {
                                             } ${plan.popular ? "ring-2 ring-[#ff6b35]/30" : ""}`}>
                                         {plan.popular && <div className="text-xs text-[#ff6b35] font-semibold mb-2">⭐ Most Popular</div>}
                                         <h3 className="font-bold text-lg">{plan.name}</h3>
-                                        <div className="mt-1">
+                                        <div className="mt-1 flex items-baseline gap-2">
                                             <span className="text-2xl font-bold">{plan.price}</span>
+                                            {plan.originalPrice && (
+                                                <span className="text-sm text-gray-500 line-through decoration-red-500/50">
+                                                    {plan.originalPrice}
+                                                </span>
+                                            )}
                                             <span className="text-gray-400 text-sm">{plan.period}</span>
                                         </div>
                                         <p className="text-gray-400 text-sm mt-2">{plan.desc}</p>

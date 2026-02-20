@@ -77,6 +77,7 @@ model Restaurant {
   socialAccounts SocialMediaAccount[]
   socialPosts    SocialPost[]
   deletionRequests DataDeletionRequest[]
+  offers         Offer[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -489,4 +490,35 @@ model DataDeletionRequest {
 
   @@index([restaurantId])
   @@index([status])
+}
+
+// Offers and Coupons
+model Offer {
+  id            String        @id @default(cuid())
+  name          String
+  description   String?
+  code          String        @unique // e.g., "WELCOME10"
+  discountType  DiscountType  @default(PERCENTAGE) // PERCENTAGE, FIXED
+  discountValue Float
+  minOrderValue Float         @default(0)
+  triggerType   TriggerType   @default(MANUAL) // MANUAL, VISIT_FREQUENCY, ORDER_AMOUNT
+  triggerValue  Int           @default(0)      // e.g., 5th visit, or order > 1000
+  isActive      Boolean       @default(true)
+  restaurantId  String
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([restaurantId])
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum TriggerType {
+  MANUAL
+  VISIT_FREQUENCY
+  ORDER_AMOUNT
 }

@@ -9,9 +9,9 @@ export async function POST(request: Request) {
         const apiSecret = process.env.CLOUDINARY_API_SECRET
 
         if (!cloudName || !apiKey || !apiSecret) {
-            console.error("Cloudinary credentials missing")
+            console.error("Cloudinary credentials missing. Please check .env file.")
             return NextResponse.json(
-                { error: "Server configuration error: Missing Cloudinary credentials" },
+                { error: "Server configuration error: Missing Cloudinary credentials. Please verify .env settings." },
                 { status: 500 }
             )
         }

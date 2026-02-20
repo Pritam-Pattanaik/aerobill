@@ -148,9 +148,39 @@ export async function getProducts() {
     }
 }
 
+import { checkProductLimit } from "@/lib/subscription"
+
 export async function createProduct(data: { name: string; price: number; isVeg: boolean; isAvailable: boolean; categoryId: string; inventoryId?: string; image?: string }) {
     try {
         const restaurantId = await requireRestaurantId()
+
+        // Check subscription limit
+        const limitCheck = await checkProductLimit(restaurantId)
+        if (!limitCheck.allowed) {
+            return {
+                success: false,
+                error: `Plan limit reached. You can only add ${limitCheck.limit} products on your current plan.`
+            }
+        }
+
+        // Check for duplicate product name
+        const existingProduct = await prisma.product.findFirst({
+            where: {
+                restaurantId,
+                name: {
+                    equals: data.name,
+                    mode: "insensitive"
+                }
+            }
+        })
+
+        if (existingProduct) {
+            return {
+                success: false,
+                error: "A product with this name already exists."
+            }
+        }
+
         const product = await prisma.product.create({
             data: { ...data, inventoryId: data.inventoryId || null, image: data.image || null, restaurantId }
         })

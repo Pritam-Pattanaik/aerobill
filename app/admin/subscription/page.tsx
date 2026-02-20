@@ -11,10 +11,11 @@ const PLANS = [
         id: "FREE",
         name: "Free",
         price: "₹0",
+        originalPrice: null,
         period: "/forever",
         features: [
             "5 tables",
-            "15 products",
+            "30 products",
             "Basic QR ordering",
             "Customer menu",
             "Simple billing",
@@ -27,10 +28,11 @@ const PLANS = [
         id: "STARTER",
         name: "Standard",
         price: "₹299",
+        originalPrice: "₹499",
         period: "/month",
         features: [
             "10 tables",
-            "50 products",
+            "100 products",
             "Everything in Free",
             "Kitchen display",
             "Order history",
@@ -44,6 +46,7 @@ const PLANS = [
         id: "BUSINESS",
         name: "Premium",
         price: "₹999",
+        originalPrice: null,
         period: "/month",
         popular: true,
         features: [
@@ -63,6 +66,7 @@ const PLANS = [
         id: "ENTERPRISE",
         name: "Elite",
         price: "₹1,999",
+        originalPrice: null,
         period: "/month",
         features: [
             "Unlimited tables",
@@ -163,8 +167,13 @@ export default function SubscriptionPage() {
                         </div>
 
                         <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
-                        <div className="flex items-baseline gap-1 mb-4">
+                        <div className="flex items-baseline gap-2 mb-4">
                             <span className="text-3xl font-bold text-white">{plan.price}</span>
+                            {plan.originalPrice && (
+                                <span className="text-sm text-gray-500 line-through decoration-red-500/50">
+                                    {plan.originalPrice}
+                                </span>
+                            )}
                             <span className="text-gray-400">{plan.period}</span>
                         </div>
 
