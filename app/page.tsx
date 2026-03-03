@@ -8,8 +8,8 @@ import PublicFooter from "@/components/PublicFooter"
 // SEO Metadata for Homepage
 export const metadata: Metadata = {
   metadataBase: new URL("https://aerobill.in"),
-  title: "Aerobill - Best Restaurant Management Software | QR Code Ordering & Billing System",
-  description: "Aerobill is India's #1 restaurant management software. QR-based ordering, real-time kitchen display, smart billing & analytics. No hardware needed. Start free today!",
+  title: "Best Restaurant Management Software in India | POS & Billing Software – Aerobill",
+  description: "Aerobill offers advanced Restaurant Management Software in India with smart POS system, GST-compliant billing, inventory management, QR ordering, and real-time analytics. Simplify restaurant operations with our powerful cloud-based solution.",
   keywords: [
     "restaurant management software",
     "QR code ordering system",
@@ -69,84 +69,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    // Organization Schema
-    {
-      "@type": "Organization",
-      "@id": "https://aerobill.in/#organization",
-      name: "Aerobill",
-      url: "https://aerobill.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://aerobill.in/logo.png",
-        width: 512,
-        height: 512,
-      },
-      description: "Aerobill is a modern restaurant management software providing QR-based ordering, kitchen display, billing, and analytics solutions.",
-      sameAs: [
-        "https://twitter.com/aerobill",
-        "https://linkedin.com/company/aerobill",
-        "https://facebook.com/aerobill",
-      ],
-      contactPoint: {
-        "@type": "ContactPoint",
-        contactType: "customer service",
-        availableLanguage: ["English", "Hindi"],
-      },
-    },
-    // SoftwareApplication Schema
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://aerobill.in/#software",
-      name: "Aerobill",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      description: "Complete restaurant management software with QR code ordering, kitchen display system, smart billing, and real-time analytics.",
-      offers: [
-        {
-          "@type": "Offer",
-          name: "Free Plan",
-          price: "0",
-          priceCurrency: "INR",
-          description: "5 tables, 30 products, basic features",
-        },
-        {
-          "@type": "Offer",
-          name: "Starter Plan",
-          price: "299",
-          priceCurrency: "INR",
-          description: "10 tables, 100 products, kitchen display",
-        },
-        {
-          "@type": "Offer",
-          name: "Business Plan",
-          price: "999",
-          priceCurrency: "INR",
-          description: "25 tables, unlimited products, full analytics",
-        },
-        {
-          "@type": "Offer",
-          name: "Enterprise Plan",
-          price: "1999",
-          priceCurrency: "INR",
-          description: "Unlimited tables & products, custom branding, API access",
-        },
-      ],
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.8",
-        reviewCount: "150",
-        bestRating: "5",
-        worstRating: "1",
-      },
-      featureList: [
-        "QR Code Ordering",
-        "Kitchen Display System",
-        "Smart Billing",
-        "Real-time Analytics",
-        "Inventory Management",
-        "Table Management",
-      ],
-    },
+
     // FAQ Schema for Featured Snippets
     {
       "@type": "FAQPage",
@@ -157,31 +80,63 @@ const jsonLd = {
           name: "What is Aerobill?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Aerobill is a modern restaurant management software that offers QR-based ordering, real-time kitchen display, smart billing, and powerful analytics. It helps restaurants digitize their operations without requiring any hardware.",
+            text: "Aerobill is a cloud-based Restaurant Management Software in India that helps restaurants manage billing, inventory, kitchen operations, and multi-outlet control from one centralized dashboard.",
           },
         },
         {
           "@type": "Question",
-          name: "How does QR code ordering work?",
+          name: "Is Aerobill GST-compliant?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Customers simply scan the QR code placed on their table, browse your digital menu, and place orders directly from their phones. Orders instantly appear on your kitchen display for preparation.",
+            text: "Yes, Aerobill provides fully GST-compliant Restaurant Billing Software in India, allowing you to generate tax invoices, manage GST reports, and stay compliant with Indian regulations.",
           },
         },
         {
           "@type": "Question",
-          name: "Is there a free plan available?",
+          name: "Does Aerobill include a Restaurant POS system?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Yes! Aerobill offers a forever-free plan that includes 1 table, 10 products, basic QR ordering, customer menu, and simple billing. No credit card required to start.",
+            text: "Yes, Aerobill includes an advanced Restaurant POS Software that enables fast billing, table management, order tracking, and seamless payment processing for restaurants of all sizes.",
           },
         },
         {
           "@type": "Question",
-          name: "Do I need any special hardware?",
+          name: "Can Aerobill manage multiple restaurant outlets?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "No special hardware is needed. Aerobill works entirely on web browsers. You just need a device (phone, tablet, or computer) with internet access to manage your restaurant.",
+            text: "Yes, Aerobill allows you to manage multiple restaurant branches from a single dashboard, with real-time sales tracking, centralized reporting, and inventory synchronization.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does Aerobill offer inventory management?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, Aerobill provides real-time inventory and stock management features, including stock alerts, supplier tracking, and automated deductions based on sales activity.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is Aerobill suitable for small restaurants and cafes?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, Aerobill is designed for small restaurants, cafes, cloud kitchens, QSRs, and large restaurant chains, offering scalable solutions based on business needs.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does Aerobill support QR code ordering?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, Aerobill supports QR-based ordering, allowing customers to scan a QR code, view the digital menu, and place orders directly from their tables.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "How can I book a demo of Aerobill?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "You can book a free demo of our Restaurant Management Software through our website to explore features, pricing, and see how Aerobill can simplify your restaurant operations.",
           },
         },
       ],
@@ -224,6 +179,30 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* SoftwareApplication Schema */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: `{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Aerobill",
+  "operatingSystem": "Web-based",
+  "applicationCategory": "BusinessApplication",
+  "description": "Aerobill is a Restaurant Management Software in India that provides Restaurant POS Software, GST-compliant billing, inventory management, QR ordering, and multi-outlet control for restaurants.",
+  "url": "https://www.aerobill.in/",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "areaServed": {
+    "@type": "Country",
+    "name": "India"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "Aerobill"
+  }
+}` }} />
       <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
         {/* Navigation - Mobile Responsive Header */}
         <PublicHeader />
@@ -232,24 +211,79 @@ export default function HomePage() {
         <section className="pt-32 pb-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-block px-4 py-1.5 bg-[#ff6b35]/10 rounded-full text-[#ff6b35] text-sm font-medium mb-6">
-              🚀 The Future of Restaurant Management
+              ⭐ Trusted Restaurant Management Software in India
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Turn Your Restaurant into a
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a]"> Digital Powerhouse</span>
+              Restaurant Management Software in India for <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a]">Smart POS & Billing</span>
             </h1>
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-              QR-based ordering, real-time kitchen display, smart billing, and powerful analytics — all in one platform. No hardware needed.
+              Aerobill is a powerful Restaurant POS Software and Billing Software designed to simplify daily operations, manage inventory, handle GST billing, and streamline restaurant growth across India.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register" className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition">
                 Start For Free &rarr;
+              </Link>
+              <Link href="/contact" className="border border-[#ff6b35]/50 bg-[#ff6b35]/10 text-[#ff6b35] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#ff6b35]/20 transition">
+                Book Free Demo
               </Link>
               <Link href="/pricing" className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition">
                 View Pricing
               </Link>
             </div>
             <p className="text-gray-500 text-sm mt-4">No credit card required • Free forever plan available</p>
+          </div>
+        </section>
+
+        {/* Introduction Section */}
+        <section className="py-16 px-4 bg-[#111827]/30">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">All-in-One Restaurant POS & Billing Software</h2>
+            <p className="text-xl text-gray-400 leading-relaxed">
+              Aerobill combines Restaurant Management Software, advanced POS system, and smart billing software into one easy-to-use platform. From order management to inventory tracking and real-time sales reports, everything is automated for maximum efficiency.
+            </p>
+          </div>
+        </section>
+
+        {/* SEO Content Sections */}
+        <section className="py-20 px-4">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+            <div className="bg-[#1a1a2e] p-8 rounded-2xl border border-white/10">
+              <h2 className="text-3xl font-bold mb-8">Key Features of Our Restaurant Management Software</h2>
+              <ul className="space-y-4">
+                {[
+                  "Smart Restaurant POS System",
+                  "Fast & Secure Billing Software",
+                  "GST-Compliant Restaurant Billing",
+                  "Inventory & Stock Management",
+                  "QR-Based Ordering System",
+                  "Real-Time Sales & Analytics",
+                  "Multi-Outlet Management"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-4 text-gray-300">
+                    <div className="w-6 h-6 rounded-full bg-[#ff6b35]/20 flex items-center justify-center text-[#ff6b35] shrink-0">
+                      ✓
+                    </div>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col justify-center">
+              <h2 className="text-3xl font-bold mb-6">Why Choose Our Restaurant POS Software in India?</h2>
+              <p className="text-lg text-gray-400 leading-relaxed mb-10">
+                Our Restaurant Management Software in India is designed for restaurants, cafes, QSRs, and cloud kitchens. With easy setup, cloud-based access, and powerful billing automation, Aerobill helps reduce manual errors and increase profits.
+              </p>
+
+              <h2 className="text-2xl font-bold mb-6">Restaurant Software for Every Food Business</h2>
+              <div className="flex flex-wrap gap-3">
+                {["Fine Dine Restaurants", "Cafes", "Quick Service Restaurants", "Food Courts", "Cloud Kitchens"].map((type, i) => (
+                  <div key={i} className="px-5 py-2.5 bg-gradient-to-r from-white/5 to-white/10 border border-white/10 rounded-full text-gray-300 hover:border-[#ff6b35]/50 transition">
+                    {type}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -324,6 +358,72 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Growing Businesses SEO Section */}
+        <section className="py-20 px-4 bg-[#111827]/30">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Best Restaurant Management Software for Growing Businesses</h2>
+            <p className="text-xl text-gray-400 leading-relaxed">
+              If you are looking for the best Restaurant Management Software in India, Aerobill offers a scalable solution with advanced POS features and smart billing tools. Our Restaurant Billing Software helps manage daily sales, taxes, inventory, and reporting — all from a single dashboard.
+            </p>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+              <p className="text-gray-400">Everything you need to know about Aerobill</p>
+            </div>
+            <div className="space-y-4">
+              {[
+                {
+                  q: "What is Aerobill?",
+                  a: "Aerobill is a cloud-based Restaurant Management Software in India that helps restaurants manage billing, inventory, kitchen operations, and multi-outlet control from one centralized dashboard."
+                },
+                {
+                  q: "Is Aerobill GST-compliant?",
+                  a: "Yes, Aerobill provides fully GST-compliant Restaurant Billing Software in India, allowing you to generate tax invoices, manage GST reports, and stay compliant with Indian regulations."
+                },
+                {
+                  q: "Does Aerobill include a Restaurant POS system?",
+                  a: "Yes, Aerobill includes an advanced Restaurant POS Software that enables fast billing, table management, order tracking, and seamless payment processing for restaurants of all sizes."
+                },
+                {
+                  q: "Can Aerobill manage multiple restaurant outlets?",
+                  a: "Yes, Aerobill allows you to manage multiple restaurant branches from a single dashboard, with real-time sales tracking, centralized reporting, and inventory synchronization."
+                },
+                {
+                  q: "Does Aerobill offer inventory management?",
+                  a: "Yes, Aerobill provides real-time inventory and stock management features, including stock alerts, supplier tracking, and automated deductions based on sales activity."
+                },
+                {
+                  q: "Is Aerobill suitable for small restaurants and cafes?",
+                  a: "Yes, Aerobill is designed for small restaurants, cafes, cloud kitchens, QSRs, and large restaurant chains, offering scalable solutions based on business needs."
+                },
+                {
+                  q: "Does Aerobill support QR code ordering?",
+                  a: "Yes, Aerobill supports QR-based ordering, allowing customers to scan a QR code, view the digital menu, and place orders directly from their tables."
+                },
+                {
+                  q: "How can I book a demo of Aerobill?",
+                  a: "You can book a free demo of our Restaurant Management Software through our website to explore features, pricing, and see how Aerobill can simplify your restaurant operations."
+                }
+              ].map((faq, i) => (
+                <details key={i} className="group border border-white/10 bg-[#1a1a2e] rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="cursor-pointer list-none px-6 py-4 font-semibold text-lg flex justify-between items-center hover:bg-white/5 transition">
+                    {faq.q}
+                    <span className="text-[#ff6b35] group-open:rotate-45 transition-transform duration-300 text-2xl">+</span>
+                  </summary>
+                  <div className="px-6 pb-4 pt-2 text-gray-400">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
             </div>
           </div>
         </section>

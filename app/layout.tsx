@@ -83,6 +83,21 @@ export default function RootLayout({
             })(window, document, "clarity", "script", "v4v8nmxtsf");
           `}
         </Script>
+        {/* Organization Schema */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: `{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Aerobill",
+  "url": "https://www.aerobill.in/",
+  "logo": "https://www.aerobill.in/logo.png",
+  "description": "Aerobill provides Restaurant Management Software in India including POS software, restaurant billing software, inventory management, and QR ordering solutions.",
+  "sameAs": [
+    "https://www.facebook.com/aerobill",
+    "https://www.instagram.com/aerobill",
+    "https://www.linkedin.com/company/aerobill"
+  ]
+}` }} />
       </head>
       <body className={`${inter.variable} antialiased`}>
         <SWRProvider>
