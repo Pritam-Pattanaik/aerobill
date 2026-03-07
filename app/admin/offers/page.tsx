@@ -300,7 +300,7 @@ export default function OffersPage() {
                                     >
                                         <option value="MANUAL">Manual Code Entry</option>
                                         <option value="VISIT_FREQUENCY">Visit Frequency (e.g. 5th visit)</option>
-                                        <option value="ORDER_AMOUNT">Order Amount (e.g. > ₹1000)</option>
+                                        <option value="ORDER_AMOUNT">Order Amount (e.g. &gt; ₹1000)</option>
                                     </select>
 
                                     {formData.triggerType !== 'MANUAL' && (
