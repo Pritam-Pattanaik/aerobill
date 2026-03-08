@@ -184,7 +184,7 @@ export default function OffersPage() {
                                     <span>
                                         {offer.triggerType === 'MANUAL' && 'Manual Code'}
                                         {offer.triggerType === 'VISIT_FREQUENCY' && `${offer.triggerValue}th Visit`}
-                                        {offer.triggerType === 'ORDER_AMOUNT' && `Order > ₹${offer.triggerValue}`}
+                                        {offer.triggerType === 'ORDER_AMOUNT' && `Order ${String.fromCharCode(62)} ₹${offer.triggerValue}`}
                                     </span>
                                 </div>
                             </div>
@@ -271,7 +271,7 @@ export default function OffersPage() {
                                     <input
                                         type="number"
                                         value={formData.discountValue}
-                                        onChange={e => setFormData({ ...formData, discountValue: parseFloat(e.target.value) })}
+                                        onChange={e => setFormData({ ...formData, discountValue: parseFloat(e.target.value) || 0 })}
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:border-[#ff6b35] outline-none"
                                         required
                                         min="0"
@@ -284,7 +284,7 @@ export default function OffersPage() {
                                 <input
                                     type="number"
                                     value={formData.minOrderValue}
-                                    onChange={e => setFormData({ ...formData, minOrderValue: parseFloat(e.target.value) })}
+                                    onChange={e => setFormData({ ...formData, minOrderValue: parseFloat(e.target.value) || 0 })}
                                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:border-[#ff6b35] outline-none"
                                     min="0"
                                 />
@@ -307,7 +307,7 @@ export default function OffersPage() {
                                         <input
                                             type="number"
                                             value={formData.triggerValue}
-                                            onChange={e => setFormData({ ...formData, triggerValue: parseInt(e.target.value) })}
+                                            onChange={e => setFormData({ ...formData, triggerValue: parseInt(e.target.value) || 0 })}
                                             className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:border-[#ff6b35] outline-none"
                                             placeholder="Value"
                                             min="1"
