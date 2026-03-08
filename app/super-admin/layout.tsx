@@ -57,9 +57,9 @@ function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {
                 />
 
                 {/* Desktop Sidebar */}
-                <aside className="hidden md:flex w-72 h-screen sticky top-0 bg-slate-900/80 backdrop-blur-xl border-r border-purple-500/20 flex-col">
+                <aside className="hidden md:flex w-72 h-[100dvh] sticky top-0 bg-slate-900/80 backdrop-blur-xl border-r border-purple-500/20 flex-col">
                     {/* Logo */}
-                    <div className="p-6 border-b border-purple-500/20">
+                    <div className="p-6 border-b border-purple-500/20 shrink-0">
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
                             Aerobill
                         </h1>
@@ -71,8 +71,8 @@ function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 p-4">
-                        <ul className="space-y-2">
+                    <nav className="flex-1 p-4 overflow-y-auto min-h-0">
+                        <ul className="space-y-2 pb-4">
                             {navItems.map((item) => (
                                 <li key={item.href}>
                                     <Link
@@ -91,7 +91,7 @@ function SuperAdminLayoutContent({ children }: { children: React.ReactNode }) {
                     </nav>
 
                     {/* Sign out */}
-                    <div className="p-4 border-t border-purple-500/20">
+                    <div className="p-4 border-t border-purple-500/20 shrink-0">
                         <button
                             onClick={() => signOut({ callbackUrl: "/super-admin/login" })}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
