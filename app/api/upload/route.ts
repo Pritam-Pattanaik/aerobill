@@ -8,10 +8,15 @@ export async function POST(request: Request) {
         const apiKey = process.env.CLOUDINARY_API_KEY
         const apiSecret = process.env.CLOUDINARY_API_SECRET
 
-        if (!cloudName || !apiKey || !apiSecret) {
-            console.error("Cloudinary credentials missing. Please check .env file.")
+        const missing: string[] = []
+        if (!cloudName) missing.push("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME")
+        if (!apiKey) missing.push("CLOUDINARY_API_KEY")
+        if (!apiSecret) missing.push("CLOUDINARY_API_SECRET")
+
+        if (missing.length > 0) {
+            console.error(`Cloudinary credentials missing: ${missing.join(", ")}`)
             return NextResponse.json(
-                { error: "Server configuration error: Missing Cloudinary credentials. Please verify .env settings." },
+                { error: `Server configuration error: Missing ${missing.join(", ")}. Please verify .env settings.` },
                 { status: 500 }
             )
         }
