@@ -49,13 +49,9 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Cloudinary credentials (passed via Cloud Run env vars or docker run --env)
-ARG NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-ARG CLOUDINARY_API_KEY
-ARG CLOUDINARY_API_SECRET
-ENV NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-ENV CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
-ENV CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+# Cloudinary credentials should be set as runtime environment variables
+# in Cloud Run (or via docker run --env), NOT as build ARGs.
+# ARGs reset between Docker stages and won't carry over here.
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -67,6 +63,7 @@ COPY --from=builder /app/package.json ./package.json
 # Copy built application
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 
 USER nextjs
 
