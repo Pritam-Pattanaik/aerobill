@@ -5,7 +5,7 @@ export async function GET() {
         DATABASE_URL: !!process.env.DATABASE_URL ? 'Set' : 'Missing',
         NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET ? 'Set' : 'Missing',
         NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'Not set',
-        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: !!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? 'Set' : 'Missing',
+        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: !!(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME) ? 'Set' : 'Missing',
         CLOUDINARY_API_KEY: !!process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing',
         CLOUDINARY_API_SECRET: !!process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing',
         NODE_ENV: process.env.NODE_ENV || 'Not set',

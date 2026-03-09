@@ -3,13 +3,13 @@ import { v2 as cloudinary } from "cloudinary"
 
 export async function POST(request: Request) {
     try {
-        // validate config
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        // validate config - using fallback for cloud name so Next.js doesn't inline it at build-time if running in Docker container
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME
         const apiKey = process.env.CLOUDINARY_API_KEY
         const apiSecret = process.env.CLOUDINARY_API_SECRET
 
         const missing: string[] = []
-        if (!cloudName) missing.push("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME")
+        if (!cloudName) missing.push("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME or CLOUDINARY_CLOUD_NAME")
         if (!apiKey) missing.push("CLOUDINARY_API_KEY")
         if (!apiSecret) missing.push("CLOUDINARY_API_SECRET")
 
