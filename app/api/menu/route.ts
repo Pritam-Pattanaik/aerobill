@@ -13,29 +13,28 @@ export async function GET() {
 
         const restaurantId = session.user.restaurantId
 
-        const [products, categories, inventory, settings] = await prisma.$transaction([
-            prisma.product.findMany({
-                where: { restaurantId },
-                orderBy: { name: "asc" },
-                include: {
-                    category: { select: { id: true, name: true } },
-                    inventory: { select: { id: true, name: true } },
-                },
-            }),
-            prisma.category.findMany({
-                where: { restaurantId },
-                orderBy: { sortOrder: "asc" },
-            }),
-            prisma.inventory.findMany({
-                where: { restaurantId },
-                select: { id: true, name: true },
-                orderBy: { name: "asc" },
-            }),
-            prisma.settings.findUnique({
-                where: { restaurantId },
-                select: { inventoryDeduction: true }
-            })
-        ])
+        // Run queries sequentially to avoid Neon serverless connection pool issues
+        const products = await prisma.product.findMany({
+            where: { restaurantId },
+            orderBy: { name: "asc" },
+            include: {
+                category: { select: { id: true, name: true } },
+                inventory: { select: { id: true, name: true } },
+            },
+        })
+        const categories = await prisma.category.findMany({
+            where: { restaurantId },
+            orderBy: { sortOrder: "asc" },
+        })
+        const inventory = await prisma.inventory.findMany({
+            where: { restaurantId },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+        })
+        const settings = await prisma.settings.findUnique({
+            where: { restaurantId },
+            select: { inventoryDeduction: true }
+        })
 
         return NextResponse.json({
             products,

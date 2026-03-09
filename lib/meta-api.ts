@@ -4,9 +4,24 @@
  */
 
 const META_GRAPH_URL = "https://graph.facebook.com/v22.0"
-const META_APP_ID = process.env.META_APP_ID!
-const META_APP_SECRET = process.env.META_APP_SECRET!
-const META_REDIRECT_URI = process.env.META_REDIRECT_URI!
+
+// Lazy getters — only evaluated when social media functions are actually called,
+// preventing the module from crashing at import time if these env vars are unset.
+function getMetaAppId() {
+    const id = process.env.META_APP_ID
+    if (!id) throw new Error("META_APP_ID environment variable is not set")
+    return id
+}
+function getMetaAppSecret() {
+    const secret = process.env.META_APP_SECRET
+    if (!secret) throw new Error("META_APP_SECRET environment variable is not set")
+    return secret
+}
+function getMetaRedirectUri() {
+    const uri = process.env.META_REDIRECT_URI
+    if (!uri) throw new Error("META_REDIRECT_URI environment variable is not set")
+    return uri
+}
 
 // Required permissions for Facebook Page posting + Instagram
 const SCOPES = [
@@ -21,8 +36,8 @@ const SCOPES = [
  */
 export function getMetaAuthorizationUrl(state: string): string {
     const params = new URLSearchParams({
-        client_id: META_APP_ID,
-        redirect_uri: META_REDIRECT_URI,
+        client_id: getMetaAppId(),
+        redirect_uri: getMetaRedirectUri(),
         scope: SCOPES,
         response_type: "code",
         state: state, // restaurantId encoded for security
@@ -39,9 +54,9 @@ export async function exchangeCodeForToken(code: string): Promise<{
     expires_in: number
 }> {
     const params = new URLSearchParams({
-        client_id: META_APP_ID,
-        client_secret: META_APP_SECRET,
-        redirect_uri: META_REDIRECT_URI,
+        client_id: getMetaAppId(),
+        client_secret: getMetaAppSecret(),
+        redirect_uri: getMetaRedirectUri(),
         code: code,
     })
 
@@ -65,8 +80,8 @@ export async function getLongLivedToken(shortLivedToken: string): Promise<{
 }> {
     const params = new URLSearchParams({
         grant_type: "fb_exchange_token",
-        client_id: META_APP_ID,
-        client_secret: META_APP_SECRET,
+        client_id: getMetaAppId(),
+        client_secret: getMetaAppSecret(),
         fb_exchange_token: shortLivedToken,
     })
 

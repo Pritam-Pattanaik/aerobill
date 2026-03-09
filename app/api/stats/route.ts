@@ -15,27 +15,19 @@ export async function GET() {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        const [
-            totalOrders,
-            pendingOrders,
-            todayRevenue,
-            totalProducts,
-            totalTables,
-            allInventory,
-        ] = await prisma.$transaction([
-            prisma.order.count({ where: { restaurantId } }),
-            prisma.order.count({ where: { restaurantId, status: { in: ["PENDING", "COOKING"] } } }),
-            prisma.order.aggregate({
-                where: { restaurantId, status: "BILLED", createdAt: { gte: today } },
-                _sum: { totalAmount: true },
-            }),
-            prisma.product.count({ where: { restaurantId } }),
-            prisma.table.count({ where: { restaurantId, isActive: true } }),
-            prisma.inventory.findMany({
-                where: { restaurantId },
-                select: { id: true, name: true, quantity: true, unit: true, lowStockThreshold: true }
-            }),
-        ])
+        // Run queries sequentially to avoid Neon serverless connection pool issues
+        const totalOrders = await prisma.order.count({ where: { restaurantId } })
+        const pendingOrders = await prisma.order.count({ where: { restaurantId, status: { in: ["PENDING", "COOKING"] } } })
+        const todayRevenue = await prisma.order.aggregate({
+            where: { restaurantId, status: "BILLED", createdAt: { gte: today } },
+            _sum: { totalAmount: true },
+        })
+        const totalProducts = await prisma.product.count({ where: { restaurantId } })
+        const totalTables = await prisma.table.count({ where: { restaurantId, isActive: true } })
+        const allInventory = await prisma.inventory.findMany({
+            where: { restaurantId },
+            select: { id: true, name: true, quantity: true, unit: true, lowStockThreshold: true }
+        })
 
         // Filter low stock items (quantity <= threshold)
         const lowStockItems = allInventory.filter(item => item.quantity <= item.lowStockThreshold)
@@ -76,4 +68,3 @@ export async function GET() {
         return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
     }
 }
-

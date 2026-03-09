@@ -20,30 +20,22 @@ async function fetchSystemStats() {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const [
-        totalRestaurants,
-        activeRestaurants,
-        subscriptionsByPlan,
-        todayOrders,
-        todayRevenue,
-        totalOrders,
-        totalUsers,
-    ] = await prisma.$transaction([
-        prisma.restaurant.count(),
-        prisma.restaurant.count({ where: { isActive: true } }),
-        prisma.subscription.groupBy({
-            by: ["plan"],
-            _count: { _all: true },
-            orderBy: { plan: "asc" },
-        }),
-        prisma.order.count({ where: { createdAt: { gte: today } } }),
-        prisma.order.aggregate({
-            where: { createdAt: { gte: today }, status: "BILLED" },
-            _sum: { totalAmount: true },
-        }),
-        prisma.order.count(),
-        prisma.user.count(),
-    ])
+    // Run queries sequentially — Neon's serverless adapter uses a single WebSocket
+    // connection and can't reliably handle many concurrent queries via Promise.all.
+    const totalRestaurants = await prisma.restaurant.count()
+    const activeRestaurants = await prisma.restaurant.count({ where: { isActive: true } })
+    const subscriptionsByPlan = await prisma.subscription.groupBy({
+        by: ["plan"],
+        _count: { _all: true },
+        orderBy: { plan: "asc" },
+    })
+    const todayOrders = await prisma.order.count({ where: { createdAt: { gte: today } } })
+    const todayRevenue = await prisma.order.aggregate({
+        where: { createdAt: { gte: today }, status: "BILLED" },
+        _sum: { totalAmount: true },
+    })
+    const totalOrders = await prisma.order.count()
+    const totalUsers = await prisma.user.count()
 
     // Format subscription counts
     const subscriptions = {
@@ -78,7 +70,8 @@ const getCachedSystemStats = unstable_cache(
 
 // Get platform-wide statistics (with caching)
 export async function getSystemStats() {
-    await validateSuperAdmin()
+    // Note: We authenticate in the page component instead of here to avoid
+    // Next.js static bailout/cache scope poisoning issues with unstable_cache.
     return getCachedSystemStats()
 }
 
@@ -97,26 +90,26 @@ export async function getAllRestaurants(page = 1, limit = 20, search = "") {
         }
         : {}
 
-    const [restaurants, total] = await prisma.$transaction([
-        prisma.restaurant.findMany({
-            where,
-            skip,
-            take: limit,
-            orderBy: { createdAt: "desc" },
-            include: {
-                subscription: true,
-                _count: {
-                    select: {
-                        orders: true,
-                        users: true,
-                        products: true,
-                        tables: true,
-                    },
+    // Run queries sequentially — Neon's serverless adapter uses a single WebSocket
+    // connection and can't reliably handle many concurrent queries via Promise.all.
+    const restaurants = await prisma.restaurant.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+            subscription: true,
+            _count: {
+                select: {
+                    orders: true,
+                    users: true,
+                    products: true,
+                    tables: true,
                 },
             },
-        }),
-        prisma.restaurant.count({ where }),
-    ])
+        },
+    })
+    const total = await prisma.restaurant.count({ where })
 
     return {
         restaurants,
@@ -163,24 +156,24 @@ export async function getRestaurantDetails(id: string) {
     }
 
     // Get today's stats for this restaurant
-    const [todayOrders, todayRevenue, recentOrders] = await prisma.$transaction([
-        prisma.order.count({
-            where: { restaurantId: id, createdAt: { gte: today } },
-        }),
-        prisma.order.aggregate({
-            where: { restaurantId: id, createdAt: { gte: today }, status: "BILLED" },
-            _sum: { totalAmount: true },
-        }),
-        prisma.order.findMany({
-            where: { restaurantId: id },
-            take: 10,
-            orderBy: { createdAt: "desc" },
-            include: {
-                table: { select: { number: true } },
-                _count: { select: { items: true } },
-            },
-        }),
-    ])
+    // Run queries sequentially — Neon's serverless adapter uses a single WebSocket
+    // connection and can't reliably handle many concurrent queries via Promise.all.
+    const todayOrders = await prisma.order.count({
+        where: { restaurantId: id, createdAt: { gte: today } },
+    })
+    const todayRevenue = await prisma.order.aggregate({
+        where: { restaurantId: id, createdAt: { gte: today }, status: "BILLED" },
+        _sum: { totalAmount: true },
+    })
+    const recentOrders = await prisma.order.findMany({
+        where: { restaurantId: id },
+        take: 10,
+        orderBy: { createdAt: "desc" },
+        include: {
+            table: { select: { number: true } },
+            _count: { select: { items: true } },
+        },
+    })
 
     return {
         success: true,
