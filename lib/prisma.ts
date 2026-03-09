@@ -3,8 +3,13 @@ import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
 import ws from 'ws'
 
-// Enable WebSocket connections for the Neon serverless driver
-neonConfig.webSocketConstructor = ws
+// Enable WebSocket connections for the Neon serverless driver conditionally
+// In Edge/Browser environments, we use the native WebSocket. In Node, we use the 'ws' package.
+if (typeof WebSocket !== 'undefined') {
+    neonConfig.webSocketConstructor = WebSocket
+} else {
+    neonConfig.webSocketConstructor = ws
+}
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
