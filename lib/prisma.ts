@@ -13,6 +13,7 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
     const connectionString = process.env.DATABASE_URL!
     const pool = new Pool({ connectionString })
+    // @ts-expect-error Prisma adapter-neon types mismatch with Neon pool instance
     const adapter = new PrismaNeon(pool)
 
     return new PrismaClient({
