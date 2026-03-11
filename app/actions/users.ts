@@ -2,13 +2,13 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { requireRestaurantId } from "@/lib/session"
+import { requireRestaurantId, requireRole } from "@/lib/session"
 import { hash } from "bcryptjs"
 import { Role } from "@prisma/client"
 
 export async function getUsers() {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
         const users = await prisma.user.findMany({
             where: { restaurantId },
             orderBy: { name: "asc" },
@@ -23,7 +23,7 @@ export async function getUsers() {
 
 export async function createUser(data: { name: string; email: string; password: string; role: Role }) {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
 
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({ where: { email: data.email } })
@@ -53,7 +53,7 @@ export async function createUser(data: { name: string; email: string; password: 
 
 export async function deleteUser(id: string) {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
 
         // Prevent deleting the last owner (basic check)
         const userToDelete = await prisma.user.findUnique({ where: { id, restaurantId } })

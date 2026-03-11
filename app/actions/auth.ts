@@ -63,11 +63,11 @@ export async function registerRestaurant(data: RegisterInput) {
                 },
             })
 
-            // Create subscription with selected plan
+            // Create subscription with FREE plan by default to prevent privilege escalation
             await tx.subscription.create({
                 data: {
                     restaurantId: rest.id,
-                    plan: data.plan as Plan,
+                    plan: "FREE",
                     status: "ACTIVE",
                 },
             })

@@ -83,6 +83,20 @@ const jsonLd = {
     },
 }
 
+// Custom Cloudinary Loader to bypass Next.js default /_next/image optimizer
+// which often throws 400 Bad Request in production for remote URLs
+const cloudinaryLoader = ({ src, width, quality }: { src: string, width: number, quality?: number }) => {
+    // If it's already a cloudinary URL, we can inject optimization params
+    if (src.includes('res.cloudinary.com')) {
+        // Find the upload/ part to inject transformations
+        const parts = src.split('/upload/')
+        if (parts.length === 2) {
+            return `${parts[0]}/upload/w_${width},q_${quality || 75},f_auto/${parts[1]}`
+        }
+    }
+    return src
+}
+
 export default async function BlogPage() {
     const result = await getPublishedBlogPosts()
     const posts = result.success ? result.data : []
@@ -127,9 +141,11 @@ export default async function BlogPage() {
                                                 {post.coverImage && (
                                                     <div className="h-48 bg-gradient-to-br from-[#ff6b35]/20 to-[#ff8c5a]/20 relative overflow-hidden">
                                                         <Image
+                                                            loader={cloudinaryLoader}
                                                             src={post.coverImage.replace(/[\n\r\s]+/g, '')}
                                                             alt={post.title}
                                                             fill
+                                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                                                         />
                                                     </div>

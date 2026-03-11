@@ -245,8 +245,9 @@ async function addProductIngredient(productId: string, inventoryId: string, quan
 
 async function updateProductIngredient(id: string, quantity: number) {
     try {
-        const ingredient = await prisma.productIngredient.update({
-            where: { id },
+        const restaurantId = await requireRestaurantId()
+        const ingredient = await prisma.productIngredient.updateMany({
+            where: { id, restaurantId },
             data: { quantity }
         })
         revalidatePath("/admin/menu")
@@ -259,7 +260,8 @@ async function updateProductIngredient(id: string, quantity: number) {
 
 async function removeProductIngredient(id: string) {
     try {
-        await prisma.productIngredient.delete({ where: { id } })
+        const restaurantId = await requireRestaurantId()
+        await prisma.productIngredient.deleteMany({ where: { id, restaurantId } })
         revalidatePath("/admin/menu")
         return { success: true }
     } catch (error) {

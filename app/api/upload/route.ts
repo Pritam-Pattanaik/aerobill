@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server"
 import { v2 as cloudinary } from "cloudinary"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(request: Request) {
     try {
+        // Enforce Authentication
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.restaurantId && !session?.user?.isSuperAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
         // validate config - using fallback for cloud name so Next.js doesn't inline it at build-time if running in Docker container
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME
         const apiKey = process.env.CLOUDINARY_API_KEY
@@ -33,6 +40,11 @@ export async function POST(request: Request) {
 
         if (!file) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
+        }
+
+        // Validate file type (allow only images)
+        if (!file.type.startsWith('image/')) {
+            return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 })
         }
 
         const bytes = await file.arrayBuffer()
