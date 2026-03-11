@@ -9,6 +9,18 @@ import { getBlogPostBySlug, getPublishedBlogPosts } from "@/app/actions/blog"
 
 export const dynamic = "force-dynamic"
 
+// Helper to bypass Next.js default /_next/image optimizer
+const getOptimizedCloudinaryUrl = (src: string) => {
+    if (!src) return src;
+    if (src.includes('res.cloudinary.com')) {
+        const parts = src.split('/upload/')
+        if (parts.length === 2) {
+            return `${parts[0]}/upload/w_1200,q_75,f_auto/${parts[1]}`
+        }
+    }
+    return src
+}
+
 type BlogPostSummary = {
     id: string
     title: string
@@ -186,13 +198,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             </time>
                         </div>
 
-                        {/* Cover Image */}
                         {post.coverImage && (
                             <div className="relative h-64 md:h-96 rounded-2xl overflow-hidden mb-10">
                                 <Image
-                                    src={post.coverImage}
+                                    src={getOptimizedCloudinaryUrl(post.coverImage.replace(/[\n\r\s]+/g, ''))}
                                     alt={post.title}
                                     fill
+                                    unoptimized={true}
                                     className="object-cover"
                                     priority
                                 />
