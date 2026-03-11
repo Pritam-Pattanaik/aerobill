@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { unstable_cache } from "next/cache"
-import { requireRestaurantId } from "@/lib/session"
+import { requireRestaurantId, requireRole } from "@/lib/session"
 import { LogType, POStatus } from "@prisma/client"
 
 // =====================================
@@ -348,7 +348,25 @@ export async function createMarketplaceOrder(data: {
     try {
         const restaurantId = await requireRestaurantId()
         const orderNumber = `PO-${Date.now().toString().slice(-8)}`
-        const totalAmount = data.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+        const productIds = data.items.map(item => item.marketplaceProductId)
+        const products = await prisma.marketplaceProduct.findMany({
+            where: { id: { in: productIds } }
+        })
+
+        const productMap = new Map(products.map(p => [p.id, p]))
+
+        // Recalculate total securely
+        const secureItems = data.items.map(item => {
+            const dbProduct = productMap.get(item.marketplaceProductId)
+            if (!dbProduct) throw new Error(`Marketplace product not found: ${item.marketplaceProductId}`)
+            return {
+                marketplaceProductId: item.marketplaceProductId,
+                quantity: item.quantity,
+                unitPrice: dbProduct.price
+            }
+        })
+
+        const totalAmount = secureItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
 
         // 48 hours from now
         const estimatedDelivery = new Date()
@@ -362,13 +380,7 @@ export async function createMarketplaceOrder(data: {
                 restaurantId,
                 status: "ORDERED", // Immediately ordered from marketplace
                 estimatedDelivery,
-                items: {
-                    create: data.items.map(item => ({
-                        marketplaceProductId: item.marketplaceProductId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice
-                    }))
-                }
+                items: { create: secureItems }
             },
             include: { items: true }
         })
@@ -383,7 +395,7 @@ export async function createMarketplaceOrder(data: {
 
 export async function updatePurchaseOrderStatus(id: string, status: POStatus) {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
 
         const order = await prisma.purchaseOrder.update({
             where: { id, restaurantId },

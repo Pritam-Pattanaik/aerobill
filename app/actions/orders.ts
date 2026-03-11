@@ -77,7 +77,25 @@ export async function placeOrder(tableId: string, items: CartItem[], guestName?:
             }
         }
 
-        const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        const productIds = items.map(item => item.productId)
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds }, restaurantId: table.restaurantId }
+        })
+
+        const productMap = new Map(products.map(p => [p.id, p]))
+
+        // Calculate total securely using database prices
+        const secureItems = items.map(item => {
+            const dbProduct = productMap.get(item.productId)
+            if (!dbProduct) throw new Error(`Product not found: ${item.productId}`)
+            return {
+                productId: item.productId,
+                quantity: item.quantity,
+                priceAtTime: dbProduct.price
+            }
+        })
+        const totalAmount = secureItems.reduce((sum, item) => sum + item.priceAtTime * item.quantity, 0)
+        
         const order = await prisma.order.create({
             data: {
                 tableId,
@@ -87,7 +105,7 @@ export async function placeOrder(tableId: string, items: CartItem[], guestName?:
                 restaurantId: table.restaurantId,
                 guestName: guestName || null,
                 customerId,
-                items: { create: items.map((item) => ({ productId: item.productId, quantity: item.quantity, priceAtTime: item.price })) }
+                items: { create: secureItems }
             },
             include: { items: { include: { product: true } }, table: true }
         })

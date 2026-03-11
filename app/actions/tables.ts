@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { requireRestaurantId } from "@/lib/session"
+import { requireRestaurantId, requireRole } from "@/lib/session"
 
 export async function getTables() {
     try {
@@ -59,7 +59,7 @@ export async function toggleTableStatus(id: string) {
 
 export async function deleteTable(id: string) {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
         const orders = await prisma.order.findMany({ where: { tableId: id, restaurantId } })
         if (orders.length > 0) return { success: false, error: "Cannot delete: This table has order history" }
         await prisma.table.delete({ where: { id, restaurantId } })
@@ -106,7 +106,7 @@ export async function updateSettings(data: {
     fssaiCertificate?: string
 }) {
     try {
-        const restaurantId = await requireRestaurantId()
+        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
         const settings = await prisma.settings.upsert({
             where: { restaurantId },
             update: {
