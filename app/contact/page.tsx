@@ -1,6 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { prisma } from "@/lib/prisma"
+import { getContactInfo } from "@/app/actions/contact"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
@@ -48,11 +48,7 @@ const defaultContactInfo = {
 }
 
 export default async function ContactPage() {
-    let contactInfo = await prisma.contactInfo.findUnique({
-        where: { id: "contact-info" }
-    })
-
-    const contact = contactInfo || defaultContactInfo
+    const { contact } = await getContactInfo()
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
