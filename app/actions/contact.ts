@@ -18,9 +18,22 @@ const defaultContactInfo = {
     linkedin: null,
 }
 
+// Global cache to prevent excessive DB hits in serverless/dev
+const globalForContact = globalThis as unknown as {
+    contactCache: any
+    contactCacheTime: number
+}
+
 // Get contact info (public)
 export async function getContactInfo() {
-    unstable_noStore() // Ensure we always get fresh data
+    unstable_noStore() // Ensure we always get fresh data (from cache or DB)
+
+    // Check in-memory cache first (valid for 5 minutes)
+    const now = Date.now()
+    if (globalForContact.contactCache && globalForContact.contactCacheTime > now - 5 * 60 * 1000) {
+        return { success: true, contact: globalForContact.contactCache }
+    }
+
     try {
         let contact = await prisma.contactInfo.findUnique({
             where: { id: "contact-info" }
@@ -32,6 +45,10 @@ export async function getContactInfo() {
                 data: defaultContactInfo
             })
         }
+
+        // Update cache
+        globalForContact.contactCache = contact
+        globalForContact.contactCacheTime = Date.now()
 
         return { success: true, contact }
     } catch (error) {
@@ -82,6 +99,10 @@ export async function updateContactInfo(data: {
                 linkedin: data.linkedin || null,
             }
         })
+
+        // Invalidate global cache immediately
+        globalForContact.contactCache = null
+        globalForContact.contactCacheTime = 0
 
         // Invalidating all paths to ensure the footer and contact page update immediately
         try {

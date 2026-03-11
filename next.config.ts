@@ -1,4 +1,4 @@
- import type { NextConfig } from "next";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       static: 180,    // Cache static pages for 3 minutes
     },
   },
+  serverExternalPackages: ['ws'],
 };
 
 export default nextConfig;

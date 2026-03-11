@@ -126,7 +126,7 @@ export default function ContactManagementPage() {
                                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                 required
                                 className="w-full px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] focus:border-[var(--primary)] outline-none"
-                                placeholder="+91 8736098253"
+                                placeholder="+91 9777295707"
                             />
                         </div>
                         <div>
@@ -136,7 +136,7 @@ export default function ContactManagementPage() {
                                 value={form.whatsapp}
                                 onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
                                 className="w-full px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] focus:border-[var(--primary)] outline-none"
-                                placeholder="+91 8736098253"
+                                placeholder="+91 9777295707"
                             />
                         </div>
                         <div>

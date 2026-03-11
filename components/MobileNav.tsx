@@ -12,7 +12,7 @@ interface MobileNavContextType {
 
 const MobileNavContext = createContext<MobileNavContextType | null>(null)
 
-export function useMobileNav() {
+function useMobileNav() {
     const context = useContext(MobileNavContext)
     if (!context) throw new Error("useMobileNav must be used within MobileNavProvider")
     return context

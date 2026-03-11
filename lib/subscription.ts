@@ -1,7 +1,7 @@
 
 import { prisma } from "@/lib/prisma"
 
-export const PLAN_LIMITS = {
+const PLAN_LIMITS = {
     FREE: {
         products: 30,
         tables: 5
@@ -20,7 +20,7 @@ export const PLAN_LIMITS = {
     }
 } as const
 
-export type PlanType = keyof typeof PLAN_LIMITS
+type PlanType = keyof typeof PLAN_LIMITS
 
 export async function checkProductLimit(restaurantId: string): Promise<{ allowed: boolean; limit: number; current: number }> {
     // 1. Get current plan
@@ -48,7 +48,7 @@ export async function checkProductLimit(restaurantId: string): Promise<{ allowed
     }
 }
 
-export async function checkTableLimit(restaurantId: string): Promise<{ allowed: boolean; limit: number; current: number }> {
+async function checkTableLimit(restaurantId: string): Promise<{ allowed: boolean; limit: number; current: number }> {
     // 1. Get current plan
     const subscription = await prisma.subscription.findUnique({
         where: { restaurantId },

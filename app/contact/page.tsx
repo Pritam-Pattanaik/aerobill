@@ -1,8 +1,10 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { getContactInfo } from "@/app/actions/contact"
+import { prisma } from "@/lib/prisma"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
     title: "Contact Us - Aerobill | Get in Touch",
@@ -31,8 +33,26 @@ export const metadata: Metadata = {
     },
 }
 
+const defaultContactInfo = {
+    id: "contact-info",
+    email: "support@aerobill.in",
+    phone: "+91 9777295707",
+    whatsapp: "+91 9777295707",
+    address: "Bhubaneswar, Odisha, India",
+    mapUrl: null,
+    officeHours: "Mon-Sat: 9AM - 6PM IST",
+    facebook: null,
+    twitter: null,
+    instagram: null,
+    linkedin: null,
+}
+
 export default async function ContactPage() {
-    const { contact } = await getContactInfo()
+    let contactInfo = await prisma.contactInfo.findUnique({
+        where: { id: "contact-info" }
+    })
+
+    const contact = contactInfo || defaultContactInfo
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">

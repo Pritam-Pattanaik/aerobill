@@ -3,12 +3,12 @@
  * Sends WhatsApp messages using Green API
  */
 
-export type WhatsAppConfig = {
+type WhatsAppConfig = {
     instanceId: string
     token: string
 }
 
-export type SendMessageResult = {
+type SendMessageResult = {
     success: boolean
     messageId?: string
     error?: string

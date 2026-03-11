@@ -120,21 +120,6 @@ export async function getActiveOrders() {
     }
 }
 
-export async function getReadyOrders() {
-    try {
-        const restaurantId = await requireRestaurantId()
-        const orders = await prisma.order.findMany({
-            where: { restaurantId, status: "READY", paymentStatus: "UNPAID" },
-            include: { items: { include: { product: true } }, table: true },
-            orderBy: { createdAt: "asc" }
-        })
-        return { success: true, orders }
-    } catch (error) {
-        console.error("Failed to fetch ready orders:", error)
-        return { success: false, error: "Failed to fetch ready orders", orders: [] }
-    }
-}
-
 export async function updateOrderStatus(orderId: string, status: "PENDING" | "COOKING" | "READY" | "BILLED") {
     try {
         const restaurantId = await requireRestaurantId()
@@ -149,38 +134,6 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
     } catch (error) {
         console.error("Failed to update order status:", error)
         return { success: false, error: "Failed to update order status" }
-    }
-}
-
-export async function billOrder(orderId: string, customerPhone?: string) {
-    try {
-        const restaurantId = await requireRestaurantId()
-
-        // Update order status
-        const order = await prisma.order.update({
-            where: { id: orderId, restaurantId },
-            data: { status: "BILLED", paymentStatus: "PAID" },
-            include: { items: { include: { product: true } }, table: true }
-        })
-
-        // Deduct inventory if enabled
-        const settings = await prisma.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
-        if (settings?.inventoryDeduction !== false) {
-            await deductInventoryForOrder(orderId)
-        }
-
-        // Send WhatsApp notification (non-blocking)
-        if (customerPhone) {
-            sendBillingWhatsApp(restaurantId, customerPhone, order.totalAmount)
-        }
-
-        revalidatePath("/admin/billing")
-        revalidatePath("/admin/inventory")
-        revalidatePath("/admin")
-        return { success: true, order }
-    } catch (error) {
-        console.error("Failed to bill order:", error)
-        return { success: false, error: "Failed to bill order" }
     }
 }
 

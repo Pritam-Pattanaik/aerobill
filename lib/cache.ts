@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache'
 
 // Cache tags for granular invalidation
-export const CacheTags = {
+const CacheTags = {
     SYSTEM_STATS: 'system-stats',
     RESTAURANT_STATS: 'restaurant-stats',
     RESTAURANTS_LIST: 'restaurants-list',

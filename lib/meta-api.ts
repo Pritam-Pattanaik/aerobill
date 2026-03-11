@@ -226,29 +226,3 @@ export async function postToInstagram(
 
     return { id: publishData.id }
 }
-
-/**
- * Post text-only to Facebook (no image required)
- */
-export async function postTextToFacebook(
-    pageId: string,
-    pageAccessToken: string,
-    content: string
-): Promise<{ id: string }> {
-    const res = await fetch(`${META_GRAPH_URL}/${pageId}/feed`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            message: content,
-            access_token: pageAccessToken,
-        }),
-    })
-
-    const data = await res.json()
-
-    if (data.error) {
-        throw new Error(data.error.message || "Failed to post to Facebook")
-    }
-
-    return { id: data.id }
-}

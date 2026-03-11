@@ -173,7 +173,7 @@ export async function adjustInventoryQuantity(id: string, adjustment: number, re
 // LOW STOCK NOTIFICATIONS
 // =====================================
 
-export async function getLowStockItems() {
+async function getLowStockItems() {
     try {
         const restaurantId = await requireRestaurantId()
         // Get items where quantity <= lowStockThreshold
@@ -199,7 +199,7 @@ export async function getLowStockItems() {
     }
 }
 
-export async function getLowStockCount() {
+async function getLowStockCount() {
     try {
         const restaurantId = await requireRestaurantId()
         const allItems = await prisma.inventory.findMany({ where: { restaurantId } })
@@ -215,7 +215,7 @@ export async function getLowStockCount() {
 // PRODUCT INGREDIENTS (RECIPES)
 // =====================================
 
-export async function getProductIngredients(productId: string) {
+async function getProductIngredients(productId: string) {
     try {
         const restaurantId = await requireRestaurantId()
         const ingredients = await prisma.productIngredient.findMany({
@@ -229,7 +229,7 @@ export async function getProductIngredients(productId: string) {
     }
 }
 
-export async function addProductIngredient(productId: string, inventoryId: string, quantity: number) {
+async function addProductIngredient(productId: string, inventoryId: string, quantity: number) {
     try {
         const restaurantId = await requireRestaurantId()
         const ingredient = await prisma.productIngredient.create({
@@ -243,7 +243,7 @@ export async function addProductIngredient(productId: string, inventoryId: strin
     }
 }
 
-export async function updateProductIngredient(id: string, quantity: number) {
+async function updateProductIngredient(id: string, quantity: number) {
     try {
         const ingredient = await prisma.productIngredient.update({
             where: { id },
@@ -257,7 +257,7 @@ export async function updateProductIngredient(id: string, quantity: number) {
     }
 }
 
-export async function removeProductIngredient(id: string) {
+async function removeProductIngredient(id: string) {
     try {
         await prisma.productIngredient.delete({ where: { id } })
         revalidatePath("/admin/menu")
@@ -463,7 +463,7 @@ export async function updatePurchaseOrderStatus(id: string, status: POStatus) {
     }
 }
 
-export async function deletePurchaseOrder(id: string) {
+async function deletePurchaseOrder(id: string) {
     try {
         await prisma.purchaseOrder.delete({ where: { id } })
         revalidatePath("/admin/purchase-orders")
@@ -478,7 +478,7 @@ export async function deletePurchaseOrder(id: string) {
 // INVENTORY LOGS
 // =====================================
 
-export async function getInventoryLogs(inventoryId?: string, limit: number = 50) {
+async function getInventoryLogs(inventoryId?: string, limit: number = 50) {
     try {
         const restaurantId = await requireRestaurantId()
         const inventoryIds = inventoryId

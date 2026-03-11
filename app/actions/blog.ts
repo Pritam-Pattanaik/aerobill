@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
 // Types for blog post data
-export type BlogPostInput = {
+type BlogPostInput = {
     title: string
     slug: string
     excerpt: string
@@ -29,15 +29,7 @@ async function validateSuperAdmin() {
     return session
 }
 
-// Helper to generate slug from title
-export async function generateSlug(title: string): Promise<string> {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '')
-}
-
-// Get all blog posts (for admin - includes unpublished)
+// Helper to validate super admin session
 export async function getAllBlogPosts() {
     try {
         await validateSuperAdmin()

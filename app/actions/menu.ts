@@ -67,7 +67,7 @@ const getAllCategoriesFromDb = async (restaurantId: string) => {
     })
 }
 
-export async function getAllCategories() {
+async function getAllCategories() {
     try {
         const restaurantId = await requireRestaurantId()
 
@@ -97,7 +97,7 @@ export async function createCategory(name: string, sortOrder: number = 0) {
     }
 }
 
-export async function updateCategory(id: string, name: string, sortOrder: number) {
+async function updateCategory(id: string, name: string, sortOrder: number) {
     try {
         const restaurantId = await requireRestaurantId()
         const category = await prisma.category.update({ where: { id, restaurantId }, data: { name, sortOrder } })
@@ -130,7 +130,7 @@ const getProductsFromDb = async (restaurantId: string) => {
     })
 }
 
-export async function getProducts() {
+async function getProducts() {
     try {
         const restaurantId = await requireRestaurantId()
 
@@ -290,7 +290,7 @@ export async function addProductIngredient(productId: string, inventoryId: strin
     }
 }
 
-export async function updateProductIngredient(ingredientId: string, quantity: number) {
+async function updateProductIngredient(ingredientId: string, quantity: number) {
     try {
         await requireRestaurantId()
         const ingredient = await prisma.productIngredient.update({
