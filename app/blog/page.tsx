@@ -127,7 +127,7 @@ export default async function BlogPage() {
                                                 {post.coverImage && (
                                                     <div className="h-48 bg-gradient-to-br from-[#ff6b35]/20 to-[#ff8c5a]/20 relative overflow-hidden">
                                                         <Image
-                                                            src={post.coverImage}
+                                                            src={post.coverImage.replace(/[\n\r\s]+/g, '')}
                                                             alt={post.title}
                                                             fill
                                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
