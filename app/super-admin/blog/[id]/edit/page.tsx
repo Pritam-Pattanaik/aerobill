@@ -9,6 +9,18 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
 
+// Helper to bypass Next.js default /_next/image optimizer
+const getOptimizedCloudinaryUrl = (src: string) => {
+    if (!src) return src;
+    if (src.includes('res.cloudinary.com')) {
+        const parts = src.split('/upload/')
+        if (parts.length === 2) {
+            return `${parts[0]}/upload/w_800,q_75,f_auto/${parts[1]}`
+        }
+    }
+    return src
+}
+
 export default function EditBlogPostPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params)
     const router = useRouter()
@@ -303,9 +315,10 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
                             {formData.coverImage ? (
                                 <div className="relative h-40 rounded-xl overflow-hidden group border border-purple-500/20">
                                     <Image
-                                        src={formData.coverImage}
+                                        src={getOptimizedCloudinaryUrl(formData.coverImage.replace(/[\n\r\s]+/g, ''))}
                                         alt="Cover"
                                         fill
+                                        unoptimized={true}
                                         className="object-cover"
                                     />
                                     <button
