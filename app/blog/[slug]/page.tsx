@@ -6,6 +6,7 @@ import Image from "next/image"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getBlogPostBySlug, getPublishedBlogPosts } from "@/app/actions/blog"
+import PublicHeader from "@/components/PublicHeader"
 
 export const dynamic = "force-dynamic"
 
@@ -144,24 +145,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             />
             <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
                 {/* Navigation */}
-                <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
-                    <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                        <Link href="/" className="flex items-center">
-                            <Image src="/logo.png" alt="Aerobill" width={150} height={50} className="h-12 w-auto" />
-                        </Link>
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link href="/about" className="text-gray-300 hover:text-white transition">About</Link>
-                            <Link href="/pricing" className="text-gray-300 hover:text-white transition">Pricing</Link>
-                            <Link href="/blog" className="text-white font-medium">Blog</Link>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <Link href="/login" className="text-gray-300 hover:text-white transition">Login</Link>
-                            <Link href="/register" className="bg-[#ff6b35] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#ff8c5a] transition">
-                                Get Started
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+                <PublicHeader />
 
                 {/* Article Header */}
                 <article className="pt-32 pb-20 px-4">
