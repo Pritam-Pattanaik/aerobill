@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const keywords = post.keywords ? post.keywords.split(",").map((k: string) => k.trim()) : []
 
     return {
-        metadataBase: new URL("https://aerobill.in"),
+        metadataBase: new URL("https://www.aerobill.in"),
         title,
         description,
         keywords: [
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         openGraph: {
             type: "article",
             locale: "en_IN",
-            url: `https://aerobill.in/blog/${post.slug}`,
+            url: `https://www.aerobill.in/blog/${post.slug}`,
             siteName: "Aerobill",
             title: post.title,
             description: post.excerpt,
@@ -92,7 +92,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             images: post.coverImage ? [post.coverImage] : ["/og-image.png"],
         },
         alternates: {
-            canonical: `https://aerobill.in/blog/${post.slug}`,
+            canonical: `https://www.aerobill.in/blog/${post.slug}`,
         },
     }
 }
@@ -113,7 +113,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         "@type": "Article",
         headline: post.title,
         description: post.excerpt,
-        image: post.coverImage || "https://aerobill.in/og-image.png",
+        image: post.coverImage || "https://www.aerobill.in/og-image.png",
         author: {
             "@type": "Person",
             name: post.author,
@@ -123,14 +123,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             name: "Aerobill",
             logo: {
                 "@type": "ImageObject",
-                url: "https://aerobill.in/logo.png",
+                url: "https://www.aerobill.in/logo.png",
             },
         },
         datePublished: post.createdAt.toISOString(),
         dateModified: post.updatedAt.toISOString(),
         mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": `https://aerobill.in/blog/${post.slug}`,
+            "@id": `https://www.aerobill.in/blog/${post.slug}`,
         },
         keywords: post.keywords,
     }

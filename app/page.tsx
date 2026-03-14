@@ -7,7 +7,7 @@ import PublicFooter from "@/components/PublicFooter"
 
 // SEO Metadata for Homepage
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aerobill.in"),
+  metadataBase: new URL("https://www.aerobill.in"),
   title: "Best Restaurant Management Software in India | POS & Billing Software – Aerobill",
   description: "Aerobill offers advanced Restaurant Management Software in India with smart POS system, GST-compliant billing, inventory management, QR ordering, and real-time analytics. Simplify restaurant operations with our powerful cloud-based solution.",
   keywords: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://aerobill.in",
+    url: "https://www.aerobill.in",
     siteName: "Aerobill",
     title: "Aerobill - Best Restaurant Management Software | QR Code Ordering",
     description: "Transform your restaurant with QR-based ordering, real-time kitchen display, smart billing & powerful analytics. No hardware needed. Free plan available!",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     creator: "@aerobill",
   },
   alternates: {
-    canonical: "https://aerobill.in",
+    canonical: "https://www.aerobill.in",
   },
   category: "Technology",
 }
@@ -73,7 +73,7 @@ const jsonLd = {
     // FAQ Schema for Featured Snippets
     {
       "@type": "FAQPage",
-      "@id": "https://aerobill.in/#faq",
+      "@id": "https://www.aerobill.in/#faq",
       mainEntity: [
         {
           "@type": "Question",
@@ -144,12 +144,12 @@ const jsonLd = {
     // WebSite Schema for Sitelinks Search
     {
       "@type": "WebSite",
-      "@id": "https://aerobill.in/#website",
-      url: "https://aerobill.in",
+      "@id": "https://www.aerobill.in/#website",
+      url: "https://www.aerobill.in",
       name: "Aerobill",
       description: "Restaurant Management Software",
       publisher: {
-        "@id": "https://aerobill.in/#organization",
+        "@id": "https://www.aerobill.in/#organization",
       },
     },
   ],
