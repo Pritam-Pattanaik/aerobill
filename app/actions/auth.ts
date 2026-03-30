@@ -18,6 +18,7 @@ type RegisterInput = {
     fssaiLicense?: string
     // Subscription
     plan: "FREE" | "STARTER" | "BUSINESS" | "ENTERPRISE"
+    referralCode?: string
 }
 
 function generateSlug(name: string): string {
@@ -48,6 +49,16 @@ export async function registerRestaurant(data: RegisterInput) {
         // Hash password
         const passwordHash = await hash(data.password, 12)
 
+        let referredById = null
+        if (data.referralCode) {
+            const reseller = await prisma.reseller.findUnique({
+                where: { referralCode: data.referralCode }
+            })
+            if (reseller && reseller.isActive) {
+                referredById = reseller.id
+            }
+        }
+
         // Create restaurant with subscription, owner, and settings in transaction
         const restaurant = await prisma.$transaction(async (tx) => {
             // Create restaurant
@@ -60,6 +71,7 @@ export async function registerRestaurant(data: RegisterInput) {
                     address: data.restaurantAddress || null,
                     gstNumber: data.gstNumber || null,
                     fssaiLicense: data.fssaiLicense || null,
+                    referredById,
                 },
             })
 

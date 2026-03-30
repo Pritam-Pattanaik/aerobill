@@ -1,17 +1,34 @@
 const { PrismaClient } = require('@prisma/client');
-const fs = require('fs');
+const prisma = new PrismaClient();
 
-async function main() {
-    const prisma = new PrismaClient();
+async function checkDatabase() {
     try {
-        console.log("Fetching contact info...");
-        const data = await prisma.contactInfo.findMany();
-        fs.writeFileSync('db-contact-info.json', JSON.stringify(data, null, 2));
-        console.log("Wrote to db-contact-info.json");
+        console.log("Checking for Test Agent Reseller...");
+        const reseller = await prisma.reseller.findUnique({
+            where: { email: 'testagent@example.com' },
+            include: { restaurants: true }
+        });
+
+        if (!reseller) {
+            console.log("Reseller not found.");
+            return;
+        }
+
+        console.log("Found Reseller:", reseller.name);
+        console.log("Referral Code:", reseller.referralCode);
+        console.log("Restaurants Referred:", reseller.restaurants.length);
+        
+        if (reseller.restaurants.length > 0) {
+            console.log("Referred Restaurant Link Verified:");
+            reseller.restaurants.forEach(rest => {
+                console.log(`- ${rest.name} (${rest.email})`);
+            });
+        }
     } catch (e) {
-        console.error(e);
+        console.error("DB Error:", e);
     } finally {
         await prisma.$disconnect();
     }
 }
-main();
+
+checkDatabase();

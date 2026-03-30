@@ -70,10 +70,38 @@ export async function POST(request: NextRequest) {
             if (customerEmail) {
                 const restaurant = await prisma.restaurant.findUnique({
                     where: { email: customerEmail },
-                    include: { subscription: true },
+                    include: { subscription: true, referredBy: true },
                 })
 
                 if (restaurant) {
+                    // Calculate and credit commission if this is a newly paid charge
+                    if (event.event === "subscription.charged" && restaurant.referredBy) {
+                        const amountPaidStr = event.payload.payment?.entity?.amount
+                        if (amountPaidStr) {
+                            // Razorpay amount is in paise (e.g. 29900 = 299 INR)
+                            const amountPaid = Number(amountPaidStr) / 100
+                            const commission = amountPaid * 0.20 // 20%
+
+                            // Update reseller balance and create log point
+                            await prisma.$transaction([
+                                prisma.reseller.update({
+                                    where: { id: restaurant.referredById! },
+                                    data: { totalBalance: { increment: commission } }
+                                }),
+                                prisma.commissionLog.create({
+                                    data: {
+                                        resellerId: restaurant.referredById!,
+                                        restaurantId: restaurant.id,
+                                        subscriptionId: razorpaySubId,
+                                        amount: commission,
+                                        description: `20% commission from ${plan} subscription (${amountPaid} INR)`
+                                    }
+                                })
+                            ])
+                            console.log(`[Razorpay Webhook] Credited ${commission} to reseller ${restaurant.referredById}`)
+                        }
+                    }
+
                     // Update or create subscription
                     if (restaurant.subscription) {
                         await prisma.subscription.update({

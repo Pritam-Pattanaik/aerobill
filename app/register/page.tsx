@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { registerRestaurant } from "@/app/actions/auth"
 
@@ -16,7 +16,18 @@ const plans = [
 ]
 
 export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">Loading...</div>}>
+            <RegisterForm />
+        </Suspense>
+    )
+}
+
+function RegisterForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const referralCode = searchParams.get("ref")
+    
     const [step, setStep] = useState<Step>(1)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
@@ -89,6 +100,7 @@ export default function RegisterPage() {
                 gstNumber: restaurant.gst,
                 fssaiLicense: restaurant.fssai,
                 plan: "FREE", // Always start with FREE
+                referralCode: referralCode || undefined,
             })
 
             if (result.success) {

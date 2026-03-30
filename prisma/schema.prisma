@@ -64,6 +64,8 @@ model Restaurant {
   fssaiLicense   String?
   logo           String?
   isActive       Boolean         @default(true)
+  referredById   String?
+  referredBy     Reseller?       @relation(fields: [referredById], references: [id])
   subscription   Subscription?
   users          User[]
   categories     Category[]
@@ -78,8 +80,11 @@ model Restaurant {
   socialPosts    SocialPost[]
   deletionRequests DataDeletionRequest[]
   offers         Offer[]
+  commissionLogs CommissionLog[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([referredById])
 }
 
 // Subscription for each restaurant
@@ -521,4 +526,38 @@ enum TriggerType {
   MANUAL
   VISIT_FREQUENCY
   ORDER_AMOUNT
+}
+
+// =====================================
+// RESELLER SYSTEM
+// =====================================
+
+model Reseller {
+  id           String          @id @default(cuid())
+  name         String
+  email        String          @unique
+  passwordHash String
+  phone        String?
+  referralCode String          @unique // e.g. "AERO2024"
+  totalBalance Float           @default(0) // Total commission earned
+  isActive     Boolean         @default(true)
+  restaurants  Restaurant[]    // Restaurants referred by this reseller
+  commissions  CommissionLog[] // History of commissions earned
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model CommissionLog {
+  id              String     @id @default(cuid())
+  resellerId      String
+  reseller        Reseller   @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  restaurantId    String
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  subscriptionId  String?    // The specific subscription/payment ID
+  amount          Float      // The 20% commission amount
+  description     String?    // Details of the payment
+  createdAt       DateTime   @default(now())
+
+  @@index([resellerId])
+  @@index([restaurantId])
 }

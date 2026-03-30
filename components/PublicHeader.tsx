@@ -31,8 +31,11 @@ export default function PublicHeader() {
                     ))}
                 </div>
 
-                {/* Right side: Login + Get Started (desktop), Hamburger (mobile) */}
+                {/* Right side: Actions (desktop), Hamburger (mobile) */}
                 <div className="flex items-center gap-2 md:gap-4">
+                    <Link href="/reseller" className="hidden md:block text-gray-300 hover:text-[#ff6b35] transition text-sm md:text-base font-medium">
+                        Become Reseller
+                    </Link>
                     <Link href="/login" className="hidden sm:block text-gray-300 hover:text-white transition text-sm md:text-base">
                         Login
                     </Link>
@@ -73,6 +76,13 @@ export default function PublicHeader() {
                             {link.label}
                         </Link>
                     ))}
+                    <Link
+                        href="/reseller"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-2 px-4 rounded-lg text-[#ff6b35] hover:text-[#ff8c5a] hover:bg-white/5 transition md:hidden"
+                    >
+                        Become Reseller
+                    </Link>
                     <Link
                         href="/login"
                         onClick={() => setMobileMenuOpen(false)}
