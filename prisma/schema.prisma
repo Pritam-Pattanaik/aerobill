@@ -572,3 +572,23 @@ model CommissionLog {
   @@index([resellerId])
   @@index([restaurantId])
 }
+
+// =====================================
+// SERVICE PAGES (Marketing)
+// =====================================
+
+model ServicePage {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  title           String
+  description     String
+  heroHeading     String
+  heroSubheading  String
+  features        Json     // Array of features
+  benefits        Json     // Array of benefits
+  faqs            Json     // Array of FAQs
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

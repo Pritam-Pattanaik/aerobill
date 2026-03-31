@@ -14,6 +14,7 @@ export default function PublicFooter() {
                 <div className="flex gap-6 text-gray-400 text-sm flex-wrap justify-center">
                     <Link href="/" className="hover:text-white transition">Home</Link>
                     <Link href="/about" className="hover:text-white transition">About</Link>
+                    <Link href="/services" className="hover:text-white transition">Services</Link>
                     <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
                     <Link href="/blog" className="hover:text-white transition">Blog</Link>
                     <Link href="/contact" className="hover:text-white transition">Contact</Link>
