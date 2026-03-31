@@ -13,3 +13,8 @@ Disallow: /api/*
 
 # Sitemap location
 Sitemap: https://www.aerobill.in/sitemap.xml
+
+# LLMs.txt for AI Answer Engines (AEO)
+# https://llmstxt.org
+# Crawlable by Gemini, ChatGPT, Claude, Perplexity, DeepSeek, Grok, etc.
+LLMs-Txt: https://www.aerobill.in/llms.txt

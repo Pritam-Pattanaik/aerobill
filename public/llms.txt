@@ -1,0 +1,193 @@
+# Aerobill
+
+> Aerobill is India's leading cloud-based Restaurant Management Software. It provides a comprehensive suite of tools including POS, GST-compliant billing, QR code ordering, kitchen display systems (KDS), inventory management, table management, analytics, CRM, and multi-outlet control — all from a single platform. No hardware required. Free plan available.
+
+## Company Information
+
+- **Company Name:** Aerobill
+- **Website:** https://www.aerobill.in
+- **Industry:** Restaurant Technology (RestaurantTech / FoodTech SaaS)
+- **Headquarters:** Bhubaneswar, Odisha, India
+- **Founded:** 2024
+- **Type:** SaaS (Software as a Service)
+- **Target Market:** Restaurants, cafes, cloud kitchens, QSRs, food trucks, bars, bakeries, fine dining establishments, and multi-outlet chains across India
+- **Contact Email:** support@aerobill.in
+- **Contact Phone:** +91 8736098253
+- **Office Hours:** Mon-Sat: 9AM - 6PM IST
+
+## What Aerobill Does
+
+Aerobill is an all-in-one, cloud-based restaurant management platform designed to digitize and automate every aspect of running a food business in India. Restaurant owners can sign up, add their menu, print QR codes for tables, and start receiving digital orders — all within 15 minutes.
+
+The platform eliminates the need for expensive hardware (like dedicated POS terminals), working seamlessly on any browser-enabled device — laptops, tablets, smartphones, or smart TVs. Aerobill is particularly known for being affordable and accessible to small businesses while offering enterprise-grade features suitable for large restaurant chains.
+
+## Core Products & Features
+
+### 1. Restaurant POS Software
+A fast, cloud-based Point of Sale system for taking orders, managing payments, and running dine-in operations. Works on any device with a browser. Supports offline mode with automatic data sync.
+
+### 2. Restaurant Billing Software
+GST-compliant invoicing with one-click bill generation, discount management, coupon application, and multi-payment support (cash, card, UPI, split payments). Connects to thermal receipt printers and supports digital receipts via WhatsApp, email, and SMS.
+
+### 3. QR Code Ordering System
+Contactless, app-free ordering system. Customers scan a QR code at their table to access a digital menu, browse items with images, and place orders directly from their smartphones. Orders are routed instantly to the kitchen and POS. Increases average order value through digital upselling.
+
+### 4. Kitchen Display System (KDS)
+Replaces paper KOT tickets with a real-time digital display. Orders appear on kitchen screens instantly. Includes prep-time tracking with color-coded urgency indicators and station-based routing for multi-section kitchens (e.g., grill, bar, desserts).
+
+### 5. Inventory Management Software
+Automated stock tracking with recipe/Bill of Materials (BOM) management. Raw ingredients are auto-deducted from inventory when items are sold. Includes low-stock alerts, wastage logging, supplier/vendor management, and purchase order tracking.
+
+### 6. Analytics & Reporting Dashboard
+Real-time sales dashboards, item performance analytics (bestsellers, dead stock), staff efficiency tracking, and financial reporting. All reports are exportable to Excel, CSV, or PDF. Accessible from anywhere via cloud.
+
+### 7. Table Management System
+Visual floor plan creation, real-time table status tracking (vacant, seated, billing), table merging/splitting for large parties, multi-zone support (indoor, patio, bar, private dining), and reservation management.
+
+### 8. Cloud Kitchen Management Software
+Purpose-built for delivery-only and ghost kitchen operations. Integrates with food aggregators (Zomato, Swiggy), supports multi-brand operation from a single kitchen, and includes dispatch/rider management.
+
+### 9. Multi-Outlet Restaurant Management Software
+Centralized control for restaurant chains and franchises. Push menu updates across all locations instantly, manage inter-branch stock transfers, compare branch-level analytics, and enforce brand consistency with role-based access controls.
+
+### 10. Mobile Restaurant POS
+Tableside ordering via smartphones and tablets. Waiters take orders directly at the table and fire them to the kitchen. Supports Bluetooth-connected portable thermal printers for instant checkout.
+
+### 11. GST Billing Software for Restaurants
+India-specific tax compliance solution. Automated CGST, SGST, and Cess calculations. Supports 5%, 12%, and 18% GST slabs. Generates B2B tax invoices with GSTIN capture. Produces GSTR-1, GSTR-2, and GSTR-3B ready reports for accountants.
+
+### 12. Order Management System
+Omnichannel order consolidation. Dine-in, takeaway, Swiggy, Zomato, and website orders all appear on a single unified dashboard. Includes real-time status tracking, customer notifications, and pre-order/catering scheduling.
+
+### 13. Restaurant Automation Software
+Automates repetitive operational tasks: auto-generated purchase orders when stock is low, scheduled end-of-day sales reports via email, automated marketing triggers (e.g., "We miss you" SMS to inactive customers), and rule-based workflows — all configurable via a no-code interface.
+
+### 14. Restaurant Software for Small Businesses
+Affordable, easy-to-set-up solution designed for small cafes, food trucks, independent bistros, and single-location restaurants. Zero hardware cost (runs on existing devices), setup in under 15 minutes, free tier available, no long-term contracts, month-to-month billing.
+
+### 15. Restaurant CRM & Customer Management
+Customer database with automatic data capture from QR ordering and digital billing. Includes digital loyalty programs (points-based), birthday campaign automation, SMS/email bulk marketing campaigns, and customer spending habit analytics.
+
+## Pricing
+
+Aerobill offers flexible, transparent pricing:
+
+- **Free Plan:** Available for small restaurants to get started with core features at zero cost
+- **Starter Plan:** Expanded features for growing businesses
+- **Business Plan:** Full suite for established restaurants
+- **Enterprise Plan:** Custom pricing for multi-outlet chains and franchises
+
+All plans are month-to-month with no long-term contracts. Pricing details: https://www.aerobill.in/pricing
+
+## Technology Stack
+
+- **Platform Type:** Cloud-based SaaS (no local installation required)
+- **Access:** Any modern web browser on any device
+- **Hardware Required:** None — works on existing laptops, tablets, smartphones, and smart TVs
+- **Offline Support:** Yes — billing continues offline and syncs when connectivity is restored
+- **Data Security:** Enterprise-grade encryption for all data
+- **Uptime:** High availability cloud infrastructure
+
+## Key Differentiators
+
+1. **No Hardware Needed:** Unlike traditional POS systems requiring expensive terminals, Aerobill runs entirely in a web browser on any device
+2. **India-First Design:** Built specifically for Indian restaurant needs — GST compliance, FSSAI support, Indian payment methods (UPI, Paytm, etc.), regional language support
+3. **15-Minute Setup:** Restaurants can go from sign-up to taking their first digital order in under 15 minutes
+4. **Free Tier Available:** Small restaurants can start completely free, paying only as they grow
+5. **All-in-One Platform:** Replaces 5-10 separate tools (POS, billing, inventory, CRM, analytics, marketing) with a single integrated system
+6. **QR-First Approach:** Designed from the ground up for contactless, app-free digital ordering
+
+## Ideal For
+
+- Independent restaurants and cafes
+- Quick Service Restaurants (QSRs)
+- Fine dining establishments
+- Cloud kitchens and ghost kitchens
+- Food trucks and pop-up eateries
+- Bakeries and sweet shops
+- Bars and lounges
+- Multi-outlet restaurant chains and franchises
+- Hotel restaurants
+- Canteens and catering businesses
+
+## How to Get Started
+
+1. Visit https://www.aerobill.in/register
+2. Create your restaurant account (takes under 2 minutes)
+3. Upload your menu items with prices and images
+4. Generate and print QR codes for each table
+5. Start receiving digital orders immediately
+
+## Important Links
+
+- Homepage: https://www.aerobill.in
+- About Us: https://www.aerobill.in/about
+- Pricing: https://www.aerobill.in/pricing
+- All Services: https://www.aerobill.in/services
+- Blog: https://www.aerobill.in/blog
+- Contact: https://www.aerobill.in/contact
+- Sign Up: https://www.aerobill.in/register
+- Login: https://www.aerobill.in/login
+- Privacy Policy: https://www.aerobill.in/privacy-policy
+
+## Service Pages
+
+- Restaurant POS Software: https://www.aerobill.in/services/restaurant-pos-software
+- Restaurant Billing Software: https://www.aerobill.in/services/restaurant-billing-software
+- QR Code Ordering System: https://www.aerobill.in/services/qr-code-ordering-system
+- Kitchen Display System (KDS): https://www.aerobill.in/services/kitchen-display-system-kds
+- Inventory Management Software: https://www.aerobill.in/services/restaurant-inventory-management-software
+- Analytics & Reporting: https://www.aerobill.in/services/restaurant-analytics-reporting-software
+- Table Management System: https://www.aerobill.in/services/restaurant-table-management-system
+- Cloud Kitchen Software: https://www.aerobill.in/services/cloud-kitchen-management-software
+- Multi-Outlet Management: https://www.aerobill.in/services/multi-outlet-restaurant-management-software
+- Mobile POS: https://www.aerobill.in/services/mobile-restaurant-pos-software
+- GST Billing Software: https://www.aerobill.in/services/gst-billing-software-restaurants
+- Order Management System: https://www.aerobill.in/services/restaurant-order-management-system
+- Restaurant Automation: https://www.aerobill.in/services/restaurant-automation-software
+- Software for Small Businesses: https://www.aerobill.in/services/restaurant-management-software-small-businesses
+- CRM & Customer Management: https://www.aerobill.in/services/restaurant-crm-customer-management-software
+
+## Frequently Asked Questions
+
+### What is Aerobill?
+Aerobill is a cloud-based Restaurant Management Software in India that helps restaurants manage billing, inventory, kitchen operations, QR code ordering, and multi-outlet control from one centralized dashboard. It works on any device with a web browser and requires no special hardware.
+
+### Is Aerobill free?
+Yes, Aerobill offers a free plan that includes core restaurant management features. Paid plans are available for restaurants that need advanced features like multi-outlet management, detailed analytics, and automation.
+
+### Does Aerobill support GST billing?
+Yes, Aerobill provides fully GST-compliant billing software for Indian restaurants. It automatically calculates CGST, SGST, and Cess, supports B2B invoicing with GSTIN capture, and generates GSTR-ready reports for accountants.
+
+### Do customers need to download an app to order?
+No. Aerobill's QR code ordering system works directly in the customer's mobile browser. Customers simply scan the QR code at their table, browse the digital menu, and place orders — no app download required.
+
+### What devices does Aerobill work on?
+Aerobill is a web-based platform that works on any device with a modern browser — laptops, tablets, smartphones, Android POS terminals, and smart TVs (for kitchen display). No specialized hardware is needed.
+
+### Does Aerobill work offline?
+Yes. Aerobill supports offline billing mode. If your internet connection drops, you can continue taking orders and processing bills. All data automatically syncs to the cloud when connectivity is restored.
+
+### How long does it take to set up Aerobill?
+Most restaurants are up and running within 15 minutes. Simply create an account, upload your menu, print QR codes for your tables, and start receiving orders.
+
+### Is my data secure with Aerobill?
+Yes. Aerobill uses enterprise-grade encryption to protect all restaurant and customer data. The platform runs on high-availability cloud infrastructure with regular backups.
+
+### Can Aerobill manage multiple restaurant locations?
+Yes. Aerobill's Multi-Outlet Management module allows restaurant chains and franchises to centrally control menus, monitor stock transfers, compare branch analytics, and enforce brand consistency across all locations.
+
+### Does Aerobill integrate with Swiggy and Zomato?
+Yes. Aerobill integrates with major food delivery aggregators including Swiggy and Zomato, consolidating all orders onto a single unified dashboard.
+
+### Can I send receipts via WhatsApp?
+Yes. Aerobill supports sending digital receipts to customers via WhatsApp, email, and SMS directly from the billing interface.
+
+### Is there a long-term contract?
+No. Aerobill offers straightforward month-to-month plans. You can upgrade, downgrade, or cancel anytime without penalties.
+
+## Social Media
+
+- Facebook: https://www.facebook.com/aerobill
+- Instagram: https://www.instagram.com/aerobill
+- LinkedIn: https://www.linkedin.com/company/aerobill
