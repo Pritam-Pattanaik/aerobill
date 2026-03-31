@@ -47,6 +47,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 })
         }
 
+        // Validate file size (max 5MB)
+        const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+        if (file.size > MAX_FILE_SIZE) {
+            return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 400 })
+        }
+
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: "aerobill-blog",
-                    resource_type: "auto"
+                    resource_type: "image"
                 },
                 (error, result) => {
                     if (error) reject(error)

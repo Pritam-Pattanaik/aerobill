@@ -6,6 +6,7 @@ import {
     getFacebookPages,
     getInstagramAccount,
 } from "@/lib/meta-api"
+import crypto from "crypto"
 
 /**
  * GET /api/social-media/callback
@@ -32,11 +33,29 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        // Decode state to get restaurantId
+        // Decode and verify HMAC-signed state to get restaurantId
         let restaurantId: string
         try {
-            const decoded = JSON.parse(Buffer.from(state, "base64").toString())
+            const lastDot = state.lastIndexOf('.')
+            if (lastDot === -1) throw new Error("Invalid state format")
+            const payloadBase64 = state.substring(0, lastDot)
+            const signature = state.substring(lastDot + 1)
+
+            // Verify HMAC signature
+            const secret = process.env.NEXTAUTH_SECRET || ''
+            const expectedSignature = crypto.createHmac('sha256', secret).update(payloadBase64).digest('hex')
+            if (expectedSignature.length !== signature.length ||
+                !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))) {
+                throw new Error("Invalid state signature")
+            }
+
+            const decoded = JSON.parse(Buffer.from(payloadBase64, "base64").toString())
             restaurantId = decoded.restaurantId
+
+            // Reject states older than 10 minutes
+            if (Date.now() - decoded.timestamp > 10 * 60 * 1000) {
+                throw new Error("State expired")
+            }
         } catch {
             return NextResponse.redirect(
                 new URL("/admin/social-media?error=invalid_state", request.url)

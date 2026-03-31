@@ -53,6 +53,19 @@ export async function placeOrder(tableId: string, items: CartItem[], guestName?:
         const table = await prisma.table.findUnique({ where: { id: tableId } })
         if (!table) return { success: false, error: "Table not found" }
 
+        // Validate items input
+        if (!items || items.length === 0) {
+            return { success: false, error: "Order must contain at least one item" }
+        }
+        for (const item of items) {
+            if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+                return { success: false, error: `Invalid quantity for ${item.name}: must be a positive integer` }
+            }
+            if (item.quantity > 100) {
+                return { success: false, error: `Quantity for ${item.name} exceeds maximum of 100` }
+            }
+        }
+
         // Find or create customer if phone provided
         let customerId: string | undefined
         if (customerPhone && guestName) {
@@ -110,10 +123,6 @@ export async function placeOrder(tableId: string, items: CartItem[], guestName?:
             include: { items: { include: { product: true } }, table: true }
         })
 
-        // Handle Customer Creation/Linking (Fire and forget or await)
-        if (guestName || (items as any).phone) { // Casting items to any to access phone if passed, wait, I need to update signature.
-            // Moving logic outside to keep placeOrder clean, or I should update signature.
-        }
 
         revalidatePath("/kitchen")
         return { success: true, order }

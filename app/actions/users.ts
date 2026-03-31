@@ -23,7 +23,12 @@ export async function getUsers() {
 
 export async function createUser(data: { name: string; email: string; password: string; role: Role }) {
     try {
-        const { restaurantId } = await requireRole(["OWNER", "ADMIN"])
+        const { restaurantId, role: callerRole } = await requireRole(["OWNER", "ADMIN"])
+
+        // Prevent role escalation: only OWNER can create OWNER users
+        if (data.role === "OWNER" && callerRole !== "OWNER") {
+            return { success: false, error: "Only owners can create other owner accounts" }
+        }
 
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({ where: { email: data.email } })

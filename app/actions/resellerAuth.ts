@@ -3,6 +3,27 @@
 import { prisma } from "@/lib/prisma"
 import { hash, compare } from "bcryptjs"
 import { cookies } from "next/headers"
+import crypto from "crypto"
+
+// Sign a value with HMAC to prevent cookie tampering
+function signValue(value: string): string {
+    const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret'
+    const signature = crypto.createHmac('sha256', secret).update(value).digest('hex')
+    return `${value}.${signature}`
+}
+
+// Verify and extract signed value
+function verifySignedValue(signedValue: string): string | null {
+    const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret'
+    const lastDot = signedValue.lastIndexOf('.')
+    if (lastDot === -1) return null
+    const value = signedValue.substring(0, lastDot)
+    const signature = signedValue.substring(lastDot + 1)
+    const expectedSignature = crypto.createHmac('sha256', secret).update(value).digest('hex')
+    if (expectedSignature.length !== signature.length) return null
+    const isValid = crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))
+    return isValid ? value : null
+}
 
 export async function registerReseller(data: { name: string; email: string; phone?: string; password: string }) {
     try {
@@ -43,9 +64,10 @@ export async function registerReseller(data: { name: string; email: string; phon
 
         // Simply set a cookie for auth (since this is a separate portal)
         const cookieStore = await cookies()
-        cookieStore.set("reseller_session", reseller.id, {
+        cookieStore.set("reseller_session", signValue(reseller.id), {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7, // 1 week
             path: "/"
         })
@@ -73,9 +95,10 @@ export async function loginReseller(data: { email: string; password: string }) {
         }
 
         const cookieStore = await cookies()
-        cookieStore.set("reseller_session", reseller.id, {
+        cookieStore.set("reseller_session", signValue(reseller.id), {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7, // 1 week
             path: "/"
         })
@@ -95,7 +118,10 @@ export async function logoutReseller() {
 
 export async function getResellerData() {
     const cookieStore = await cookies()
-    const sessionId = cookieStore.get("reseller_session")?.value
+    const signedSessionId = cookieStore.get("reseller_session")?.value
+    if (!signedSessionId) return null
+
+    const sessionId = verifySignedValue(signedSessionId)
     if (!sessionId) return null
 
     try {

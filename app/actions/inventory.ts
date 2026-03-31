@@ -143,6 +143,11 @@ export async function adjustInventoryQuantity(id: string, adjustment: number, re
         const oldItem = await prisma.inventory.findUnique({ where: { id } })
         if (!oldItem) return { success: false, error: "Item not found" }
 
+        const newQuantity = oldItem.quantity + adjustment
+        if (newQuantity < 0) {
+            return { success: false, error: "Adjustment would result in negative stock" }
+        }
+
         const item = await prisma.inventory.update({
             where: { id, restaurantId },
             data: { quantity: { increment: adjustment } }
@@ -271,10 +276,16 @@ async function removeProductIngredient(id: string) {
 }
 
 // Auto-deduct inventory when order is completed
-export async function deductInventoryForOrder(orderId: string) {
+export async function deductInventoryForOrder(orderId: string, restaurantId?: string) {
     try {
+        // Build query with restaurantId scoping if provided
+        const whereClause: { id: string; restaurantId?: string } = { id: orderId }
+        if (restaurantId) {
+            whereClause.restaurantId = restaurantId
+        }
+
         const order = await prisma.order.findUnique({
-            where: { id: orderId },
+            where: whereClause,
             include: {
                 items: {
                     include: {
@@ -479,7 +490,8 @@ export async function updatePurchaseOrderStatus(id: string, status: POStatus) {
 
 async function deletePurchaseOrder(id: string) {
     try {
-        await prisma.purchaseOrder.delete({ where: { id } })
+        const restaurantId = await requireRestaurantId()
+        await prisma.purchaseOrder.delete({ where: { id, restaurantId } })
         revalidatePath("/admin/purchase-orders")
         return { success: true }
     } catch (error) {

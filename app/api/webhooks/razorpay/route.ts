@@ -15,7 +15,12 @@ function verifyWebhookSignature(body: string, signature: string, secret: string)
         .createHmac("sha256", secret)
         .update(body)
         .digest("hex")
-    return expectedSignature === signature
+    // Use constant-time comparison to prevent timing attacks
+    if (expectedSignature.length !== signature.length) return false
+    return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(signature, 'hex')
+    )
 }
 
 export async function POST(request: NextRequest) {

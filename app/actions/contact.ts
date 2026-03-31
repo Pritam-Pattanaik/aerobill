@@ -1,14 +1,16 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { revalidatePath, unstable_noStore } from "next/cache"
+import { revalidatePath } from "next/cache"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 // Default contact info used when no record exists
 const defaultContactInfo = {
     id: "contact-info",
     email: "support@aerobill.in",
-    phone: "+91 8736098253",
-    whatsapp: "+91 8736098253",
+    phone: "+91 9777295707",
+    whatsapp: "+91 9777295707",
     address: "Bhubaneswar, Odisha, India",
     mapUrl: null,
     officeHours: "Mon-Sat: 9AM - 6PM IST",
@@ -26,7 +28,6 @@ const globalForContact = globalThis as unknown as {
 
 // Get contact info (public)
 export async function getContactInfo() {
-    unstable_noStore() // Ensure we always get fresh data (from cache or DB)
 
     // Check in-memory cache first (valid for 5 minutes)
     const now = Date.now()
@@ -71,6 +72,12 @@ export async function updateContactInfo(data: {
     linkedin?: string
 }) {
     try {
+        // Verify super-admin authentication
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.isSuperAdmin) {
+            return { success: false, error: "Unauthorized: Super admin access required" }
+        }
+
         const contact = await prisma.contactInfo.upsert({
             where: { id: "contact-info" },
             update: {

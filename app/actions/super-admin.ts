@@ -70,8 +70,7 @@ const getCachedSystemStats = unstable_cache(
 
 // Get platform-wide statistics (with caching)
 export async function getSystemStats() {
-    // Note: We authenticate in the page component instead of here to avoid
-    // Next.js static bailout/cache scope poisoning issues with unstable_cache.
+    await validateSuperAdmin()
     return getCachedSystemStats()
 }
 

@@ -19,6 +19,21 @@ type BlogPostInput = {
     keywords?: string
 }
 
+// Sanitize HTML content to prevent stored XSS
+function sanitizeHtml(html: string): string {
+    return html
+        // Remove script tags and their contents
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        // Remove event handler attributes (onclick, onerror, onload, etc.)
+        .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        // Remove javascript: URIs
+        .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"')
+        .replace(/src\s*=\s*["']javascript:[^"']*["']/gi, 'src=""')
+        // Remove iframe, object, embed tags
+        .replace(/<(iframe|object|embed|form)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+        .replace(/<(iframe|object|embed|form)\b[^>]*\/?>/gi, '')
+}
+
 // Helper to validate super admin session
 async function validateSuperAdmin() {
     const session = await getServerSession(authOptions)
@@ -126,7 +141,7 @@ export async function createBlogPost(data: BlogPostInput) {
                 title: data.title,
                 slug: data.slug,
                 excerpt: data.excerpt,
-                content: data.content,
+                content: sanitizeHtml(data.content),
                 coverImage: data.coverImage || null,
                 author: data.author || "Aerobill Team",
                 isPublished: data.isPublished || false,
@@ -171,7 +186,7 @@ export async function updateBlogPost(id: string, data: Partial<BlogPostInput>) {
                 ...(data.title && { title: data.title }),
                 ...(data.slug && { slug: data.slug }),
                 ...(data.excerpt && { excerpt: data.excerpt }),
-                ...(data.content && { content: data.content }),
+                ...(data.content && { content: sanitizeHtml(data.content) }),
                 ...(data.coverImage !== undefined && { coverImage: data.coverImage || null }),
                 ...(data.author && { author: data.author }),
                 ...(data.isPublished !== undefined && { isPublished: data.isPublished }),

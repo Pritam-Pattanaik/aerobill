@@ -2,6 +2,17 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+
+// Helper to validate super admin session
+async function validateSuperAdmin() {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isSuperAdmin) {
+        throw new Error("Unauthorized: Super admin access required")
+    }
+    return session
+}
 
 // =====================================
 // MARKETPLACE PRODUCTS (Super Admin)
@@ -42,6 +53,7 @@ export async function createMarketplaceProduct(data: {
     minOrder?: number
 }) {
     try {
+        await validateSuperAdmin()
         const product = await prisma.marketplaceProduct.create({
             data: {
                 name: data.name,
@@ -72,6 +84,7 @@ export async function updateMarketplaceProduct(id: string, data: {
     inStock?: boolean
 }) {
     try {
+        await validateSuperAdmin()
         const product = await prisma.marketplaceProduct.update({
             where: { id },
             data
@@ -86,6 +99,7 @@ export async function updateMarketplaceProduct(id: string, data: {
 
 export async function deleteMarketplaceProduct(id: string) {
     try {
+        await validateSuperAdmin()
         await prisma.marketplaceProduct.delete({ where: { id } })
         revalidatePath("/super-admin/marketplace")
         return { success: true }
@@ -97,6 +111,7 @@ export async function deleteMarketplaceProduct(id: string) {
 
 export async function toggleMarketplaceProductStock(id: string) {
     try {
+        await validateSuperAdmin()
         const product = await prisma.marketplaceProduct.findUnique({ where: { id } })
         if (!product) return { success: false, error: "Product not found" }
 
