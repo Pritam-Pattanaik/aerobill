@@ -1,9 +1,10 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
     title: "Pricing - Aerobill | Affordable Restaurant Management Software Plans",
     description: "Simple, transparent pricing for Aerobill restaurant management software. Start free forever or upgrade for more features. No hidden fees, no commissions. Plans from ₹0/month.",
     keywords: ["aerobill pricing", "restaurant software cost", "pos system pricing", "free restaurant management", "qr ordering price"],
@@ -28,6 +29,10 @@ export const metadata: Metadata = {
         index: true,
         follow: true,
     },
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return generatePageMetadata("/pricing", fallbackMetadata)
 }
 
 export default function PricingPage() {

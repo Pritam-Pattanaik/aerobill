@@ -1,9 +1,10 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
     title: "About Aerobill - By ASSETMAGNETS | Restaurant Management Software",
     description: "Learn about Aerobill by ASSETMAGNETS - India's most innovative restaurant management software with QR ordering, kitchen display, and smart billing. Zero commission, 100% cloud-based.",
     keywords: ["about aerobill", "assetmagnets", "restaurant software india", "qr code ordering", "restaurant management"],
@@ -24,6 +25,10 @@ export const metadata: Metadata = {
     alternates: {
         canonical: "https://www.aerobill.in/about",
     },
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return generatePageMetadata("/about", fallbackMetadata)
 }
 
 export default function AboutPage() {

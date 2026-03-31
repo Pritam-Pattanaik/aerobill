@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import { getPublishedBlogPosts } from "@/app/actions/blog"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
@@ -19,7 +20,7 @@ type BlogPost = {
 }
 
 // SEO Metadata for Blog Page
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
     metadataBase: new URL("https://www.aerobill.in"),
     title: "Blog | Aerobill - Restaurant Management Tips & Insights",
     description: "Discover expert tips on restaurant management, QR code ordering, kitchen display systems, smart billing, and digital menu strategies. Learn how to grow your restaurant business.",
@@ -64,6 +65,10 @@ export const metadata: Metadata = {
         index: true,
         follow: true,
     },
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return generatePageMetadata("/blog", fallbackMetadata)
 }
 
 // JSON-LD for Blog Page

@@ -1,11 +1,17 @@
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 import Link from "next/link"
+import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import { ResellerAuthForm } from "@/app/reseller/ResellerAuthForm"
 
-export const metadata = {
+const fallbackMetadata: Metadata = {
     title: "Become a Reseller - Aerobill",
     description: "Join the Aerobill Partner Program and earn 20% recurring commission on every paid subscription you refer.",
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return generatePageMetadata("/reseller", fallbackMetadata)
 }
 
 export default function ResellerPage() {

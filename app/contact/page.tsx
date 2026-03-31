@@ -1,12 +1,13 @@
 import Link from "next/link"
 import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import { getContactInfo } from "@/app/actions/contact"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
     title: "Contact Us - Aerobill | Get in Touch",
     description: "Contact Aerobill for support, sales inquiries, or partnership opportunities. We're here to help your restaurant succeed with our management software.",
     keywords: ["contact aerobill", "aerobill support", "restaurant software help", "aerobill phone", "aerobill email"],
@@ -31,6 +32,10 @@ export const metadata: Metadata = {
         index: true,
         follow: true,
     },
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    return generatePageMetadata("/contact", fallbackMetadata)
 }
 
 const defaultContactInfo = {

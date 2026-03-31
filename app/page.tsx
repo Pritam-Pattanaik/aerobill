@@ -1,12 +1,13 @@
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { generatePageMetadata } from "@/lib/seo"
 import TestimonialCarousel from "@/components/TestimonialCarousel"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
 // SEO Metadata for Homepage
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
   metadataBase: new URL("https://www.aerobill.in"),
   title: "Best Restaurant Management Software in India | POS & Billing Software – Aerobill",
   description: "Aerobill offers advanced Restaurant Management Software in India with smart POS system, GST-compliant billing, inventory management, QR ordering, and real-time analytics. Simplify restaurant operations with our powerful cloud-based solution.",
@@ -63,6 +64,10 @@ export const metadata: Metadata = {
     canonical: "https://www.aerobill.in",
   },
   category: "Technology",
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata("/", fallbackMetadata)
 }
 
 // JSON-LD Structured Data for Rich Snippets
