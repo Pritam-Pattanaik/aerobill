@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
+import PublicHeader from "@/components/PublicHeader"
+import PublicFooter from "@/components/PublicFooter"
 
 export const metadata: Metadata = {
     title: "Best Restaurant POS Software in India | Billing & Management | Aerobill",
@@ -8,8 +10,9 @@ export const metadata: Metadata = {
 
 export default function RestaurantPOSPage() {
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-gray-300 pt-24 pb-12">
-            <div className="max-w-6xl mx-auto px-4">
+        <div className="min-h-screen bg-[#0a0a0a] text-gray-300">
+            <PublicHeader />
+            <div className="pt-24 pb-12 max-w-6xl mx-auto px-4">
                 {/* Breadcrumb */}
                 <div className="flex items-center text-sm text-gray-500 mb-8 border-b border-white/10 pb-4">
                     <Link href="/" className="hover:text-white transition flex items-center gap-1">
@@ -246,6 +249,7 @@ export default function RestaurantPOSPage() {
                     })
                 }}
             />
+            <PublicFooter />
         </div>
     )
 }
