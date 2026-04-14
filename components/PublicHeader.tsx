@@ -4,8 +4,28 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 
-const navLinks = [
+type NavLink = {
+    href?: string
+    label: string
+    dropdown?: { href: string; label: string }[]
+}
+
+const navLinks: NavLink[] = [
     { href: "/about", label: "About" },
+    {
+        label: "Restaurant POS",
+        dropdown: [
+            { href: "/restaurant-pos-software-india", label: "Overview" },
+            { href: "/restaurant-pos-software-india#billing", label: "Restaurant Billing Software" },
+            { href: "/restaurant-pos-software-india#inventory", label: "Inventory Management" },
+            { href: "/restaurant-pos-software-india#qr-ordering", label: "QR Code Ordering" },
+            { href: "/restaurant-pos-software-india#kot", label: "KOT System" },
+            { href: "/restaurant-pos-software-india#table", label: "Table Management" },
+            { href: "/restaurant-pos-software-india#kds", label: "Kitchen Display System" },
+            { href: "/restaurant-pos-software-india#analytics", label: "Analytics & Reporting" },
+            { href: "/restaurant-pos-software-india#cloud-kitchen", label: "Cloud Kitchen Software" },
+        ]
+    },
     { href: "/services", label: "Services" },
     { href: "/pricing", label: "Pricing" },
     { href: "/blog", label: "Blog" },
@@ -25,10 +45,28 @@ export default function PublicHeader() {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
-                        <Link key={link.href} href={link.href} className="text-gray-300 hover:text-white transition">
-                            {link.label}
-                        </Link>
+                    {navLinks.map((link, i) => (
+                        link.dropdown ? (
+                            <div key={i} className="relative group">
+                                <button className="flex items-center gap-1 text-gray-300 hover:text-white transition py-2">
+                                    {link.label}
+                                    <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </button>
+                                <div className="absolute top-full left-0 mt-0 w-60 rounded-xl shadow-xl bg-[#0a0a0a] border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden transform origin-top group-hover:translate-y-0 translate-y-2">
+                                    <div className="p-2 flex flex-col gap-1 backdrop-blur-xl">
+                                        {link.dropdown.map((subItem) => (
+                                            <Link key={subItem.href} href={subItem.href} className="block px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                                                {subItem.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link key={link.href} href={link.href!} className="text-gray-300 hover:text-white transition">
+                                {link.label}
+                            </Link>
+                        )
                     ))}
                 </div>
 
@@ -66,16 +104,36 @@ export default function PublicHeader() {
                 className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
                     }`}
             >
-                <div className="px-4 py-4 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur-lg space-y-3">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition"
-                        >
-                            {link.label}
-                        </Link>
+                <div className="px-4 py-4 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur-lg space-y-3 max-h-[75vh] overflow-y-auto">
+                    {navLinks.map((link, i) => (
+                        link.dropdown ? (
+                            <div key={i} className="space-y-1">
+                                <div className="block py-2 px-4 rounded-lg text-gray-400 font-medium">
+                                    {link.label}
+                                </div>
+                                <div className="pl-4 space-y-1 border-l border-white/10 ml-4">
+                                    {link.dropdown.map(subItem => (
+                                        <Link
+                                            key={subItem.href}
+                                            href={subItem.href}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block py-2 px-4 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5 transition"
+                                        >
+                                            {subItem.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                key={link.href}
+                                href={link.href!}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="block py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition"
+                            >
+                                {link.label}
+                            </Link>
+                        )
                     ))}
                     <Link
                         href="/reseller"
