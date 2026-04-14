@@ -11,7 +11,42 @@ export const metadata: Metadata = {
 
 export default async function ServicesPage() {
   const result = await getActiveServicePages()
-  const servicesData = result.success && result.data ? result.data : []
+  
+  // Fallback data when database is empty so the UI doesn't look broken
+  const fallbackServices = [
+    {
+      name: "Restaurant POS System",
+      slug: "restaurant-pos-software-india",
+      description: "Our comprehensive, fast, and secure point-of-sale system that serves as the core of your operational flow. From taking orders to payment processing.",
+    },
+    {
+      name: "Restaurant Billing Software",
+      slug: "restaurant-billing-software",
+      description: "Fast and lightweight billing software designed for everyday restaurant usage. Helps in creating quick invoices, managing GST, and processing diverse payment types.",
+    },
+    {
+      name: "Inventory Management",
+      slug: "inventory-management-software",
+      description: "Monitor stock levels, track ingredient usage, and reduce unnecessary waste. Get alerts when supplies are low to restock efficiently.",
+    },
+    {
+      name: "QR Code Ordering",
+      slug: "qr-code-ordering-system",
+      description: "Seamless ordering experience where diners can view the menu, select addons, and order directly from their mobile device.",
+    },
+    {
+      name: "KOT System",
+      slug: "kot-system",
+      description: "Kitchen Order Ticket dispatching eliminates manual errors and routes tickets directly to prep stations for robust communication.",
+    },
+    {
+      name: "Table Management",
+      slug: "table-management-system",
+      description: "Visually manage table occupancy, track table turning times, and optimize seating arrangements for walk-in guests and reservations.",
+    }
+  ]
+
+  const servicesData = result.success && result.data && result.data.length > 0 ? result.data : fallbackServices
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
@@ -35,7 +70,7 @@ export default async function ServicesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {servicesData.map((service: any, idx: number) => (
               <Link 
-                href={`/services/${service.slug}`} 
+                href={service.slug.includes('pos-software') ? `/${service.slug}` : `/services/${service.slug}`} 
                 key={idx}
                 className="group block bg-[#1a1a2e] border border-white/10 rounded-2xl p-6 hover:border-[#ff6b35] hover:shadow-lg hover:shadow-[#ff6b35]/20 transition-all"
               >
