@@ -59,14 +59,14 @@ export default function Page() {
                                 <span className="text-2xl">🚀</span> Key Features
                             </h3>
                             <ul className="space-y-4">
-                                ${data.features.map(f => \`
+                                ${data.features.map(f => `
                                 <li className="flex items-start gap-3 text-gray-300">
                                     <svg className="w-6 h-6 text-[#ff6b35] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     <div>
-                                        <strong className="text-white block mb-0.5">\${f.title}</strong>
-                                        <span className="text-sm text-gray-400">\${f.desc}</span>
+                                        <strong className="text-white block mb-0.5">${f.title}</strong>
+                                        <span className="text-sm text-gray-400">${f.desc}</span>
                                     </div>
-                                </li>\`).join('')}
+                                </li>`).join('')}
                             </ul>
                         </div>
                     </div>
@@ -78,10 +78,10 @@ export default function Page() {
                                 <span className="text-3xl">📈</span> Key Benefits
                             </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                ${data.benefits.map(b => \`
+                                ${data.benefits.map(b => `
                                 <div className="bg-gradient-to-br from-white/5 to-transparent p-4 rounded-xl border border-white/5">
-                                    <p className="text-gray-300 font-medium">\${b}</p>
-                                </div>\`).join('')}
+                                    <p className="text-gray-300 font-medium">${b}</p>
+                                </div>`).join('')}
                             </div>
                         </div>
 
@@ -91,11 +91,11 @@ export default function Page() {
                             </h2>
                             <p className="text-gray-400 mb-6">Aerobill provides an integrated, robust solution specifically tuned for Indian food businesses.</p>
                             <ul className="space-y-3 mb-6">
-                                ${data.whyAerobill.map(w => \`
+                                ${data.whyAerobill.map(w => `
                                 <li className="flex items-center gap-3 text-gray-300">
                                     <svg className="w-5 h-5 text-[#10b981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    \${w}
-                                </li>\`).join('')}
+                                    ${w}
+                                </li>`).join('')}
                             </ul>
                         </div>
                     </div>
@@ -104,11 +104,11 @@ export default function Page() {
                     <div className="border-t border-white/10 pt-16">
                         <h2 className="text-3xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
                         <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                            ${data.faqs.map(faq => \`
+                            ${data.faqs.map(faq => `
                             <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition">
-                                <h3 className="text-lg font-bold text-white mb-2">\${faq.q}</h3>
-                                <p className="text-gray-400 text-sm leading-relaxed">\${faq.a}</p>
-                            </div>\`).join('')}
+                                <h3 className="text-lg font-bold text-white mb-2">${faq.q}</h3>
+                                <p className="text-gray-400 text-sm leading-relaxed">${faq.a}</p>
+                            </div>`).join('')}
                         </div>
                     </div>
                     
@@ -130,14 +130,14 @@ export default function Page() {
                         "@context": "https://schema.org",
                         "@type": "FAQPage",
                         "mainEntity": [
-                            ${data.faqs.map(faq => \`{
+                            ${data.faqs.map(faq => `{
                                 "@type": "Question",
-                                "name": "\${faq.q}",
+                                "name": "${faq.q}",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "\${faq.a}"
+                                    "text": "${faq.a}"
                                 }
-                            }\`).join(',')}
+                            }`).join(',')}
                         ]
                     })
                 }}
