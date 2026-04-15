@@ -4,6 +4,7 @@ import { generatePageMetadata } from "@/lib/seo"
 import TestimonialCarousel from "@/components/TestimonialCarousel"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
+import HeroIllustration from "@/components/HeroIllustration"
 
 // SEO Metadata for Homepage
 const fallbackMetadata: Metadata = {
@@ -216,8 +217,8 @@ export default function HomePage() {
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-indigo-900/5 rounded-full blur-[100px] -z-10" />
 
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="reveal-up">
+            <div className="grid md:grid-cols-2 gap-12 items-center flex-col-reverse">
+              <div className="reveal-up order-2 md:order-1">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ff6b35]/10 border border-[#ff6b35]/20 text-[#ff8c5a] text-sm font-medium mb-6">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                   Trusted Restaurant Management Software in India
@@ -243,50 +244,9 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Animated dashboard preview */}
-              <div className="reveal-right delay-2 hidden md:block">
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] rounded-3xl border border-white/10 p-6 glow-border">
-                  <div className="animate-float">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                      <span className="text-xs text-gray-600 ml-2">dashboard.aerobill.in</span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="bg-white/5 rounded-xl p-3 border border-white/5 text-center">
-                        <div className="text-lg font-bold text-[#10b981]">₹47K</div>
-                        <div className="text-[10px] text-gray-500">Today&apos;s Revenue</div>
-                      </div>
-                      <div className="bg-white/5 rounded-xl p-3 border border-white/5 text-center">
-                        <div className="text-lg font-bold text-[#818cf8]">142</div>
-                        <div className="text-[10px] text-gray-500">Orders</div>
-                      </div>
-                      <div className="bg-white/5 rounded-xl p-3 border border-white/5 text-center">
-                        <div className="text-lg font-bold text-[#ff6b35]">24</div>
-                        <div className="text-[10px] text-gray-500">Active Tables</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 rounded-xl p-3 border border-white/5 mb-3">
-                      <div className="text-[10px] text-gray-500 mb-2">Live Orders</div>
-                      <div className="space-y-2">
-                        {[
-                          { table: "T3", items: "Butter Chicken, Naan ×2", status: "Preparing", color: "#f59e0b" },
-                          { table: "T7", items: "Pizza Margherita", status: "Ready", color: "#10b981" },
-                          { table: "T1", items: "Biryani, Raita", status: "New", color: "#f43f5e" },
-                        ].map((o, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs bg-white/[0.03] rounded-lg p-2">
-                            <span className="text-white font-medium">{o.table}</span>
-                            <span className="text-gray-400 truncate mx-2 flex-1">{o.items}</span>
-                            <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: `${o.color}20`, color: o.color }}>{o.status}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              {/* Animated hero illustration - Indian man with phone & feature cards */}
+              <div className="reveal-right delay-2 mt-4 md:mt-0 order-1 md:order-2">
+                <HeroIllustration />
               </div>
             </div>
           </div>

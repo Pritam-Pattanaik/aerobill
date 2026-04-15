@@ -1,0 +1,193 @@
+.wrap {
+    position: relative;
+    width: 100%;
+    height: 550px; /* Increased height to give the man more space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ambient glow behind person */
+.ambientGlow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(255,107,53,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    animation: ambientPulse 4s ease-in-out infinite;
+}
+
+@keyframes ambientPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+/* Orbiting orange glow */
+.orbitGlow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 400px;
+    margin-left: -200px;
+    margin-top: -200px;
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.orbitGlow::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, #ff6b35 0%, #ff8c5a 30%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px 10px rgba(255,107,53,0.4), 0 0 60px 20px rgba(255,107,53,0.15);
+    animation: orbitGlow 6s linear infinite;
+    top: 0;
+    left: 50%;
+    transform-origin: 50% 200px;
+}
+
+.orbitGlow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,107,53,0.12);
+}
+
+.orbitGlow2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 320px;
+    height: 320px;
+    margin-left: -160px;
+    margin-top: -160px;
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.orbitGlow2::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #ff8c5a 0%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 20px 6px rgba(255,140,90,0.3);
+    animation: orbitGlow 8s linear infinite reverse;
+    top: 0;
+    left: 50%;
+    transform-origin: 50% 160px;
+}
+
+@keyframes orbitGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Person image container */
+.person {
+    position: relative;
+    z-index: 2;
+    width: 380px; /* Scaled up */
+    height: 550px; /* Scaled up */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.personImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover will make him fill the space better */
+    object-position: bottom center; /* Keep his feet/knees anchored at bottom */
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+    z-index: 2;
+}
+
+/* Feature cards */
+.featureCard {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    z-index: 3;
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    animation: cardFloat 5s ease-in-out infinite;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.featureCardVisible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.featureCard:hover {
+    border-color: rgba(255,107,53,0.5);
+    background: rgba(255,107,53,0.1);
+    box-shadow: 0 8px 40px rgba(255,107,53,0.2);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+@keyframes cardFloat {
+    0%, 100% { margin-top: 0px; }
+    50% { margin-top: -8px; }
+}
+
+.cardIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255,107,53,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff6b35;
+    flex-shrink: 0;
+}
+
+.cardLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+
+@media (max-width: 1024px) {
+    .wrap {
+        height: 450px;
+        transform: scale(0.85);
+    }
+}
+
+@media (max-width: 768px) {
+    .wrap {
+        height: 380px;
+        transform: scale(0.65);
+    }
+}
+
+@media (max-width: 480px) {
+    .wrap {
+        height: 300px;
+        transform: scale(0.5);
+    }
+}
