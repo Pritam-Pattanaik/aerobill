@@ -52,6 +52,8 @@ export default function PricingPage() {
             ],
             cta: "Start Free",
             popular: false,
+            color: "#10b981",
+            icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
         },
         {
             name: "Standard",
@@ -69,6 +71,8 @@ export default function PricingPage() {
             ],
             cta: "Get Standard",
             popular: false,
+            color: "#818cf8",
+            icon: "M13 10V3L4 14h7v7l9-11h-7z",
         },
         {
             name: "Premium",
@@ -87,6 +91,8 @@ export default function PricingPage() {
             ],
             cta: "Go Premium",
             popular: true,
+            color: "#ff6b35",
+            icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
         },
         {
             name: "Elite",
@@ -105,6 +111,8 @@ export default function PricingPage() {
             ],
             cta: "Contact Sales",
             popular: false,
+            color: "#a855f7",
+            icon: "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z",
         },
     ]
 
@@ -136,24 +144,26 @@ export default function PricingPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]">
-            {/* Navigation */}
-            {/* Navigation */}
+        <div className="min-h-screen bg-[#0a0a0a] text-gray-300">
             <PublicHeader />
 
             {/* Hero */}
-            <section className="pt-32 pb-12 px-4">
+            <section className="pt-28 pb-12 px-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ff6b35]/8 rounded-full blur-[120px] -z-10" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#818cf8]/8 rounded-full blur-[100px] -z-10" />
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="inline-block px-4 py-1.5 bg-[#ff6b35]/10 rounded-full text-[#ff6b35] text-sm font-medium mb-6">
-                        💰 Simple, Transparent Pricing
+                    <div className="reveal-up">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ff6b35]/10 border border-[#ff6b35]/20 text-[#ff8c5a] text-sm font-medium mb-6">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Simple, Transparent Pricing
+                        </div>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight">
+                            Choose the Plan That <span className="gradient-text">Fits Your Restaurant</span>
+                        </h1>
+                        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+                            Start free forever. Upgrade when you need more. No hidden fees, no commissions, no surprises.
+                        </p>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                        Choose the Plan That
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a]"> Fits Your Restaurant</span>
-                    </h1>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        Start free forever. Upgrade when you need more. No hidden fees, no commissions, no surprises.
-                    </p>
                 </div>
             </section>
 
@@ -164,42 +174,56 @@ export default function PricingPage() {
                         {plans.map((p, i) => (
                             <div
                                 key={i}
-                                className={`bg-[#1a1a2e] rounded-2xl p-6 border ${p.popular ? "border-[#ff6b35] shadow-lg shadow-[#ff6b35]/20" : "border-white/10"
-                                    } relative hover:border-[#ff6b35]/50 transition`}
+                                className={`feature-card relative !rounded-3xl reveal-up delay-${i + 1} ${p.popular ? "!border-[#ff6b35]/50 shadow-lg shadow-[#ff6b35]/10" : ""}`}
                             >
                                 {p.popular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ff6b35] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white text-xs font-semibold px-4 py-1 rounded-full shadow-lg shadow-[#ff6b35]/30">
                                         Most Popular
                                     </div>
                                 )}
-                                <h3 className="text-xl font-bold mb-2">{p.name}</h3>
+
+                                {/* Icon */}
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: `${p.color}15` }}>
+                                    <svg className="w-6 h-6" style={{ color: p.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={p.icon} /></svg>
+                                </div>
+
+                                <h3 className="text-xl font-bold text-white mb-2">{p.name}</h3>
                                 <div className="mb-4">
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-4xl font-bold">{p.price}</span>
+                                        <span className="text-4xl font-extrabold text-white">{p.price}</span>
                                         {p.originalPrice && (
                                             <span className="text-lg text-gray-500 line-through decoration-red-500/50">
                                                 {p.originalPrice}
                                             </span>
                                         )}
                                     </div>
-                                    <span className="text-gray-400">{p.period}</span>
+                                    <span className="text-gray-500 text-sm">{p.period}</span>
                                 </div>
-                                <div className="text-sm text-gray-400 mb-4 pb-4 border-b border-white/10">
-                                    <div>📦 {p.tables} Tables</div>
-                                    <div>🍽️ {p.products} Products</div>
+
+                                <div className="text-sm text-gray-400 mb-4 pb-4 border-b border-white/10 space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" /></svg>
+                                        {p.tables} Tables
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                                        {p.products} Products
+                                    </div>
                                 </div>
+
                                 <ul className="space-y-3 mb-6">
                                     {p.features.map((f, j) => (
                                         <li key={j} className="text-sm text-gray-300 flex items-start gap-2">
-                                            <span className="text-[#ff6b35] mt-0.5">✓</span>
+                                            <svg className="w-4 h-4 text-[#10b981] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                             <span>{f}</span>
                                         </li>
                                     ))}
                                 </ul>
+
                                 <Link
                                     href="/register"
-                                    className={`block w-full text-center py-3 rounded-lg font-medium transition ${p.popular
-                                        ? "bg-[#ff6b35] text-white hover:bg-[#ff8c5a]"
+                                    className={`block w-full text-center py-3 rounded-xl font-medium transition-all duration-300 ${p.popular
+                                        ? "bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white hover:shadow-lg hover:shadow-[#ff6b35]/30 hover:-translate-y-0.5"
                                         : "bg-white/10 text-white hover:bg-white/20"
                                         }`}
                                 >
@@ -211,25 +235,29 @@ export default function PricingPage() {
                 </div>
             </section>
 
-            {/* Features Comparison */}
-            <section className="py-20 px-4 bg-[#111827]/50">
+            <div className="section-divider max-w-6xl mx-auto" />
+
+            {/* Features Included */}
+            <section className="py-20 px-4">
                 <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">All Plans Include</h2>
+                    <div className="text-center mb-12 reveal-up">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">All Plans <span className="gradient-text">Include</span></h2>
                         <p className="text-gray-400">Core features available on every plan</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6">
                         {[
-                            { icon: "📱", title: "QR Code Ordering", desc: "Customers scan & order from their phones" },
-                            { icon: "🧾", title: "Digital Billing", desc: "Generate bills with one click" },
-                            { icon: "🔒", title: "Secure & Reliable", desc: "Bank-grade security, 99.9% uptime" },
-                            { icon: "📊", title: "Basic Analytics", desc: "Track daily orders and revenue" },
-                            { icon: "🌐", title: "Cloud-Based", desc: "Access from anywhere, any device" },
-                            { icon: "🔄", title: "Free Updates", desc: "Always get the latest features" },
+                            { icon: "M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z", title: "QR Code Ordering", desc: "Customers scan & order from their phones", color: "blue" },
+                            { icon: "M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", title: "Digital Billing", desc: "Generate bills with one click", color: "orange" },
+                            { icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", title: "Secure & Reliable", desc: "Bank-grade security, 99.9% uptime", color: "rose" },
+                            { icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z", title: "Basic Analytics", desc: "Track daily orders and revenue", color: "purple" },
+                            { icon: "M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z", title: "Cloud-Based", desc: "Access from anywhere, any device", color: "green" },
+                            { icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", title: "Free Updates", desc: "Always get the latest features", color: "amber" },
                         ].map((f, i) => (
-                            <div key={i} className="glass-card p-6 text-center">
-                                <div className="text-3xl mb-3">{f.icon}</div>
-                                <h3 className="font-semibold mb-1">{f.title}</h3>
+                            <div key={i} className={`feature-card text-center reveal-up delay-${i + 1}`}>
+                                <div className={`icon-box icon-box-${f.color} mx-auto mb-4`}>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={f.icon} /></svg>
+                                </div>
+                                <h3 className="font-bold text-white mb-1">{f.title}</h3>
                                 <p className="text-gray-400 text-sm">{f.desc}</p>
                             </div>
                         ))}
@@ -237,81 +265,68 @@ export default function PricingPage() {
                 </div>
             </section>
 
+            <div className="section-divider max-w-6xl mx-auto" />
+
             {/* FAQ */}
             <section className="py-20 px-4">
                 <div className="max-w-3xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+                    <div className="text-center mb-12 reveal-up">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked <span className="gradient-text">Questions</span></h2>
                         <p className="text-gray-400">Got questions? We&apos;ve got answers.</p>
                     </div>
                     <div className="space-y-4">
                         {faqs.map((faq, i) => (
-                            <div key={i} className="glass-card p-6">
-                                <h3 className="font-semibold text-lg mb-2">{faq.q}</h3>
-                                <p className="text-gray-400">{faq.a}</p>
-                            </div>
+                            <details key={i} className="group faq-card [&_summary::-webkit-details-marker]:hidden reveal-up">
+                                <summary className="cursor-pointer list-none flex justify-between items-center font-bold text-white text-lg">
+                                    <span className="flex items-center gap-3">
+                                        <svg className="w-5 h-5 text-[#ff6b35] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {faq.q}
+                                    </span>
+                                    <span className="text-[#ff6b35] group-open:rotate-45 transition-transform duration-300 text-2xl flex-shrink-0 ml-4">+</span>
+                                </summary>
+                                <div className="pt-3 pl-8 text-gray-400 leading-relaxed">{faq.a}</div>
+                            </details>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Social Responsibility Banner */}
+            {/* Social Responsibility */}
             <section className="py-16 px-4">
                 <div className="max-w-4xl mx-auto">
-                    <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl" />
-                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl" />
-                        <div className="relative">
-                            <div className="inline-block px-4 py-1.5 bg-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-4">
-                                🌱 Social Responsibility
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden glow-border">
+                        <div className="absolute top-0 right-0 w-60 h-60 bg-emerald-500/10 rounded-full blur-[80px] -z-10" />
+                        <div className="absolute bottom-0 left-0 w-60 h-60 bg-teal-500/10 rounded-full blur-[80px] -z-10" />
+                        <div className="relative reveal-up">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium mb-4">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                Social Responsibility
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                                Every Signup Feeds Someone in Need
-                            </h2>
-                            <p className="text-xl text-gray-300 mb-6 max-w-2xl mx-auto">
-                                For <span className="text-emerald-400 font-bold">every restaurant</span> that signs up with Aerobill,
+                            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Every Signup Feeds Someone in Need</h2>
+                            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                                For <span className="text-emerald-400 font-bold">every restaurant</span> that signs up,
                                 we donate <span className="text-emerald-400 font-bold">₹100</span> to local food banks.
                             </p>
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                                <div className="flex items-center gap-3 text-gray-400">
-                                    <span className="text-3xl">🍽️</span>
-                                    <span>Feeding communities together</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-gray-400">
-                                    <span className="text-3xl">💚</span>
-                                    <span>Building a hunger-free India</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* CTA */}
-            <section className="py-20 px-4 bg-[#111827]/50">
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-                    <p className="text-gray-400 mb-8">
+            <section className="py-20 px-4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b35]/5 to-purple-900/5 -z-10" />
+                <div className="max-w-3xl mx-auto text-center reveal-up">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
+                    <p className="text-gray-400 mb-8 text-lg">
                         Join hundreds of restaurants already using Aerobill. Start with our free plan today.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/register"
-                            className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#ff6b35]/30 transition"
-                        >
-                            Start For Free &rarr;
-                        </Link>
-                        <Link
-                            href="/about"
-                            className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/5 transition"
-                        >
-                            Learn More
-                        </Link>
+                        <Link href="/register" className="cta-btn inline-block text-center text-lg">Start For Free →</Link>
+                        <Link href="/about" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-white/20 text-white font-semibold hover:bg-white/5 transition">Learn More</Link>
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
             <PublicFooter />
         </div>
     )
