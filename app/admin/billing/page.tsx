@@ -250,7 +250,8 @@ export default function BillingPage() {
 
     const calculateTax = (amount: number) => {
         if (!settings) return 0
-        return amount * (settings.taxRate / 100)
+        const rate = (settings.cgst || 0) + (settings.sgst || 0) + (settings.taxRate || 0)
+        return amount * (rate / 100)
     }
 
     const isToday = (dateStr: string) => {
@@ -334,7 +335,7 @@ export default function BillingPage() {
                                     <p className="text-2xl font-bold text-[var(--primary)]">
                                         ₹{table.totalAmount.toFixed(0)}
                                     </p>
-                                    {settings && settings.taxRate > 0 && (
+                                    {settings && calculateTax(table.totalAmount) > 0 && (
                                         <p className="text-xs text-gray-400">
                                             +₹{calculateTax(table.totalAmount).toFixed(0)} tax
                                         </p>
@@ -400,11 +401,27 @@ export default function BillingPage() {
                                     <span className="text-gray-400">Subtotal</span>
                                     <span>₹{table.totalAmount.toFixed(0)}</span>
                                 </div>
-                                {settings && settings.taxRate > 0 && (
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-400">Tax ({settings.taxRate}%)</span>
-                                        <span>₹{calculateTax(table.totalAmount).toFixed(0)}</span>
-                                    </div>
+                                {settings && (settings.cgst > 0 || settings.sgst > 0 || settings.taxRate > 0) && (
+                                    <>
+                                        {settings.cgst > 0 && (
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="text-gray-400">CGST ({settings.cgst}%)</span>
+                                                <span>₹{(table.totalAmount * (settings.cgst / 100)).toFixed(0)}</span>
+                                            </div>
+                                        )}
+                                        {settings.sgst > 0 && (
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="text-gray-400">SGST ({settings.sgst}%)</span>
+                                                <span>₹{(table.totalAmount * (settings.sgst / 100)).toFixed(0)}</span>
+                                            </div>
+                                        )}
+                                        {settings.taxRate > 0 && (
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="text-gray-400">Tax ({settings.taxRate}%)</span>
+                                                <span>₹{(table.totalAmount * (settings.taxRate / 100)).toFixed(0)}</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total</span>
@@ -588,14 +605,36 @@ export default function BillingPage() {
                         </span>
                     </div>
 
-                    {settings && settings.taxRate > 0 && (
-                        <div className="receipt-item">
-                            <span className="receipt-item-name">Tax ({settings.taxRate}%)</span>
-                            <span className="receipt-item-qty"></span>
-                            <span className="receipt-item-price">
-                                ₹{calculateTax(billingReceipt.totalAmount).toFixed(0)}
-                            </span>
-                        </div>
+                    {settings && (settings.cgst > 0 || settings.sgst > 0 || settings.taxRate > 0) && (
+                        <>
+                            {settings.cgst > 0 && (
+                                <div className="receipt-item">
+                                    <span className="receipt-item-name">CGST ({settings.cgst}%)</span>
+                                    <span className="receipt-item-qty"></span>
+                                    <span className="receipt-item-price">
+                                        ₹{(billingReceipt.totalAmount * (settings.cgst / 100)).toFixed(0)}
+                                    </span>
+                                </div>
+                            )}
+                            {settings.sgst > 0 && (
+                                <div className="receipt-item">
+                                    <span className="receipt-item-name">SGST ({settings.sgst}%)</span>
+                                    <span className="receipt-item-qty"></span>
+                                    <span className="receipt-item-price">
+                                        ₹{(billingReceipt.totalAmount * (settings.sgst / 100)).toFixed(0)}
+                                    </span>
+                                </div>
+                            )}
+                            {settings.taxRate > 0 && (
+                                <div className="receipt-item">
+                                    <span className="receipt-item-name">Tax ({settings.taxRate}%)</span>
+                                    <span className="receipt-item-qty"></span>
+                                    <span className="receipt-item-price">
+                                        ₹{(billingReceipt.totalAmount * (settings.taxRate / 100)).toFixed(0)}
+                                    </span>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <div className="receipt-total">

@@ -200,7 +200,7 @@ export default function Page() {
                             { q: "Can I add service charges?", a: "Yes — service charges, packing fees, and custom discounts can be auto-applied or manually triggered." },
                             { q: "What hardware do I need?", a: "Works on any standard PC, laptop, tablet, or modern POS terminal via our web platform." },
                         ].map((faq, i) => (
-                            <div key={i} className={`faq-card reveal-up delay-${i + 1}`}>
+                            <details key={i} className={`faq-card group reveal-up delay-${i + 1}`}>
 <summary className="flex items-center justify-between cursor-pointer list-none select-none"><div className="flex-1 pr-4">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="icon-box icon-box-orange" style={{ width: 36, height: 36 }}>
