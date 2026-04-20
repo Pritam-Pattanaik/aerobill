@@ -15,15 +15,15 @@ const navLinks: NavLink[] = [
     {
         label: "Restaurant POS",
         dropdown: [
-            { href: "/restaurant-pos-software-india", label: "Overview" },
-            { href: "/restaurant-billing-software", label: "Restaurant Billing Software" },
-            { href: "/inventory-management-software", label: "Inventory Management" },
-            { href: "/qr-code-ordering-system", label: "QR Code Ordering" },
-            { href: "/kot-system", label: "KOT System" },
-            { href: "/table-management-system", label: "Table Management" },
-            { href: "/kitchen-display-system", label: "Kitchen Display System" },
-            { href: "/restaurant-analytics-reporting", label: "Analytics & Reporting" },
-            { href: "/cloud-kitchen-management-software", label: "Cloud Kitchen Software" },
+            { href: "/restaurant-pos/overview", label: "Overview" },
+            { href: "/restaurant-pos/restaurant-billing-software", label: "Restaurant Billing Software" },
+            { href: "/restaurant-pos/inventory-management-software", label: "Inventory Management" },
+            { href: "/restaurant-pos/qr-code-ordering-system", label: "QR Code Ordering" },
+            { href: "/restaurant-pos/kot-system", label: "KOT System" },
+            { href: "/restaurant-pos/table-management-system", label: "Table Management" },
+            { href: "/restaurant-pos/kitchen-display-system", label: "Kitchen Display System" },
+            { href: "/restaurant-pos/restaurant-analytics-reporting", label: "Analytics & Reporting" },
+            { href: "/restaurant-pos/cloud-kitchen-management-software", label: "Cloud Kitchen Software" },
         ]
     },
     { href: "/pricing", label: "Pricing" },
@@ -33,6 +33,7 @@ const navLinks: NavLink[] = [
 
 export default function PublicHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [activeMobileDropdown, setActiveMobileDropdown] = useState<number | null>(null)
 
     return (
         <nav className="fixed top-0 w-full z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
@@ -100,17 +101,21 @@ export default function PublicHeader() {
 
             {/* Mobile Menu Dropdown */}
             <div
-                className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+                className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? "max-h-[100dvh] opacity-100" : "max-h-0 opacity-0"
                     }`}
             >
-                <div className="px-4 py-4 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur-lg space-y-3 max-h-[75vh] overflow-y-auto">
+                <div className="px-4 py-4 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur-lg space-y-3 max-h-[calc(100dvh-70px)] overflow-y-auto">
                     {navLinks.map((link, i) => (
                         link.dropdown ? (
                             <div key={i} className="space-y-1">
-                                <div className="block py-2 px-4 rounded-lg text-gray-400 font-medium">
+                                <button
+                                    onClick={() => setActiveMobileDropdown(activeMobileDropdown === i ? null : i)}
+                                    className="w-full flex items-center justify-between py-2 px-4 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition font-medium text-left"
+                                >
                                     {link.label}
-                                </div>
-                                <div className="pl-4 space-y-1 border-l border-white/10 ml-4">
+                                    <svg className={`w-4 h-4 transition-transform duration-200 ${activeMobileDropdown === i ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </button>
+                                <div className={`pl-4 border-l border-white/10 ml-4 overflow-hidden transition-all duration-300 ${activeMobileDropdown === i ? 'max-h-[800px] opacity-100 mt-1 space-y-1' : 'max-h-0 opacity-0'}`}>
                                     {link.dropdown.map(subItem => (
                                         <Link
                                             key={subItem.href}

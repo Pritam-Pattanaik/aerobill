@@ -174,10 +174,10 @@ export default function PricingPage() {
                         {plans.map((p, i) => (
                             <div
                                 key={i}
-                                className={`feature-card relative !rounded-3xl reveal-up delay-${i + 1} ${p.popular ? "!border-[#ff6b35]/50 shadow-lg shadow-[#ff6b35]/10" : ""}`}
+                                className={`feature-card relative !rounded-3xl reveal-up delay-${i + 1} ${p.popular ? "!border-[#ff6b35]/50 shadow-lg shadow-[#ff6b35]/10 !overflow-visible" : ""}`}
                             >
                                 {p.popular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white text-xs font-semibold px-4 py-1 rounded-full shadow-lg shadow-[#ff6b35]/30">
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#ff6b35] to-[#ff8c5a] text-white text-xs font-semibold px-4 py-1 rounded-full shadow-lg shadow-[#ff6b35]/30 whitespace-nowrap z-10">
                                         Most Popular
                                     </div>
                                 )}

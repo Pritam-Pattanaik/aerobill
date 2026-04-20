@@ -27,7 +27,7 @@ export default function Page() {
                             Home
                         </Link>
                         <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                        <Link href="/restaurant-pos-software-india" className="hover:text-white transition">Restaurant POS</Link>
+                        <Link href="/restaurant-pos/overview" className="hover:text-white transition">Restaurant POS</Link>
                         <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                         <span className="text-[#ff6b35]">Billing Software</span>
                     </div>
@@ -201,15 +201,16 @@ export default function Page() {
                             { q: "What hardware do I need?", a: "Works on any standard PC, laptop, tablet, or modern POS terminal via our web platform." },
                         ].map((faq, i) => (
                             <div key={i} className={`faq-card reveal-up delay-${i + 1}`}>
+<summary className="flex items-center justify-between cursor-pointer list-none select-none"><div className="flex-1 pr-4">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="icon-box icon-box-orange" style={{ width: 36, height: 36 }}>
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </div>
                                     <h3 className="text-white font-bold">{faq.q}</h3>
                                 </div>
-                                <p className="text-gray-400 text-sm leading-relaxed pl-12">{faq.a}</p>
-                            </div>
-                        ))}
+                                </div><span className="transition-transform group-open:rotate-180 text-gray-500 flex-shrink-0"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></span></summary>
+<p className="mt-4 animate-in fade-in slide-in-from-top-2 text-gray-400 text-sm leading-relaxed pl-12">{faq.a}</p>
+                            </details>))}
                     </div>
                 </div>
             </section>

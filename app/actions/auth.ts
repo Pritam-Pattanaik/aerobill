@@ -8,12 +8,12 @@ type RegisterInput = {
     // Personal Details
     ownerName: string
     email: string
-    ownerPhone?: string
+    ownerPhone: string
     password: string
     // Restaurant Details
     restaurantName: string
     restaurantAddress?: string
-    restaurantPhone?: string
+    restaurantPhone: string
     gstNumber?: string
     fssaiLicense?: string
     // Subscription

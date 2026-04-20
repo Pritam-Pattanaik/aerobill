@@ -2,6 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthOptions } from "next-auth"
+import { sendEmail } from "@/lib/email"
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -103,6 +104,34 @@ export const authOptions: NextAuthOptions = {
     },
     session: {
         strategy: "jwt"
+    },
+    events: {
+        async signIn({ user }) {
+            try {
+                // Send email to user
+                if (user.email) {
+                    await sendEmail({
+                        to: user.email,
+                        subject: "Welcome to Aerobill - New Sign In",
+                        text: `Hello ${user.name || 'User'},\n\nYou have successfully signed in to your Aerobill account.\nIf this wasn't you, please change your password immediately or contact support.\n\nBest,\nAerobill Team`,
+                        html: `<p>Hello ${user.name || 'User'},</p><p>You have successfully signed in to your Aerobill account.</p><p>If this wasn't you, please change your password immediately or contact support.</p><p>Best,<br>Aerobill Team</p>`
+                    });
+                }
+                
+                // Send email to super admin
+                const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || "support@aerobill.in";
+                if (superAdminEmail) {
+                    await sendEmail({
+                        to: superAdminEmail,
+                        subject: "New Sign In Alert - Aerobill",
+                        text: `A user has signed in to Aerobill.\n\nUser: ${user.name || 'Unknown'}\nEmail: ${user.email}\nRole: ${(user as any).role || 'Unknown'}`,
+                        html: `<p>A user has signed in to Aerobill.</p><ul><li>User: ${user.name || 'Unknown'}</li><li>Email: ${user.email}</li><li>Role: ${(user as any).role || 'Unknown'}</li></ul>`
+                    });
+                }
+            } catch (error) {
+                console.error("Error sending signIn notification emails:", error);
+            }
+        }
     },
     secret: process.env.NEXTAUTH_SECRET
 }

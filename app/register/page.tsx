@@ -41,8 +41,8 @@ function RegisterForm() {
     const [acceptedTerms, setAcceptedTerms] = useState(false)
 
     const validateStep1 = () => {
-        if (!personal.name || !personal.email || !personal.password) {
-            setError("Name, Email and Password are required")
+        if (!personal.name || !personal.email || !personal.phone || !personal.password) {
+            setError("Name, Email, Phone and Password are required")
             return false
         }
         if (personal.password.length < 6) {
@@ -58,8 +58,8 @@ function RegisterForm() {
     }
 
     const validateStep2 = () => {
-        if (!restaurant.name) {
-            setError("Restaurant name is required")
+        if (!restaurant.name || !restaurant.phone) {
+            setError("Restaurant Name and Phone are required")
             return false
         }
         setError("")
@@ -163,9 +163,9 @@ function RegisterForm() {
                                     className="input" placeholder="you@email.com" required />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Phone</label>
+                                <label className="block text-sm text-gray-400 mb-1">Phone *</label>
                                 <input type="tel" value={personal.phone} onChange={(e) => setPersonal({ ...personal, phone: e.target.value })}
-                                    className="input" placeholder="+91 98765 43210" />
+                                    className="input" placeholder="+91 98765 43210" required />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -197,9 +197,9 @@ function RegisterForm() {
                                     className="input" placeholder="123 Main Street, City" />
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Restaurant Phone</label>
+                                <label className="block text-sm text-gray-400 mb-1">Restaurant Phone *</label>
                                 <input type="tel" value={restaurant.phone} onChange={(e) => setRestaurant({ ...restaurant, phone: e.target.value })}
-                                    className="input" placeholder="+91 98765 43210" />
+                                    className="input" placeholder="+91 98765 43210" required />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>

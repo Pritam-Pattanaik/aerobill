@@ -31,7 +31,7 @@ export default function RestaurantPOSPage() {
                     <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
                         Best Restaurant <span className="text-[#ff6b35]">POS Software</span> in India
                     </h1>
-                    <div className="space-y-4 text-lg md:text-xl text-gray-400 max-w-4xl">
+                    <div className="space-y-4 text-lg md:text-xl text-gray-400 max-w-4xl mb-8">
                         <p>
                             Running a restaurant in today’s competitive market requires more than just good food — it demands speed, accuracy, and smart management. Many restaurant owners struggle with slow billing, stock mismanagement, and lack of business insights.
                         </p>
@@ -41,6 +41,14 @@ export default function RestaurantPOSPage() {
                         <p>
                             Whether you run a cafe, QSR, or multi-outlet restaurant, the right POS software can transform your operations.
                         </p>
+                    </div>
+                    <div className="flex flex-wrap gap-4 mt-8 relative z-10">
+                        <Link href="/register" className="bg-[#ff6b35] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#ff8c5a] transition shadow-[0_0_20px_rgba(255,107,53,0.3)]">
+                            Start Free Trial
+                        </Link>
+                        <Link href="/pricing" className="bg-white/10 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/20 border border-white/10 transition">
+                            View Pricing
+                        </Link>
                     </div>
                 </div>
 
@@ -83,25 +91,25 @@ export default function RestaurantPOSPage() {
 
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
-                                { title: "Restaurant Billing Software", desc: "Fast and accurate billing is the backbone of any restaurant. Aerobill offers advanced restaurant billing software with GST compliance, quick invoice generation, and smooth payment processing.", link: "Explore our Restaurant Billing Software", id: "billing" },
-                                { title: "Restaurant Inventory Management Software", desc: "Avoid stock shortages and reduce wastage with smart restaurant inventory management software. Track ingredients, monitor usage, and optimize purchasing decisions.", link: "Learn more about Inventory Management Software", id: "inventory" },
-                                { title: "QR Code Ordering System for Restaurants", desc: "Enhance customer convenience with a modern QR code ordering system for restaurants. Customers can scan, view menus, and place orders directly from their phones.", link: "Discover QR Code Ordering System", id: "qr-ordering" },
-                                { title: "KOT (Kitchen Order Ticket) System", desc: "Ensure seamless communication between kitchen and billing with a reliable KOT system for restaurants, reducing delays and improving order accuracy.", link: "Check KOT System", id: "kot" },
-                                { title: "Table Management System for Restaurants", desc: "Efficient seating and faster service are possible with a smart table management system for restaurants.", link: "View Table Management System", id: "table" },
-                                { title: "Kitchen Display System (KDS)", desc: "Replace traditional paper tickets with a digital kitchen display system (KDS) for restaurants. Improve kitchen efficiency, reduce errors, and ensure faster order preparation with real-time updates.", link: "Explore Kitchen Display System", id: "kds" },
-                                { title: "Restaurant Analytics & Reporting", desc: "Make smarter decisions with powerful restaurant analytics and reporting software. Track sales, monitor performance, and gain valuable insights to grow your business.", link: "View Analytics & Reporting", id: "analytics" },
-                                { title: "Cloud Kitchen Management", desc: "Manage your cloud kitchen operations effortlessly with dedicated cloud kitchen management software. Handle multiple online orders, streamline workflows, and optimize delivery performance.", link: "Discover Cloud Kitchen Software", id: "cloud-kitchen" },
-                                { title: "Multi-Outlet Management", desc: "Easily manage multiple branches with centralized multi-outlet restaurant management software. Monitor sales, inventory, and staff across all locations from a single dashboard.", link: "Explore Multi-Outlet Management", id: "multi-outlet" },
-                                { title: "GST Billing Software", desc: "Stay compliant with Indian tax regulations using reliable GST billing software for restaurants. Generate accurate invoices, manage taxes, and simplify your accounting process.", link: "Learn more about GST Billing", id: "gst" },
-                                { title: "Order Management System", desc: "Streamline your entire order process with an efficient restaurant order management system. Manage dine-in, takeaway, and online orders from one unified platform.", link: "Check Order Management", id: "order-management" },
+                                { title: "Restaurant Billing Software", desc: "Fast and accurate billing is the backbone of any restaurant. Aerobill offers advanced restaurant billing software with GST compliance, quick invoice generation, and smooth payment processing.", link: "Explore our Restaurant Billing Software", url: "/restaurant-pos/restaurant-billing-software" },
+                                { title: "Restaurant Inventory Management Software", desc: "Avoid stock shortages and reduce wastage with smart restaurant inventory management software. Track ingredients, monitor usage, and optimize purchasing decisions.", link: "Learn more about Inventory Management Software", url: "/restaurant-pos/inventory-management-software" },
+                                { title: "QR Code Ordering System for Restaurants", desc: "Enhance customer convenience with a modern QR code ordering system for restaurants. Customers can scan, view menus, and place orders directly from their phones.", link: "Discover QR Code Ordering System", url: "/restaurant-pos/qr-code-ordering-system" },
+                                { title: "KOT (Kitchen Order Ticket) System", desc: "Ensure seamless communication between kitchen and billing with a reliable KOT system for restaurants, reducing delays and improving order accuracy.", link: "Check KOT System", url: "/restaurant-pos/kot-system" },
+                                { title: "Table Management System for Restaurants", desc: "Efficient seating and faster service are possible with a smart table management system for restaurants.", link: "View Table Management System", url: "/restaurant-pos/table-management-system" },
+                                { title: "Kitchen Display System (KDS)", desc: "Replace traditional paper tickets with a digital kitchen display system (KDS) for restaurants. Improve kitchen efficiency, reduce errors, and ensure faster order preparation with real-time updates.", link: "Explore Kitchen Display System", url: "/restaurant-pos/kitchen-display-system" },
+                                { title: "Restaurant Analytics & Reporting", desc: "Make smarter decisions with powerful restaurant analytics and reporting software. Track sales, monitor performance, and gain valuable insights to grow your business.", link: "View Analytics & Reporting", url: "/restaurant-pos/restaurant-analytics-reporting" },
+                                { title: "Cloud Kitchen Management", desc: "Manage your cloud kitchen operations effortlessly with dedicated cloud kitchen management software. Handle multiple online orders, streamline workflows, and optimize delivery performance.", link: "Discover Cloud Kitchen Software", url: "/restaurant-pos/cloud-kitchen-management-software" },
+                                { title: "Multi-Outlet Management", desc: "Easily manage multiple branches with centralized multi-outlet restaurant management software. Monitor sales, inventory, and staff across all locations from a single dashboard.", link: "Explore Multi-Outlet Management", url: "/restaurant-pos/restaurant-analytics-reporting" },
+                                { title: "GST Billing Software", desc: "Stay compliant with Indian tax regulations using reliable GST billing software for restaurants. Generate accurate invoices, manage taxes, and simplify your accounting process.", link: "Learn more about GST Billing", url: "/restaurant-pos/restaurant-billing-software" },
+                                { title: "Order Management System", desc: "Streamline your entire order process with an efficient restaurant order management system. Manage dine-in, takeaway, and online orders from one unified platform.", link: "Check Order Management", url: "/restaurant-pos/table-management-system" },
                             ].map((feature, i) => (
-                                <div key={i} id={feature.id} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition group flex flex-col pt-12 mt-[-3rem]">
+                                <Link href={feature.url} key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition group flex flex-col pt-12 mt-[-3rem] block">
                                     <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[#ff6b35] transition">{feature.title}</h3>
                                     <p className="text-gray-400 mb-6 flex-grow">{feature.desc}</p>
-                                    <button className="flex items-center gap-2 text-[#ff6b35] text-sm font-medium hover:text-[#ff8c5a] transition mt-auto">
+                                    <span className="flex items-center gap-2 text-[#ff6b35] text-sm font-medium group-hover:text-[#ff8c5a] transition mt-auto">
                                         👉 {feature.link}
-                                    </button>
-                                </div>
+                                    </span>
+                                </Link>
                             ))}
                         </div>
                     </div>
@@ -141,6 +149,13 @@ export default function RestaurantPOSPage() {
                                 ))}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Mid-page CTA */}
+                    <div className="text-center bg-gradient-to-r from-[#ff6b35]/20 to-purple-900/20 py-12 px-6 rounded-3xl border border-white/10">
+                        <h2 className="text-3xl font-bold text-white mb-4">Ready to Transform Your Restaurant?</h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">Join thousands of restaurants currently growing their operations with Aerobill's powerful POS and management suite.</p>
+                        <Link href="/register" className="inline-block bg-[#ff6b35] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#ff8c5a] transition shadow-[0_0_20px_rgba(255,107,53,0.3)]">Start Your Free Trial</Link>
                     </div>
 
                     {/* Who Should Use It & Why Aerobill */}
@@ -195,12 +210,24 @@ export default function RestaurantPOSPage() {
                                 { q: "Is POS software useful for multi-outlet restaurants?", a: "Yes, it allows centralized control and reporting across multiple locations." },
                                 { q: "Why choose Aerobill for restaurant POS software?", a: "Aerobill offers a complete solution with billing, inventory, reporting, and cloud access tailored for Indian restaurants." }
                             ].map((faq, i) => (
-                                <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6">
-                                    <h3 className="text-lg font-bold text-white mb-2">{faq.q}</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">{faq.a}</p>
-                                </div>
+                                <details key={i} className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition [&_summary::-webkit-details-marker]:hidden">
+                                    <summary className="flex items-center justify-between cursor-pointer list-none">
+                                        <h3 className="text-lg font-bold text-white mb-2 pr-4">{faq.q}</h3>
+                                        <span className="transition group-open:rotate-180 text-[#ff6b35]">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                        </span>
+                                    </summary>
+                                    <p className="text-gray-400 text-sm leading-relaxed mt-4 animate-in fade-in slide-in-from-top-2">{faq.a}</p>
+                                </details>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Bottom CTA */}
+                    <div className="text-center py-16">
+                        <h2 className="text-3xl font-bold text-white mb-6">Take Control of Your Restaurant Today</h2>
+                        <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">Get setup in minutes. No credit card required to start your free trial.</p>
+                        <Link href="/register" className="inline-block bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition">Create Free Account</Link>
                     </div>
                 </div>
             </div>
