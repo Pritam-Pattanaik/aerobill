@@ -8,8 +8,9 @@ import { startOfDay, endOfDay } from "date-fns"
 export type ReportData = {
     totalSales: number
     totalPurchases: number
+    totalGST: number
     inventoryValue: number
-    netProfit: number
+    inventoryDeduction: boolean
     dateRange: {
         from: Date
         to: Date
@@ -105,29 +106,46 @@ export async function getRestaurantReport(
 
         const totalPurchases = (poAgg._sum.totalAmount || 0) + (dailyPoAgg._sum.price || 0)
 
-        // 3. Current Inventory Value (Snapshot - not date filtered)
-        // We calculate this based on current state. Historical inventory value is complex to reconstruct.
-        const inventoryItems = await prisma.inventory.findMany({
-            where: {
-                restaurantId,
-            },
+        // 3. Fetch settings for GST rates and inventory deduction flag
+        const settings = await prisma.settings.findFirst({
+            where: { restaurantId },
             select: {
-                quantity: true,
-                pricePerUnit: true,
+                cgst: true,
+                sgst: true,
+                taxRate: true,
+                inventoryDeduction: true,
             },
         })
 
-        const inventoryValue = inventoryItems.reduce((acc: number, item) => {
-            return acc + (item.quantity * item.pricePerUnit)
-        }, 0)
+        // 4. Total GST Collected
+        const gstRate = (settings?.cgst || 0) + (settings?.sgst || 0) + (settings?.taxRate || 0)
+        const totalGST = Math.round(totalSales * (gstRate / 100) * 100) / 100
+
+        const inventoryDeduction = settings?.inventoryDeduction ?? false
+
+        // 5. Current Inventory Value (Snapshot - only if inventory deduction is enabled)
+        let inventoryValue = 0
+        if (inventoryDeduction) {
+            const inventoryItems = await prisma.inventory.findMany({
+                where: { restaurantId },
+                select: {
+                    quantity: true,
+                    pricePerUnit: true,
+                },
+            })
+            inventoryValue = inventoryItems.reduce((acc: number, item) => {
+                return acc + (item.quantity * item.pricePerUnit)
+            }, 0)
+        }
 
         return {
             success: true,
             data: {
                 totalSales,
                 totalPurchases,
+                totalGST,
                 inventoryValue,
-                netProfit: totalSales - totalPurchases,
+                inventoryDeduction,
                 dateRange: {
                     from: start,
                     to: end,

@@ -159,22 +159,23 @@ export const ReportPDF = ({ data }: ReportPDFProps) => {
                         </Text>
                     </View>
 
-                    {/* Net Profit */}
-                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: "#3B82F6" }]}>
-                        <Text style={styles.statLabel}>Net Profit / Loss</Text>
-                        <Text style={[styles.statValue, data.netProfit >= 0 ? styles.positive : styles.negative]}>
-                            {data.netProfit >= 0 ? "+" : ""}
-                            INR {data.netProfit.toLocaleString('en-IN')}
+                    {/* GST Collected */}
+                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: "#8B5CF6" }]}>
+                        <Text style={styles.statLabel}>Total GST Collected</Text>
+                        <Text style={styles.statValue}>
+                            INR {data.totalGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </Text>
                     </View>
 
-                    {/* Inventory */}
-                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: "#F59E0B" }]}>
-                        <Text style={styles.statLabel}>Inventory Value (Current)</Text>
-                        <Text style={styles.statValue}>
-                            INR {data.inventoryValue.toLocaleString('en-IN')}
-                        </Text>
-                    </View>
+                    {/* Inventory — only if auto-deduction is enabled */}
+                    {data.inventoryDeduction && (
+                        <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: "#F59E0B" }]}>
+                            <Text style={styles.statLabel}>Inventory Value (Current)</Text>
+                            <Text style={styles.statValue}>
+                                INR {data.inventoryValue.toLocaleString('en-IN')}
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Footer */}

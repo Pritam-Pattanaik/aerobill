@@ -251,7 +251,7 @@ export default function BillingPage() {
     const calculateTax = (amount: number) => {
         if (!settings) return 0
         const rate = (settings.cgst || 0) + (settings.sgst || 0) + (settings.taxRate || 0)
-        return amount * (rate / 100)
+        return Math.round(amount * (rate / 100) * 100) / 100
     }
 
     const isToday = (dateStr: string) => {
@@ -333,11 +333,11 @@ export default function BillingPage() {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-2xl font-bold text-[var(--primary)]">
-                                        ₹{table.totalAmount.toFixed(0)}
+                                        ₹{table.totalAmount.toFixed(2)}
                                     </p>
                                     {settings && calculateTax(table.totalAmount) > 0 && (
                                         <p className="text-xs text-gray-400">
-                                            +₹{calculateTax(table.totalAmount).toFixed(0)} tax
+                                            +₹{calculateTax(table.totalAmount).toFixed(2)} tax
                                         </p>
                                     )}
                                 </div>
@@ -360,7 +360,7 @@ export default function BillingPage() {
                                                 </span>
                                             </div>
                                             <span className="font-bold text-[var(--primary)]">
-                                                ₹{guest.totalAmount.toFixed(0)}
+                                                ₹{guest.totalAmount.toFixed(2)}
                                             </span>
                                         </div>
 
@@ -376,7 +376,7 @@ export default function BillingPage() {
                                                         <span className="font-medium">{item.quantity}×</span>
                                                         <span>{item.product.name}</span>
                                                     </div>
-                                                    <span className="text-gray-400">₹{(item.priceAtTime * item.quantity).toFixed(0)}</span>
+                                                    <span className="text-gray-400">₹{(item.priceAtTime * item.quantity).toFixed(2)}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -389,7 +389,7 @@ export default function BillingPage() {
                                         >
                                             {processing === `${table.tableId}-${guest.guestName}`
                                                 ? "Processing..."
-                                                : `💳 Bill ${guest.guestName} — ₹${guest.totalAmount.toFixed(0)}`}
+                                                : `💳 Bill ${guest.guestName} — ₹${guest.totalAmount.toFixed(2)}`}
                                         </button>
                                     </div>
                                 ))}
@@ -399,26 +399,26 @@ export default function BillingPage() {
                             <div className="border-t border-[var(--border)] pt-4 mb-4">
                                 <div className="flex justify-between text-sm mb-1">
                                     <span className="text-gray-400">Subtotal</span>
-                                    <span>₹{table.totalAmount.toFixed(0)}</span>
+                                    <span>₹{table.totalAmount.toFixed(2)}</span>
                                 </div>
                                 {settings && (settings.cgst > 0 || settings.sgst > 0 || settings.taxRate > 0) && (
                                     <>
                                         {settings.cgst > 0 && (
                                             <div className="flex justify-between text-sm mb-1">
                                                 <span className="text-gray-400">CGST ({settings.cgst}%)</span>
-                                                <span>₹{(table.totalAmount * (settings.cgst / 100)).toFixed(0)}</span>
+                                                <span>₹{(table.totalAmount * (settings.cgst / 100)).toFixed(2)}</span>
                                             </div>
                                         )}
                                         {settings.sgst > 0 && (
                                             <div className="flex justify-between text-sm mb-1">
                                                 <span className="text-gray-400">SGST ({settings.sgst}%)</span>
-                                                <span>₹{(table.totalAmount * (settings.sgst / 100)).toFixed(0)}</span>
+                                                <span>₹{(table.totalAmount * (settings.sgst / 100)).toFixed(2)}</span>
                                             </div>
                                         )}
                                         {settings.taxRate > 0 && (
                                             <div className="flex justify-between text-sm mb-1">
                                                 <span className="text-gray-400">Tax ({settings.taxRate}%)</span>
-                                                <span>₹{(table.totalAmount * (settings.taxRate / 100)).toFixed(0)}</span>
+                                                <span>₹{(table.totalAmount * (settings.taxRate / 100)).toFixed(2)}</span>
                                             </div>
                                         )}
                                     </>
@@ -426,7 +426,7 @@ export default function BillingPage() {
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total</span>
                                     <span className="text-[var(--primary)]">
-                                        ₹{(table.totalAmount + calculateTax(table.totalAmount)).toFixed(0)}
+                                        ₹{(table.totalAmount + calculateTax(table.totalAmount)).toFixed(2)}
                                     </span>
                                 </div>
                             </div>
@@ -439,7 +439,7 @@ export default function BillingPage() {
                             >
                                 {processing === table.tableId
                                     ? "Processing..."
-                                    : `🧾 Bill Entire Table — ₹${(table.totalAmount + calculateTax(table.totalAmount)).toFixed(0)}`}
+                                    : `🧾 Bill Entire Table — ₹${(table.totalAmount + calculateTax(table.totalAmount)).toFixed(2)}`}
                             </button>
                         </div>
                     ))}
@@ -498,7 +498,7 @@ export default function BillingPage() {
                                 </div>
                                 <div>
                                     <p className="text-gray-400 text-sm">Total Revenue</p>
-                                    <p className="text-2xl font-bold text-green-400">₹{historySummary.totalRevenue.toFixed(0)}</p>
+                                    <p className="text-2xl font-bold text-green-400">₹{historySummary.totalRevenue.toFixed(2)}</p>
                                 </div>
                             </div>
                         )}
@@ -534,7 +534,7 @@ export default function BillingPage() {
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-xl font-bold text-[var(--primary)]">
-                                                        ₹{order.totalAmount.toFixed(0)}
+                                                        ₹{order.totalAmount.toFixed(2)}
                                                     </p>
                                                     <p className="text-xs text-gray-500">
                                                         {formatDate(order.updatedAt || order.createdAt)}
@@ -591,7 +591,7 @@ export default function BillingPage() {
                                 <span className="receipt-item-name">{item.product.name}</span>
                                 <span className="receipt-item-qty">{item.quantity}</span>
                                 <span className="receipt-item-price">
-                                    ₹{(item.priceAtTime * item.quantity).toFixed(0)}
+                                    ₹{(item.priceAtTime * item.quantity).toFixed(2)}
                                 </span>
                             </div>
                         ))}
@@ -601,7 +601,7 @@ export default function BillingPage() {
                         <span className="receipt-item-name">Subtotal</span>
                         <span className="receipt-item-qty"></span>
                         <span className="receipt-item-price">
-                            ₹{billingReceipt.totalAmount.toFixed(0)}
+                            ₹{billingReceipt.totalAmount.toFixed(2)}
                         </span>
                     </div>
 
@@ -612,7 +612,7 @@ export default function BillingPage() {
                                     <span className="receipt-item-name">CGST ({settings.cgst}%)</span>
                                     <span className="receipt-item-qty"></span>
                                     <span className="receipt-item-price">
-                                        ₹{(billingReceipt.totalAmount * (settings.cgst / 100)).toFixed(0)}
+                                        ₹{(billingReceipt.totalAmount * (settings.cgst / 100)).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -621,7 +621,7 @@ export default function BillingPage() {
                                     <span className="receipt-item-name">SGST ({settings.sgst}%)</span>
                                     <span className="receipt-item-qty"></span>
                                     <span className="receipt-item-price">
-                                        ₹{(billingReceipt.totalAmount * (settings.sgst / 100)).toFixed(0)}
+                                        ₹{(billingReceipt.totalAmount * (settings.sgst / 100)).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -630,7 +630,7 @@ export default function BillingPage() {
                                     <span className="receipt-item-name">Tax ({settings.taxRate}%)</span>
                                     <span className="receipt-item-qty"></span>
                                     <span className="receipt-item-price">
-                                        ₹{(billingReceipt.totalAmount * (settings.taxRate / 100)).toFixed(0)}
+                                        ₹{(billingReceipt.totalAmount * (settings.taxRate / 100)).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -640,7 +640,7 @@ export default function BillingPage() {
                     <div className="receipt-total">
                         <span>TOTAL</span>
                         <span>
-                            ₹{(billingReceipt.totalAmount + calculateTax(billingReceipt.totalAmount)).toFixed(0)}
+                            ₹{(billingReceipt.totalAmount + calculateTax(billingReceipt.totalAmount)).toFixed(2)}
                         </span>
                     </div>
 

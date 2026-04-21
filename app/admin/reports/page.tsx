@@ -192,7 +192,7 @@ export default function ReportsPage() {
 
             {/* Results Grid */}
             {reportData && (
-                <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className={`grid gap-4 md:gap-6 md:grid-cols-2 ${reportData.inventoryDeduction ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
                     {/* Sales Card */}
                     <div className="glass-card p-6 border-t-4 border-t-emerald-500 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -221,36 +221,38 @@ export default function ReportsPage() {
                         </p>
                     </div>
 
-                    {/* Net Profit Card */}
-                    <div className="glass-card p-6 border-t-4 border-t-blue-500 relative overflow-hidden group">
+                    {/* GST Collected Card */}
+                    <div className="glass-card p-6 border-t-4 border-t-violet-500 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <span className="text-6xl">📊</span>
+                            <span className="text-6xl">🧾</span>
                         </div>
-                        <p className="text-sm text-gray-400 font-medium">Net Profit / Loss</p>
-                        <h3 className={`text-3xl font-bold mt-2 ${reportData.netProfit >= 0 ? "text-blue-400" : "text-red-400"}`}>
-                            {reportData.netProfit >= 0 ? "+" : ""}₹{reportData.netProfit.toLocaleString('en-IN')}
+                        <p className="text-sm text-gray-400 font-medium">Total GST Collected</p>
+                        <h3 className="text-3xl font-bold mt-2 text-white">
+                            ₹{reportData.totalGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </h3>
-                        <p className="text-xs text-blue-400 mt-2 bg-blue-500/10 w-fit px-2 py-1 rounded">
-                            Sales - Purchases
+                        <p className="text-xs text-violet-400 mt-2 bg-violet-500/10 w-fit px-2 py-1 rounded">
+                            CGST + SGST + Tax
                         </p>
                     </div>
 
-                    {/* Inventory Value Card */}
-                    <div className="glass-card p-6 border-t-4 border-t-orange-500 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <span className="text-6xl">📦</span>
+                    {/* Inventory Value Card — only if auto-deduction is enabled */}
+                    {reportData.inventoryDeduction && (
+                        <div className="glass-card p-6 border-t-4 border-t-orange-500 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <span className="text-6xl">📦</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-gray-400 font-medium">Inventory Value</p>
+                                <span className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300" title="Based on current stock levels">CURRENT</span>
+                            </div>
+                            <h3 className="text-3xl font-bold mt-2 text-white">
+                                ₹{reportData.inventoryValue.toLocaleString('en-IN')}
+                            </h3>
+                            <p className="text-xs text-orange-400 mt-2 bg-orange-500/10 w-fit px-2 py-1 rounded">
+                                Total Asset Value
+                            </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <p className="text-sm text-gray-400 font-medium">Inventory Value</p>
-                            <span className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300" title="Based on current stock levels">CURRENT</span>
-                        </div>
-                        <h3 className="text-3xl font-bold mt-2 text-white">
-                            ₹{reportData.inventoryValue.toLocaleString('en-IN')}
-                        </h3>
-                        <p className="text-xs text-orange-400 mt-2 bg-orange-500/10 w-fit px-2 py-1 rounded">
-                            Total Asset Value
-                        </p>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
