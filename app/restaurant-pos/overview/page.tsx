@@ -6,6 +6,21 @@ import PublicFooter from "@/components/PublicFooter"
 export const metadata: Metadata = {
     title: "Best Restaurant POS Software in India | Billing & Management | Aerobill",
     description: "Looking for the best restaurant POS software in India? Aerobill offers fast billing, QR code ordering, inventory management, GST compliance, and cloud-based solutions for restaurants of all sizes. Book a free demo today!",
+    keywords: [
+        "restaurant POS software India",
+        "best restaurant POS software India",
+        "cloud based restaurant POS India",
+        "POS software for restaurants India",
+        "restaurant POS system with inventory India",
+        "affordable restaurant POS software India",
+        "small restaurant POS software India",
+        "POS software for cafes India",
+        "POS software for QSR India",
+        "restaurant POS software Bhubaneswar"
+    ],
+    alternates: {
+        canonical: "https://aerobill.in/restaurant-pos/overview"
+    }
 }
 
 export default function RestaurantPOSPage() {
