@@ -1,17 +1,40 @@
+import { Pool, neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
+import ws from 'ws'
+
+// Use the 'ws' package for WebSocket in Node.js environments
+neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
 }
 
 function createPrismaClient() {
+    const connectionString = process.env.DATABASE_URL
+    if (!connectionString) {
+        throw new Error("DATABASE_URL is not set. Cannot create Prisma client.")
+    }
+
+    // Use Neon serverless adapter — connects via WebSocket (port 443)
+    // instead of direct TCP (port 5432), which works on all networks
+    const pool = new Pool({ connectionString })
+    // @ts-expect-error Pool type mismatch with PrismaNeon — works correctly at runtime
+    const adapter = new PrismaNeon(pool)
+
     return new PrismaClient({
+        adapter,
         log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
     })
 }
 
-// Singleton pattern to prevent connection exhaustion
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
-
-// Cache in globalThis for both dev and production
-globalForPrisma.prisma = prisma
+// Lazy singleton — only creates the client on first access,
+// ensuring env vars are loaded by then
+export const prisma = new Proxy({} as PrismaClient, {
+    get(_target, prop) {
+        if (!globalForPrisma.prisma) {
+            globalForPrisma.prisma = createPrismaClient()
+        }
+        return (globalForPrisma.prisma as any)[prop]
+    }
+})

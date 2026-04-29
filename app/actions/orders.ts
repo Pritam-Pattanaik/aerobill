@@ -153,43 +153,77 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
         const order = await prisma.order.update({
             where: { id: orderId, restaurantId },
             data: { status },
-            include: { items: { include: { product: { include: { inventory: true, ingredients: true } } } } }
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            include: {
+                                inventory: true,
+                                ingredients: {
+                                    include: { inventory: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         })
 
         // Auto-deduct recipe ingredients when order is marked READY (cooking done)
         if (status === "READY") {
+            console.log(`[INVENTORY DEDUCTION] Order ${orderId} marked READY. Processing deduction...`)
+            console.log(`[INVENTORY DEDUCTION] Order has ${order.items.length} item(s)`)
+
             const settings = await prisma.settings.findUnique({
                 where: { restaurantId },
                 select: { inventoryDeduction: true }
             })
 
+            console.log(`[INVENTORY DEDUCTION] Settings found: ${JSON.stringify(settings)}`)
+
             if (settings?.inventoryDeduction !== false) {
+                console.log(`[INVENTORY DEDUCTION] Auto-deduction is ENABLED. Processing items...`)
+
                 for (const item of order.items) {
+                    console.log(`[INVENTORY DEDUCTION] Processing: ${item.product.name} x${item.quantity}`)
+                    console.log(`[INVENTORY DEDUCTION]   Recipe ingredients count: ${item.product.ingredients.length}`)
+                    console.log(`[INVENTORY DEDUCTION]   Direct inventory link: ${item.product.inventoryId || 'NONE'}`)
+
                     // Deduct via recipe ingredients (ProductIngredient)
-                    for (const ingredient of item.product.ingredients) {
-                        const deductQty = ingredient.quantity * item.quantity
-                        const inv = await prisma.inventory.findUnique({ where: { id: ingredient.inventoryId } })
-                        if (!inv) continue
+                    if (item.product.ingredients.length > 0) {
+                        for (const ingredient of item.product.ingredients) {
+                            const deductQty = ingredient.quantity * item.quantity
+                            console.log(`[INVENTORY DEDUCTION]   Deducting ${deductQty} of inventory ${ingredient.inventoryId} (${ingredient.quantity} per unit × ${item.quantity} ordered)`)
 
-                        await prisma.inventory.update({
-                            where: { id: ingredient.inventoryId },
-                            data: { quantity: { decrement: deductQty } }
-                        })
-
-                        await prisma.inventoryLog.create({
-                            data: {
-                                inventoryId: ingredient.inventoryId,
-                                type: "ORDER_DEDUCTION",
-                                quantity: -deductQty,
-                                previousQty: inv.quantity,
-                                newQty: inv.quantity - deductQty,
-                                reason: `Order #${orderId.slice(-6)} (Kitchen Ready)`
+                            const inv = await prisma.inventory.findUnique({ where: { id: ingredient.inventoryId } })
+                            if (!inv) {
+                                console.log(`[INVENTORY DEDUCTION]   ⚠️ Inventory item ${ingredient.inventoryId} NOT FOUND, skipping`)
+                                continue
                             }
-                        })
-                    }
 
-                    // Fallback: if no recipe ingredients, deduct simple 1:1 inventory link
-                    if (item.product.ingredients.length === 0 && item.product.inventory) {
+                            console.log(`[INVENTORY DEDUCTION]   Current stock: ${inv.quantity} ${inv.unit} → New stock: ${inv.quantity - deductQty} ${inv.unit}`)
+
+                            await prisma.inventory.update({
+                                where: { id: ingredient.inventoryId },
+                                data: { quantity: { decrement: deductQty } }
+                            })
+
+                            await prisma.inventoryLog.create({
+                                data: {
+                                    inventoryId: ingredient.inventoryId,
+                                    type: "ORDER_DEDUCTION",
+                                    quantity: -deductQty,
+                                    previousQty: inv.quantity,
+                                    newQty: inv.quantity - deductQty,
+                                    reason: `Order #${orderId.slice(-6)} (Kitchen Ready)`
+                                }
+                            })
+
+                            console.log(`[INVENTORY DEDUCTION]   ✅ Deducted successfully`)
+                        }
+                    } else if (item.product.inventory) {
+                        // Fallback: if no recipe ingredients, deduct simple 1:1 inventory link
+                        console.log(`[INVENTORY DEDUCTION]   No recipe, using direct inventory link: ${item.product.inventory.id}`)
                         const inv = await prisma.inventory.findUnique({ where: { id: item.product.inventory.id } })
                         if (inv) {
                             await prisma.inventory.update({
@@ -207,11 +241,17 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
                                     reason: `Order #${orderId.slice(-6)} (Kitchen Ready)`
                                 }
                             })
+                            console.log(`[INVENTORY DEDUCTION]   ✅ Direct deduction done`)
                         }
+                    } else {
+                        console.log(`[INVENTORY DEDUCTION]   ⚠️ No recipe AND no direct inventory link. Nothing to deduct.`)
                     }
                 }
                 revalidatePath("/admin/inventory")
                 revalidatePath("/admin")
+                console.log(`[INVENTORY DEDUCTION] ✅ All deductions complete for order ${orderId}`)
+            } else {
+                console.log(`[INVENTORY DEDUCTION] ❌ Auto-deduction is DISABLED in settings`)
             }
         }
 
