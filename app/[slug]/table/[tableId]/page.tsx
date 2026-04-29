@@ -34,6 +34,7 @@ export default function TableMenu() {
 
     useEffect(() => {
         async function fetchData() {
+            setError(null)
             try {
                 const tableResult = await getTableByNumber(slug, tableNumber)
                 if (tableResult.success && tableResult.table && tableResult.restaurant) {

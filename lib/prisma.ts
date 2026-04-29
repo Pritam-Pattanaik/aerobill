@@ -1,4 +1,4 @@
-import { Pool, neonConfig } from '@neondatabase/serverless'
+import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
 import ws from 'ws'
@@ -16,11 +16,8 @@ function createPrismaClient() {
         throw new Error("DATABASE_URL is not set. Cannot create Prisma client.")
     }
 
-    // Use Neon serverless adapter — connects via WebSocket (port 443)
-    // instead of direct TCP (port 5432), which works on all networks
-    const pool = new Pool({ connectionString })
-    // @ts-expect-error Pool type mismatch with PrismaNeon — works correctly at runtime
-    const adapter = new PrismaNeon(pool)
+    // In Prisma 6.x, PrismaNeon expects a configuration object, NOT a pool instance.
+    const adapter = new PrismaNeon({ connectionString })
 
     return new PrismaClient({
         adapter,

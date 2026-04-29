@@ -1,29 +1,43 @@
+require('dotenv').config({ path: '.env.local' });
+
+const { neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+neonConfig.webSocketConstructor = ws;
+
+const { PrismaNeon } = require('@prisma/adapter-neon');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
 
 async function main() {
+    const connectionString = process.env.DATABASE_URL;
+    console.log('Using URL:', connectionString ? connectionString.substring(0, 30) + '...' : 'UNDEFINED');
+    
+    // In Prisma 6.x, PrismaNeon takes the config object, NOT a pool instance!
+    const adapter = new PrismaNeon({ connectionString });
+    const prisma = new PrismaClient({ adapter });
+
     try {
-        console.log('Testing connection...');
-        await prisma.$connect();
-        console.log('Database connection successful!');
+        const count = await prisma.user.count();
+        console.log('✅ Connected via adapter! User count:', count);
+        
+        // Check if the user exists
+        const user = await prisma.user.findUnique({
+            where: { email: 'admin@aerobill.com' },
+            include: { restaurant: true }
+        });
 
-        const tableCount = await prisma.table.count();
-        const orderCount = await prisma.order.count();
-        const userCount = await prisma.user.count();
-        const restaurantCount = await prisma.restaurant.count();
-        const contactInfo = await prisma.contactInfo.findFirst();
-
-        console.log(`Summary: Users: ${userCount}, Restaurants: ${restaurantCount}, Tables: ${tableCount}, Orders: ${orderCount}`);
-        console.log(`Contact info in DB:`, contactInfo);
-
-        const restaurants = await prisma.restaurant.findMany({ take: 1 });
-        if (restaurants.length > 0) {
-            console.log('Found restaurant:', restaurants[0].name, '- Slug:', restaurants[0].slug);
+        if (!user) {
+            console.log('❌ User admin@aerobill.com NOT FOUND in database');
         } else {
-            console.log('No restaurants found in the database. You might need to seed the data.');
+            console.log('✅ User found:', user.email, '| Role:', user.role);
+            console.log('   Restaurant:', user.restaurant?.name || 'None', '| Active:', user.restaurant?.isActive || false);
+            
+            // Verify password
+            const isValid = await bcrypt.compare('admin123', user.passwordHash);
+            console.log('   Password "admin123" valid:', isValid);
         }
     } catch (error) {
-        console.error('Database connection failed:', error);
+        console.error('Error connecting to DB:', error.message);
     } finally {
         await prisma.$disconnect();
     }
