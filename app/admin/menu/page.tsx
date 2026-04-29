@@ -36,6 +36,7 @@ type Category = {
 type InventoryItem = {
     id: string
     name: string
+    unit: string
 }
 
 type MenuData = {
@@ -66,6 +67,21 @@ export default function MenuManagement() {
     const [recipeIngredients, setRecipeIngredients] = useState<Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>>([])
     const [filterCategory, setFilterCategory] = useState<string>("all")
     const [newIngredient, setNewIngredient] = useState({ inventoryId: "", quantity: "" })
+
+    // Helper: convert kg→g and L→ml for display
+    const toSmallUnit = (qty: number, unit: string) => {
+        const lower = unit.toLowerCase()
+        if (lower === 'kg') return { value: Math.round(qty * 1000 * 100) / 100, unit: 'g' }
+        if (lower === 'l' || lower === 'ltr' || lower === 'litre' || lower === 'liter') return { value: Math.round(qty * 1000 * 100) / 100, unit: 'ml' }
+        return { value: qty, unit }
+    }
+    // Helper: convert g→kg and ml→L for storage
+    const toBigUnit = (qty: number, unit: string) => {
+        const lower = unit.toLowerCase()
+        if (lower === 'kg') return qty / 1000
+        if (lower === 'l' || lower === 'ltr' || lower === 'litre' || lower === 'liter') return qty / 1000
+        return qty
+    }
 
     // Form states
     const [productForm, setProductForm] = useState({
@@ -150,7 +166,11 @@ export default function MenuManagement() {
     const handleAddIngredient = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!recipeProduct || !newIngredient.inventoryId || !newIngredient.quantity) return
-        await addProductIngredient(recipeProduct.id, newIngredient.inventoryId, parseFloat(newIngredient.quantity))
+        // Find the selected inventory item's unit to convert g→kg or ml→L
+        const selectedInv = inventory.find(i => i.id === newIngredient.inventoryId)
+        const invUnit = selectedInv?.unit || 'kg'
+        const qtyInBigUnit = toBigUnit(parseFloat(newIngredient.quantity), invUnit)
+        await addProductIngredient(recipeProduct.id, newIngredient.inventoryId, qtyInBigUnit)
         const res = await getProductIngredients(recipeProduct.id)
         if (res.success) setRecipeIngredients(res.ingredients as Array<{ id: string; quantity: number; inventory: { id: string; name: string; unit: string } }>)
         setNewIngredient({ inventoryId: "", quantity: "" })
@@ -498,7 +518,7 @@ export default function MenuManagement() {
                                         <div key={ing.id} className="flex items-center justify-between p-3 bg-[var(--background)] rounded-lg">
                                             <div>
                                                 <span className="font-medium">{ing.inventory.name}</span>
-                                                <span className="text-gray-400 ml-2">{ing.quantity} {ing.inventory.unit}</span>
+                                                <span className="text-gray-400 ml-2">{toSmallUnit(ing.quantity, ing.inventory.unit).value} {toSmallUnit(ing.quantity, ing.inventory.unit).unit}</span>
                                             </div>
                                             <button
                                                 onClick={() => handleRemoveIngredient(ing.id)}
@@ -531,8 +551,8 @@ export default function MenuManagement() {
                                 </select>
                                 <input
                                     type="number"
-                                    step="0.01"
-                                    placeholder="Qty"
+                                    step="1"
+                                    placeholder="Qty (g)"
                                     value={newIngredient.quantity}
                                     onChange={(e) => setNewIngredient({ ...newIngredient, quantity: e.target.value })}
                                     className="input"

@@ -28,7 +28,7 @@ export async function GET() {
         })
         const inventory = await prisma.inventory.findMany({
             where: { restaurantId },
-            select: { id: true, name: true },
+            select: { id: true, name: true, unit: true },
             orderBy: { name: "asc" },
         })
         const settings = await prisma.settings.findUnique({

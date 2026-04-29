@@ -153,8 +153,68 @@ export async function updateOrderStatus(orderId: string, status: "PENDING" | "CO
         const order = await prisma.order.update({
             where: { id: orderId, restaurantId },
             data: { status },
-            include: { items: { include: { product: { include: { inventory: true } } } } }
+            include: { items: { include: { product: { include: { inventory: true, ingredients: true } } } } }
         })
+
+        // Auto-deduct recipe ingredients when order is marked READY (cooking done)
+        if (status === "READY") {
+            const settings = await prisma.settings.findUnique({
+                where: { restaurantId },
+                select: { inventoryDeduction: true }
+            })
+
+            if (settings?.inventoryDeduction !== false) {
+                for (const item of order.items) {
+                    // Deduct via recipe ingredients (ProductIngredient)
+                    for (const ingredient of item.product.ingredients) {
+                        const deductQty = ingredient.quantity * item.quantity
+                        const inv = await prisma.inventory.findUnique({ where: { id: ingredient.inventoryId } })
+                        if (!inv) continue
+
+                        await prisma.inventory.update({
+                            where: { id: ingredient.inventoryId },
+                            data: { quantity: { decrement: deductQty } }
+                        })
+
+                        await prisma.inventoryLog.create({
+                            data: {
+                                inventoryId: ingredient.inventoryId,
+                                type: "ORDER_DEDUCTION",
+                                quantity: -deductQty,
+                                previousQty: inv.quantity,
+                                newQty: inv.quantity - deductQty,
+                                reason: `Order #${orderId.slice(-6)} (Kitchen Ready)`
+                            }
+                        })
+                    }
+
+                    // Fallback: if no recipe ingredients, deduct simple 1:1 inventory link
+                    if (item.product.ingredients.length === 0 && item.product.inventory) {
+                        const inv = await prisma.inventory.findUnique({ where: { id: item.product.inventory.id } })
+                        if (inv) {
+                            await prisma.inventory.update({
+                                where: { id: item.product.inventory.id },
+                                data: { quantity: { decrement: item.quantity } }
+                            })
+
+                            await prisma.inventoryLog.create({
+                                data: {
+                                    inventoryId: item.product.inventory.id,
+                                    type: "ORDER_DEDUCTION",
+                                    quantity: -item.quantity,
+                                    previousQty: inv.quantity,
+                                    newQty: inv.quantity - item.quantity,
+                                    reason: `Order #${orderId.slice(-6)} (Kitchen Ready)`
+                                }
+                            })
+                        }
+                    }
+                }
+                revalidatePath("/admin/inventory")
+                revalidatePath("/admin")
+            }
+        }
+
         revalidatePath("/kitchen")
         revalidatePath("/admin/billing")
         return { success: true, order }
@@ -299,28 +359,14 @@ export async function billTableOrders(tableId: string, customerPhone?: string) {
             // Get all unpaid ready orders for this table
             const orders = await tx.order.findMany({
                 where: { tableId, restaurantId, status: "READY", paymentStatus: "UNPAID" },
-                include: { items: { include: { product: { include: { inventory: true } } } }, table: true }
+                include: { items: { include: { product: true } }, table: true }
             })
 
             if (orders.length === 0) {
                 throw new Error("No orders to bill for this table")
             }
 
-            // Deduct inventory for all orders if enabled
-            const settings = await tx.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
-
-            if (settings?.inventoryDeduction !== false) {
-                for (const order of orders) {
-                    for (const item of order.items) {
-                        if (item.product.inventory) {
-                            await tx.inventory.update({
-                                where: { id: item.product.inventory.id },
-                                data: { quantity: { decrement: item.quantity } }
-                            })
-                        }
-                    }
-                }
-            }
+            // Inventory deduction already handled when order was marked READY from kitchen
 
             // Update all orders to BILLED
             await tx.order.updateMany({
@@ -380,28 +426,14 @@ export async function billGuestOrders(tableId: string, guestName: string) {
                     paymentStatus: "UNPAID",
                     guestName: matchGuestName
                 },
-                include: { items: { include: { product: { include: { inventory: true } } } }, table: true }
+                include: { items: { include: { product: true } }, table: true }
             })
 
             if (orders.length === 0) {
                 throw new Error("No orders to bill for this guest")
             }
 
-            // Deduct inventory for all orders if enabled
-            const settings = await tx.settings.findUnique({ where: { restaurantId }, select: { inventoryDeduction: true } })
-
-            if (settings?.inventoryDeduction !== false) {
-                for (const order of orders) {
-                    for (const item of order.items) {
-                        if (item.product.inventory) {
-                            await tx.inventory.update({
-                                where: { id: item.product.inventory.id },
-                                data: { quantity: { decrement: item.quantity } }
-                            })
-                        }
-                    }
-                }
-            }
+            // Inventory deduction already handled when order was marked READY from kitchen
 
             // Update all orders to BILLED
             await tx.order.updateMany({
