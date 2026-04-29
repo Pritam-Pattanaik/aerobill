@@ -5,9 +5,11 @@ import { useParams } from "next/navigation"
 import { getCategoriesPublic } from "@/app/actions/menu"
 import { getTableByNumber } from "@/app/actions/tables"
 import { placeOrder, CartItem, getActiveOrderForTable } from "@/app/actions/orders"
+import { getPublicOffers, validateCoupon } from "@/app/actions/offers"
 
 type Product = { id: string; name: string; price: number; isVeg: boolean; isAvailable: boolean; image: string | null }
 type Category = { id: string; name: string; products: Product[] }
+type PublicOffer = { id: string; name: string; description: string | null; code: string; discountType: string; discountValue: number; minOrderValue: number; triggerType: string; triggerValue: number }
 
 export default function TableMenu() {
     const params = useParams()
@@ -32,6 +34,13 @@ export default function TableMenu() {
     const [activeOrder, setActiveOrder] = useState<any>(null)
     const [showGreeting, setShowGreeting] = useState(false)
 
+    // Offers State
+    const [offers, setOffers] = useState<PublicOffer[]>([])
+    const [couponCode, setCouponCode] = useState("")
+    const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; name: string; discount: number } | null>(null)
+    const [couponError, setCouponError] = useState("")
+    const [couponLoading, setCouponLoading] = useState(false)
+
     useEffect(() => {
         async function fetchData() {
             setError(null)
@@ -55,6 +64,12 @@ export default function TableMenu() {
                 if (menuResult.success) {
                     setCategories(menuResult.categories)
                     if (menuResult.categories.length > 0) setActiveCategory(menuResult.categories[0].id)
+                }
+
+                // Fetch active offers
+                const offersResult = await getPublicOffers(slug)
+                if (offersResult.success) {
+                    setOffers(offersResult.offers as PublicOffer[])
                 }
             } catch {
                 setError("Failed to load menu")
@@ -110,6 +125,35 @@ export default function TableMenu() {
 
     const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+    const finalTotal = appliedCoupon ? Math.max(0, cartTotal - appliedCoupon.discount) : cartTotal
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return
+        setCouponLoading(true)
+        setCouponError("")
+        try {
+            const result = await validateCoupon(couponCode.trim(), slug, cartTotal)
+            if (result.success && result.discount) {
+                setAppliedCoupon({
+                    code: result.offer!.code,
+                    name: result.offer!.name,
+                    discount: result.discount
+                })
+                setCouponCode("")
+            } else {
+                setCouponError(result.error || "Invalid coupon")
+            }
+        } catch {
+            setCouponError("Failed to validate coupon")
+        } finally {
+            setCouponLoading(false)
+        }
+    }
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null)
+        setCouponError("")
+    }
 
     const handlePlaceOrder = async () => {
         if (!tableDbId || cart.length === 0 || ordering) return
@@ -265,6 +309,34 @@ export default function TableMenu() {
                 </div>
             </div>
 
+            {/* Offers Banner */}
+            {offers.length > 0 && (
+                <div className="px-4 max-w-4xl mx-auto mt-2">
+                    <div className="overflow-x-auto flex gap-3 pb-2 scrollbar-hide">
+                        {offers.map(offer => (
+                            <div key={offer.id}
+                                className="flex-shrink-0 w-[260px] p-3 rounded-xl border border-[var(--primary)]/30 bg-gradient-to-r from-[var(--primary)]/10 to-transparent"
+                                onClick={() => { setCouponCode(offer.code); setIsCartOpen(true) }}
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-lg">🎁</span>
+                                    <span className="font-bold text-sm text-[var(--primary)]">
+                                        {offer.discountValue}{offer.discountType === 'PERCENTAGE' ? '%' : '₹'} OFF
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-300 font-medium truncate">{offer.name}</p>
+                                <div className="flex items-center justify-between mt-2">
+                                    <code className="text-xs bg-white/10 px-2 py-0.5 rounded text-[var(--primary)]">{offer.code}</code>
+                                    {offer.minOrderValue > 0 && (
+                                        <span className="text-[10px] text-gray-500">Min ₹{offer.minOrderValue}</span>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <main className="p-4 max-w-4xl mx-auto">
                 {categories.filter(cat => cat.id === activeCategory).map(category => (
                     <div key={category.id} className="grid gap-4 md:grid-cols-2">
@@ -349,7 +421,55 @@ export default function TableMenu() {
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between mb-4 text-lg"><span>Total</span><span className="font-bold text-[var(--primary)]">₹{cartTotal.toFixed(0)}</span></div>
+                                {/* Coupon Code Section */}
+                                <div className="mb-4 p-3 bg-[var(--card)] rounded-xl border border-[var(--border)]">
+                                    <label className="block text-sm text-gray-400 mb-2">🎟️ Have a coupon?</label>
+                                    {appliedCoupon ? (
+                                        <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2">
+                                            <div>
+                                                <span className="text-green-400 font-semibold text-sm">{appliedCoupon.code}</span>
+                                                <span className="text-gray-400 text-xs ml-2">−₹{appliedCoupon.discount.toFixed(0)} off</span>
+                                            </div>
+                                            <button onClick={handleRemoveCoupon} className="text-red-400 text-xs hover:text-red-300">Remove</button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError("") }}
+                                                placeholder="Enter code"
+                                                className="input flex-1 text-sm"
+                                            />
+                                            <button
+                                                onClick={handleApplyCoupon}
+                                                disabled={couponLoading || !couponCode.trim()}
+                                                className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-medium disabled:opacity-50"
+                                            >
+                                                {couponLoading ? '...' : 'Apply'}
+                                            </button>
+                                        </div>
+                                    )}
+                                    {couponError && <p className="text-red-400 text-xs mt-1">{couponError}</p>}
+                                </div>
+
+                                {/* Totals */}
+                                <div className="space-y-1 mb-4">
+                                    <div className="flex justify-between text-sm text-gray-400">
+                                        <span>Subtotal</span>
+                                        <span>₹{cartTotal.toFixed(0)}</span>
+                                    </div>
+                                    {appliedCoupon && (
+                                        <div className="flex justify-between text-sm text-green-400">
+                                            <span>Discount ({appliedCoupon.code})</span>
+                                            <span>−₹{appliedCoupon.discount.toFixed(0)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between text-lg pt-1 border-t border-[var(--border)]">
+                                        <span>Total</span>
+                                        <span className="font-bold text-[var(--primary)]">₹{finalTotal.toFixed(0)}</span>
+                                    </div>
+                                </div>
                                 <button onClick={handlePlaceOrder} disabled={ordering} className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                     {ordering ? (
                                         <>

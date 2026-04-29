@@ -7,6 +7,7 @@ import {
     updateInventoryItem,
     deleteInventoryItem,
     adjustInventoryQuantity,
+    getInventoryLogs,
 } from "@/app/actions/inventory"
 import { getSettings, updateSettings } from "@/app/actions/tables"
 
@@ -19,6 +20,18 @@ type InventoryItem = {
     products: { id: string; name: string }[]
 }
 
+type InventoryLog = {
+    id: string
+    inventoryId: string
+    type: string
+    quantity: number
+    previousQty: number
+    newQty: number
+    reason: string | null
+    createdAt: Date
+    inventory: { name: string; unit: string }
+}
+
 export default function InventoryManagement() {
     const [inventory, setInventory] = useState<InventoryItem[]>([])
     const [loading, setLoading] = useState(true)
@@ -27,6 +40,11 @@ export default function InventoryManagement() {
     const [adjustingId, setAdjustingId] = useState<string | null>(null)
     const [adjustAmount, setAdjustAmount] = useState("")
     const [autoDeduction, setAutoDeduction] = useState(true)
+
+    const [logs, setLogs] = useState<InventoryLog[]>([])
+    const [showLogsModal, setShowLogsModal] = useState(false)
+    const [logsLoading, setLogsLoading] = useState(false)
+    const [viewingInventoryId, setViewingInventoryId] = useState<string | undefined>(undefined)
 
     const [form, setForm] = useState({
         name: "",
@@ -83,6 +101,24 @@ export default function InventoryManagement() {
     useEffect(() => {
         fetchInventory()
     }, [])
+
+    const fetchLogs = async (inventoryId?: string) => {
+        setLogsLoading(true)
+        setViewingInventoryId(inventoryId)
+        setShowLogsModal(true)
+        try {
+            const res = await getInventoryLogs(inventoryId)
+            if (res.success) {
+                setLogs(res.logs as unknown as InventoryLog[])
+            } else {
+                alert(res.error)
+            }
+        } catch (error) {
+            console.error("Failed to fetch logs:", error)
+        } finally {
+            setLogsLoading(false)
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -175,6 +211,12 @@ export default function InventoryManagement() {
                         </button>
                     </div>
 
+                    <button
+                        onClick={() => fetchLogs()}
+                        className="btn-secondary whitespace-nowrap"
+                    >
+                        View History
+                    </button>
                     <button
                         onClick={() => {
                             resetForm()
@@ -271,6 +313,12 @@ export default function InventoryManagement() {
                                 </td>
                                 <td className="p-4 text-right">
                                     <button
+                                        onClick={() => fetchLogs(item.id)}
+                                        className="text-sm text-purple-400 hover:text-purple-300 mr-3"
+                                    >
+                                        History
+                                    </button>
+                                    <button
                                         onClick={() => editItem(item)}
                                         className="text-sm text-blue-400 hover:text-blue-300 mr-3"
                                     >
@@ -364,6 +412,71 @@ export default function InventoryManagement() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Logs Modal */}
+            {showLogsModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLogsModal(false)} />
+                    <div className="glass-card p-6 w-full max-w-4xl relative z-10 animate-fadeIn max-h-[85vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold">
+                                {viewingInventoryId ? "Item History" : "Inventory History"}
+                            </h2>
+                            <button onClick={() => setShowLogsModal(false)} className="text-gray-400 hover:text-white">✕</button>
+                        </div>
+
+                        {logsLoading ? (
+                            <div className="text-center py-8 text-gray-400 animate-pulse">Loading history...</div>
+                        ) : logs.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">No history found.</div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-[var(--background)] text-gray-400 border-b border-[var(--border)]">
+                                            <th className="text-left p-3 font-medium">Date & Time</th>
+                                            <th className="text-left p-3 font-medium">Item</th>
+                                            <th className="text-left p-3 font-medium">Type</th>
+                                            <th className="text-right p-3 font-medium">Change</th>
+                                            <th className="text-right p-3 font-medium">Previous</th>
+                                            <th className="text-right p-3 font-medium">New Qty</th>
+                                            <th className="text-left p-3 font-medium">Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {logs.map((log) => (
+                                            <tr key={log.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--card-hover)]">
+                                                <td className="p-3 text-gray-300">
+                                                    {new Date(log.createdAt).toLocaleString(undefined, {
+                                                        year: 'numeric', month: 'short', day: 'numeric',
+                                                        hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </td>
+                                                <td className="p-3 font-medium">{log.inventory.name}</td>
+                                                <td className="p-3">
+                                                    <span className={`px-2 py-1 rounded-full text-xs ${
+                                                        log.type === 'ADDITION' || log.type === 'PURCHASE_RECEIVED' ? 'bg-green-500/20 text-green-400' :
+                                                        log.type === 'ORDER_DEDUCTION' || log.type === 'WASTAGE' ? 'bg-red-500/20 text-red-400' :
+                                                        'bg-blue-500/20 text-blue-400'
+                                                    }`}>
+                                                        {log.type.replace('_', ' ')}
+                                                    </span>
+                                                </td>
+                                                <td className={`p-3 text-right font-medium ${log.quantity > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                    {log.quantity > 0 ? '+' : ''}{log.quantity} {log.inventory.unit}
+                                                </td>
+                                                <td className="p-3 text-right text-gray-400">{log.previousQty}</td>
+                                                <td className="p-3 text-right font-medium text-white">{log.newQty}</td>
+                                                <td className="p-3 text-gray-400 italic">{log.reason || '-'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

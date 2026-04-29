@@ -110,3 +110,127 @@ export async function toggleOfferStatus(id: string) {
         return { success: false, error: "Failed to toggle status" }
     }
 }
+
+// ====== PUBLIC / CUSTOMER-FACING ======
+
+// Get active offers for a restaurant (by slug) — shown on QR menu
+export async function getPublicOffers(slug: string) {
+    try {
+        const restaurant = await prisma.restaurant.findUnique({
+            where: { slug },
+            select: { id: true }
+        })
+        if (!restaurant) return { success: false, offers: [] }
+
+        const offers = await prisma.offer.findMany({
+            where: { restaurantId: restaurant.id, isActive: true },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                code: true,
+                discountType: true,
+                discountValue: true,
+                minOrderValue: true,
+                triggerType: true,
+                triggerValue: true,
+            },
+            orderBy: { createdAt: "desc" }
+        })
+        return { success: true, offers }
+    } catch (error) {
+        console.error("Failed to fetch public offers:", error)
+        return { success: false, offers: [] }
+    }
+}
+
+// Validate a coupon code entered by customer or staff
+export async function validateCoupon(code: string, restaurantSlug: string, orderAmount: number) {
+    try {
+        const restaurant = await prisma.restaurant.findUnique({
+            where: { slug: restaurantSlug },
+            select: { id: true }
+        })
+        if (!restaurant) return { success: false, error: "Restaurant not found" }
+
+        const offer = await prisma.offer.findUnique({
+            where: { code: code.toUpperCase() }
+        })
+
+        if (!offer) return { success: false, error: "Invalid coupon code" }
+        if (!offer.isActive) return { success: false, error: "This offer is no longer active" }
+        if (offer.restaurantId !== restaurant.id) return { success: false, error: "Invalid coupon code" }
+        if (orderAmount < offer.minOrderValue) {
+            return { success: false, error: `Minimum order ₹${offer.minOrderValue} required` }
+        }
+
+        // Calculate discount
+        let discount = 0
+        if (offer.discountType === "PERCENTAGE") {
+            discount = Math.round(orderAmount * (offer.discountValue / 100) * 100) / 100
+        } else {
+            discount = offer.discountValue
+        }
+
+        // Discount should not exceed order total
+        discount = Math.min(discount, orderAmount)
+
+        return {
+            success: true,
+            offer: {
+                id: offer.id,
+                name: offer.name,
+                code: offer.code,
+                discountType: offer.discountType,
+                discountValue: offer.discountValue,
+            },
+            discount
+        }
+    } catch (error) {
+        console.error("Failed to validate coupon:", error)
+        return { success: false, error: "Failed to validate coupon" }
+    }
+}
+
+// Get auto-apply offers for billing (ORDER_AMOUNT trigger)
+export async function getAutoApplyOffers(restaurantId: string, orderAmount: number) {
+    try {
+        const offers = await prisma.offer.findMany({
+            where: {
+                restaurantId,
+                isActive: true,
+                triggerType: "ORDER_AMOUNT",
+                triggerValue: { lte: orderAmount },
+                minOrderValue: { lte: orderAmount },
+            },
+            orderBy: { discountValue: "desc" },
+            take: 1 // Best offer
+        })
+
+        if (offers.length === 0) return { success: true, offer: null, discount: 0 }
+
+        const offer = offers[0]
+        let discount = 0
+        if (offer.discountType === "PERCENTAGE") {
+            discount = Math.round(orderAmount * (offer.discountValue / 100) * 100) / 100
+        } else {
+            discount = offer.discountValue
+        }
+        discount = Math.min(discount, orderAmount)
+
+        return {
+            success: true,
+            offer: {
+                id: offer.id,
+                name: offer.name,
+                code: offer.code,
+                discountType: offer.discountType,
+                discountValue: offer.discountValue,
+            },
+            discount
+        }
+    } catch (error) {
+        console.error("Failed to get auto-apply offers:", error)
+        return { success: true, offer: null, discount: 0 }
+    }
+}

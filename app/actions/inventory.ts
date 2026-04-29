@@ -504,7 +504,7 @@ async function deletePurchaseOrder(id: string) {
 // INVENTORY LOGS
 // =====================================
 
-async function getInventoryLogs(inventoryId?: string, limit: number = 50) {
+export async function getInventoryLogs(inventoryId?: string, limit: number = 50) {
     try {
         const restaurantId = await requireRestaurantId()
         const inventoryIds = inventoryId

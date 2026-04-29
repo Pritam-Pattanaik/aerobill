@@ -78,7 +78,9 @@ export async function getSettings() {
         if (!settings) {
             settings = await prisma.settings.create({ data: { cafeName: "My Restaurant", taxRate: 0, restaurantId } })
         }
-        return { success: true, settings }
+        // Also fetch the restaurant slug for coupon validation
+        const restaurant = await prisma.restaurant.findUnique({ where: { id: restaurantId }, select: { slug: true } })
+        return { success: true, settings: { ...settings, slug: restaurant?.slug || "" } }
     } catch (error) {
         console.error("Failed to fetch settings:", error)
         return { success: false, error: "Failed to fetch settings" }

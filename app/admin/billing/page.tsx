@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { getReadyOrdersByTable, billTableOrders, billGuestOrders, getBillingHistory } from "@/app/actions/orders"
 import { getSettings } from "@/app/actions/tables"
+import { validateCoupon } from "@/app/actions/offers"
 
 type OrderItem = {
     id: string
@@ -98,6 +99,13 @@ export default function BillingPage() {
     const [customerPhone, setCustomerPhone] = useState("")
     const [pendingBill, setPendingBill] = useState<{ type: 'table' | 'guest'; tableId: string; tableNumber: number; guestName?: string } | null>(null)
 
+    // Coupon State
+    const [couponCodes, setCouponCodes] = useState<Record<string, string>>({})
+    const [appliedDiscounts, setAppliedDiscounts] = useState<Record<string, { code: string; name: string; discount: number }>>({})
+    const [couponErrors, setCouponErrors] = useState<Record<string, string>>({})
+    const [couponLoading, setCouponLoading] = useState<Record<string, boolean>>({})
+    const [restaurantSlug, setRestaurantSlug] = useState("")
+
     const fetchData = async () => {
         try {
             const [tablesRes, settingsRes] = await Promise.all([
@@ -110,6 +118,9 @@ export default function BillingPage() {
             }
             if (settingsRes.success && settingsRes.settings) {
                 setSettings(settingsRes.settings)
+                if ((settingsRes.settings as any).slug) {
+                    setRestaurantSlug((settingsRes.settings as any).slug)
+                }
             }
         } catch (error) {
             console.error("Failed to fetch data:", error)
@@ -259,6 +270,37 @@ export default function BillingPage() {
         return dateStr === today
     }
 
+    const handleApplyCoupon = async (tableId: string, orderAmount: number) => {
+        const code = couponCodes[tableId]?.trim()
+        if (!code || !restaurantSlug) return
+        setCouponLoading(prev => ({ ...prev, [tableId]: true }))
+        setCouponErrors(prev => ({ ...prev, [tableId]: "" }))
+        try {
+            const result = await validateCoupon(code, restaurantSlug, orderAmount)
+            if (result.success && result.discount) {
+                setAppliedDiscounts(prev => ({
+                    ...prev,
+                    [tableId]: { code: result.offer!.code, name: result.offer!.name, discount: result.discount! }
+                }))
+                setCouponCodes(prev => ({ ...prev, [tableId]: "" }))
+            } else {
+                setCouponErrors(prev => ({ ...prev, [tableId]: result.error || "Invalid coupon" }))
+            }
+        } catch {
+            setCouponErrors(prev => ({ ...prev, [tableId]: "Failed to validate" }))
+        } finally {
+            setCouponLoading(prev => ({ ...prev, [tableId]: false }))
+        }
+    }
+
+    const handleRemoveDiscount = (tableId: string) => {
+        setAppliedDiscounts(prev => {
+            const next = { ...prev }
+            delete next[tableId]
+            return next
+        })
+    }
+
     if (loading) {
         return (
             <div className="p-4 md:p-8 flex items-center justify-center min-h-[60vh]">
@@ -401,6 +443,45 @@ export default function BillingPage() {
                                     <span className="text-gray-400">Subtotal</span>
                                     <span>₹{table.totalAmount.toFixed(2)}</span>
                                 </div>
+
+                                {/* Coupon Section */}
+                                <div className="my-3 p-3 bg-[var(--background)] rounded-lg border border-[var(--border)]">
+                                    {appliedDiscounts[table.tableId] ? (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-green-400 text-sm">🎟️ {appliedDiscounts[table.tableId].code}</span>
+                                                <span className="text-green-400 text-sm font-semibold">−₹{appliedDiscounts[table.tableId].discount.toFixed(2)}</span>
+                                            </div>
+                                            <button onClick={() => handleRemoveDiscount(table.tableId)} className="text-red-400 text-xs hover:text-red-300">Remove</button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={couponCodes[table.tableId] || ""}
+                                                    onChange={(e) => {
+                                                        setCouponCodes(prev => ({ ...prev, [table.tableId]: e.target.value.toUpperCase() }))
+                                                        setCouponErrors(prev => ({ ...prev, [table.tableId]: "" }))
+                                                    }}
+                                                    placeholder="Coupon code"
+                                                    className="input flex-1 text-sm py-1.5"
+                                                />
+                                                <button
+                                                    onClick={() => handleApplyCoupon(table.tableId, table.totalAmount)}
+                                                    disabled={couponLoading[table.tableId] || !couponCodes[table.tableId]?.trim()}
+                                                    className="px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-medium disabled:opacity-50"
+                                                >
+                                                    {couponLoading[table.tableId] ? '...' : 'Apply'}
+                                                </button>
+                                            </div>
+                                            {couponErrors[table.tableId] && (
+                                                <p className="text-red-400 text-xs mt-1">{couponErrors[table.tableId]}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
                                 {settings && (settings.cgst > 0 || settings.sgst > 0 || settings.taxRate > 0) && (
                                     <>
                                         {settings.cgst > 0 && (
@@ -423,10 +504,16 @@ export default function BillingPage() {
                                         )}
                                     </>
                                 )}
+                                {appliedDiscounts[table.tableId] && (
+                                    <div className="flex justify-between text-sm mb-1 text-green-400">
+                                        <span>Discount ({appliedDiscounts[table.tableId].code})</span>
+                                        <span>−₹{appliedDiscounts[table.tableId].discount.toFixed(2)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total</span>
                                     <span className="text-[var(--primary)]">
-                                        ₹{(table.totalAmount + calculateTax(table.totalAmount)).toFixed(2)}
+                                        ₹{(table.totalAmount + calculateTax(table.totalAmount) - (appliedDiscounts[table.tableId]?.discount || 0)).toFixed(2)}
                                     </span>
                                 </div>
                             </div>
@@ -439,7 +526,7 @@ export default function BillingPage() {
                             >
                                 {processing === table.tableId
                                     ? "Processing..."
-                                    : `🧾 Bill Entire Table — ₹${(table.totalAmount + calculateTax(table.totalAmount)).toFixed(2)}`}
+                                    : `🧾 Bill Entire Table — ₹${(table.totalAmount + calculateTax(table.totalAmount) - (appliedDiscounts[table.tableId]?.discount || 0)).toFixed(2)}`}
                             </button>
                         </div>
                     ))}
