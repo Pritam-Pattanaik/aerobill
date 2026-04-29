@@ -195,6 +195,28 @@ export async function createProduct(data: { name: string; price: number; isVeg: 
 export async function updateProduct(id: string, data: { name: string; price: number; isVeg: boolean; isAvailable: boolean; categoryId: string; inventoryId?: string | null; image?: string | null }) {
     try {
         const restaurantId = await requireRestaurantId()
+
+        // Check for duplicate product name (excluding the current product)
+        const existingProduct = await prisma.product.findFirst({
+            where: {
+                restaurantId,
+                name: {
+                    equals: data.name,
+                    mode: "insensitive"
+                },
+                id: {
+                    not: id
+                }
+            }
+        })
+
+        if (existingProduct) {
+            return {
+                success: false,
+                error: "Another product with this name already exists."
+            }
+        }
+
         const product = await prisma.product.update({
             where: { id, restaurantId },
             data: { name: data.name, price: data.price, isVeg: data.isVeg, isAvailable: data.isAvailable, categoryId: data.categoryId, inventoryId: data.inventoryId || null, image: data.image || null }

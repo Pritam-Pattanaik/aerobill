@@ -111,10 +111,16 @@ export default function MenuManagement() {
             inventoryId: productForm.inventoryId || undefined,
         }
 
+        let result;
         if (editingProduct) {
-            await updateProduct(editingProduct.id, data)
+            result = await updateProduct(editingProduct.id, data)
         } else {
-            await createProduct(data)
+            result = await createProduct(data)
+        }
+
+        if (!result?.success) {
+            alert(result?.error || "Failed to save product.")
+            return
         }
 
         setShowProductModal(false)
@@ -132,8 +138,11 @@ export default function MenuManagement() {
     }
 
     const handleDeleteProduct = async (id: string) => {
-        if (confirm("Are you sure you want to delete this product?")) {
-            await deleteProduct(id)
+        if (confirm("Are you sure you want to delete this product?\n\nNote: You cannot delete products that have been part of previous orders (this preserves your billing history).")) {
+            const result = await deleteProduct(id)
+            if (!result?.success) {
+                alert("Failed to delete product.\n\nTip: If this product has been ordered before, you cannot delete it. Instead, click the 'Available' button to mark it as Unavailable and hide it from your public menu.")
+            }
             refreshData()
         }
     }
