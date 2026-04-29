@@ -14,7 +14,7 @@ COPY prisma ./prisma
 # --- FIX ENDS HERE ---
 
 # Omit --production so we can also install devDependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Rebuild the source code only when needed
 FROM base AS builder
