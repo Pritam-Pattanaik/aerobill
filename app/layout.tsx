@@ -29,8 +29,8 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
+
             gtag('config', 'G-QL6RKM35N6');
-            gtag('config', 'AW-17950861542');
           `
         }} />
         {/* Meta Pixel Code */}
