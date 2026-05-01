@@ -1,2 +1,0 @@
-﻿[dotenv@17.2.3] injecting env (3) from .env.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
-Using DATABASE_URL: postgresql://neondb_owner:npg_N6FnTZy4ekCf@ep-weathered-breeze-a113zk4h-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require

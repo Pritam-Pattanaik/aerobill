@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { SWRProvider } from "@/lib/swr-provider";
 
@@ -24,26 +23,19 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Google tag (gtag.js) */}
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-QL6RKM35N6"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-QL6RKM35N6" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-
-            // Google Analytics (GA4)
             gtag('config', 'G-QL6RKM35N6');
-
-            // Google Ads
             gtag('config', 'AW-17950861542');
-          `}
-        </Script>
+          `
+        }} />
         {/* Meta Pixel Code */}
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
+        <script dangerouslySetInnerHTML={{
+          __html: `
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -54,8 +46,8 @@ export default function RootLayout({
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('init', '1417054093416760');
             fbq('track', 'PageView');
-          `}
-        </Script>
+          `
+        }} />
         <noscript>
           <img
             height="1"
@@ -66,15 +58,15 @@ export default function RootLayout({
           />
         </noscript>
         {/* Microsoft Clarity */}
-        <Script id="microsoft-clarity" strategy="afterInteractive">
-          {`
+        <script dangerouslySetInnerHTML={{
+          __html: `
             (function(c,l,a,r,i,t,y){
               c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
               t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
               y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
             })(window, document, "clarity", "script", "v4v8nmxtsf");
-          `}
-        </Script>
+          `
+        }} />
         {/* Organization Schema */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{
           __html: `{
