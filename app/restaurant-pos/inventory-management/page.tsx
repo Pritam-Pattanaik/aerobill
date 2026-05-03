@@ -6,7 +6,10 @@ import PublicFooter from "@/components/PublicFooter"
 export const metadata: Metadata = {
     title: "Best Restaurant Inventory Management Software in India | Fast & Accurate Tracking",
     description: "Take control of your restaurant inventory with Aerobill. Track stock in real time, reduce wastage, and manage purchases easily. Book a free demo today.",
-    keywords: "restaurant inventory management software, inventory management software for restaurants, restaurant inventory software India, stock management software restaurant, food inventory management system, inventory software India, Aerobill inventory software"
+    keywords: "restaurant inventory management software, inventory management software for restaurants, restaurant inventory software India, stock management software restaurant, food inventory management system, inventory software India, Aerobill inventory software",
+    alternates: {
+        canonical: "https://www.aerobill.in/restaurant-pos/inventory-management"
+    }
 }
 
 export default function Page() {
