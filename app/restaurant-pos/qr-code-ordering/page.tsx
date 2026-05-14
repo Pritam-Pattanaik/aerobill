@@ -7,6 +7,10 @@ import PublicFooter from "@/components/PublicFooter"
 export const metadata: Metadata = {
     title: "Best QR Code Ordering System for Restaurants in India | Aerobill",
     description: "Streamline restaurant operations in India with Aerobill’s QR code ordering system. Enable fast, contactless ordering, reduce wait time, and boost customer satisfaction. Book a free demo today.",
+    keywords: "QR code ordering software, restaurant QR ordering system, digital menu software, contactless restaurant ordering, restaurant POS software, QR menu ordering India, restaurant billing software, self ordering system, Aerobill QR ordering, restaurant automation software",
+    alternates: {
+        canonical: "https://www.aerobill.in/restaurant-pos/qr-code-ordering",
+    },
 }
 
 const faqSchema = {

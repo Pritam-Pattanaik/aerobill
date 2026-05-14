@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import PublicHeader from "@/components/PublicHeader"
 import PublicFooter from "@/components/PublicFooter"
 
@@ -140,8 +141,8 @@ export default function Page() {
             <section className="py-20 border-t border-white/5 bg-white/[0.01]">
                 <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
                     <div className="reveal-left">
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-8 aspect-video flex items-center justify-center">
-                             <svg className="w-32 h-32 text-indigo-400/50 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 aspect-video">
+                             <Image src="/inventory/inventory-analytics.png" alt="Restaurant inventory management analytics dashboard showing real-time stock levels and data visualization" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                     <div className="reveal-right">
@@ -212,16 +213,8 @@ export default function Page() {
                         </p>
                     </div>
                     <div className="reveal-right order-1 md:order-2">
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#10b981]/10 to-blue-500/10 p-8 aspect-video flex items-center justify-center glow-border">
-                            <div className="flex items-center justify-between w-full max-w-xs">
-                                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                    <svg className="w-10 h-10 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                </div>
-                                <svg className="w-8 h-8 text-[#10b981] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                     <svg className="w-10 h-10 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                                </div>
-                            </div>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#10b981]/10 to-blue-500/10 aspect-video glow-border">
+                            <Image src="/inventory/pos-integration.png" alt="Seamless integration between restaurant POS billing system and inventory management software" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                 </div>
@@ -274,8 +267,8 @@ export default function Page() {
                         </p>
                     </div>
                     <div className="reveal-right">
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-8 aspect-video flex items-center justify-center">
-                             <svg className="w-32 h-32 text-amber-400/50 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-amber-500/10 to-orange-500/10 aspect-video">
+                             <Image src="/inventory/inventory-reporting.png" alt="Advanced inventory insights and reporting dashboard with consumption analytics" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                 </div>
@@ -283,8 +276,8 @@ export default function Page() {
                 {/* Multi-Outlet Inventory Management Made Easy */}
                 <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
                     <div className="reveal-left order-2 md:order-1">
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-8 aspect-video flex items-center justify-center">
-                            <svg className="w-32 h-32 text-blue-400/50 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 aspect-video">
+                            <Image src="/inventory/multi-outlet.png" alt="Multi-outlet restaurant inventory management with centralized dashboard" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                     <div className="reveal-right order-1 md:order-2">
@@ -310,8 +303,8 @@ export default function Page() {
                         </p>
                     </div>
                     <div className="reveal-right">
-                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-red-500/10 to-pink-500/10 p-8 aspect-video flex items-center justify-center">
-                             <svg className="w-32 h-32 text-red-400/50 drop-shadow-[0_0_15px_rgba(248,113,113,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-red-500/10 to-pink-500/10 aspect-video">
+                             <Image src="/inventory/cost-control.png" alt="Cost control and loss prevention analytics for restaurant inventory management" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                 </div>
@@ -341,12 +334,8 @@ export default function Page() {
                         <Link href="/contact" className="cta-btn inline-block">Simplify Your Inventory Today</Link>
                     </div>
                     <div className="reveal-right">
-                         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-8 aspect-video flex flex-col items-center justify-center glow-border">
-                             <div className="w-20 h-20 mb-4 bg-gradient-to-br from-[#10b981] to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-[#10b981]/30">
-                                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                             </div>
-                             <h3 className="text-xl font-bold text-white mb-2">Aerobill POS Ecosystem</h3>
-                             <p className="text-gray-400 text-center text-sm">All-in-one platform for your restaurant</p>
+                        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-[#10b981]/10 to-teal-500/10 aspect-video glow-border">
+                            <Image src="/inventory/aerobill-ecosystem.png" alt="Aerobill complete restaurant management ecosystem with inventory, billing, and POS integration" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                         </div>
                     </div>
                 </div>
@@ -366,7 +355,7 @@ export default function Page() {
                     <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 reveal-up delay-2">
                         {[
                             { title: "Restaurant Billing Software", url: "/restaurant-pos/restaurant-billing-software" },
-                            { title: "QR Code Ordering System", url: "/restaurant-pos/qr-code-ordering-system" },
+                            { title: "QR Code Ordering System", url: "/restaurant-pos/qr-code-ordering" },
                             { title: "KOT System", url: "/restaurant-pos/kot-system" },
                             { title: "Table Management System", url: "/restaurant-pos/table-management-system" }
                         ].map((link, i) => (

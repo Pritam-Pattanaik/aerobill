@@ -18,7 +18,7 @@ const navLinks: NavLink[] = [
             { href: "/restaurant-pos/overview", label: "Overview" },
             { href: "/restaurant-pos/restaurant-billing-software", label: "Restaurant Billing Software" },
             { href: "/restaurant-pos/inventory-management", label: "Inventory Management" },
-            { href: "/restaurant-pos/qr-code-ordering-system", label: "QR Code Ordering" },
+            { href: "/restaurant-pos/qr-code-ordering", label: "QR Code Ordering" },
             { href: "/restaurant-pos/kot-system", label: "KOT System" },
             { href: "/restaurant-pos/table-management-system", label: "Table Management" },
             { href: "/restaurant-pos/kitchen-display-system", label: "Kitchen Display System" },
