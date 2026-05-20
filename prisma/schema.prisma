@@ -485,6 +485,28 @@ model PrivacyPolicy {
   updatedAt DateTime @updatedAt
 }
 
+// Terms & Conditions (Singleton)
+model TermsConditions {
+  id        String   @id @default("terms-conditions")
+  content   String   // Markdown/HTML content
+  updatedAt DateTime @updatedAt
+}
+
+// Shipping Policy (Singleton)
+model ShippingPolicy {
+  id        String   @id @default("shipping-policy")
+  content   String   // Markdown/HTML content
+  updatedAt DateTime @updatedAt
+}
+
+// Refund Policy (Singleton)
+model RefundPolicy {
+  id        String   @id @default("refund-policy")
+  content   String   // Markdown/HTML content
+  updatedAt DateTime @updatedAt
+}
+
+
 enum DeletionStatus {
   PENDING
   PROCESSING

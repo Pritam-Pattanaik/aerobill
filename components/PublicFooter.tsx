@@ -17,8 +17,11 @@ export default function PublicFooter() {
                     <Link href="/services" className="hover:text-white transition">Services</Link>
                     <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
                     <Link href="/blog" className="hover:text-white transition">Blog</Link>
-                    <Link href="/contact" className="hover:text-white transition">Contact</Link>
+                    <Link href="/contact-us" className="hover:text-white transition">Contact Us</Link>
                     <Link href="/privacy-policy" className="hover:text-white transition">Privacy Policy</Link>
+                    <Link href="/terms-and-conditions" className="hover:text-white transition">Terms & Conditions</Link>
+                    <Link href="/shipping-policy" className="hover:text-white transition">Shipping Policy</Link>
+                    <Link href="/cancellations-and-refunds" className="hover:text-white transition">Cancellation & Refund</Link>
                 </div>
             </div>
         </footer>

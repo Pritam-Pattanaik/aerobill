@@ -19,6 +19,9 @@ const navItems = [
     { href: "/super-admin/blog", label: "Blog", icon: "📝" },
     { href: "/super-admin/contact", label: "Contact Page", icon: "📞" },
     { href: "/super-admin/privacy-policy", label: "Privacy Policy", icon: "🔒" },
+    { href: "/super-admin/terms-conditions", label: "Terms & Conditions", icon: "📜" },
+    { href: "/super-admin/shipping-policy", label: "Shipping Policy", icon: "🚚" },
+    { href: "/super-admin/refund-policy", label: "Refund Policy", icon: "💰" },
     { href: "/super-admin/data-deletion", label: "Data Deletion", icon: "🗑️" },
     { href: "/super-admin/seo", label: "SEO Management", icon: "🔍" },
 ]
